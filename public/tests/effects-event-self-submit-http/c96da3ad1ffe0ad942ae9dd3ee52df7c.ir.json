@@ -1,0 +1,415 @@
+{
+    "atoms": [
+        {
+            "id": 1,
+            "initial": ""
+        },
+        {
+            "id": 2,
+            "initial": null
+        },
+        {
+            "id": 3,
+            "initial": null
+        },
+        {
+            "id": 4,
+            "initial": ""
+        },
+        {
+            "id": 5,
+            "initial": ""
+        }
+    ],
+    "root": {
+        "k": "fragment",
+        "children": [
+            {
+                "k": "el",
+                "tag": "div",
+                "props": {
+                    "attrs": {
+                        "class": {
+                            "k": "val",
+                            "v": "container p-3"
+                        }
+                    },
+                    "style": [],
+                    "on": []
+                },
+                "children": [
+                    {
+                        "k": "el",
+                        "tag": "h1",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Effect: onSelf(submit) + HTTP POST + navigate"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "form",
+                        "props": {
+                            "attrs": {
+                                "class": {
+                                    "k": "val",
+                                    "v": "d-flex gap-2"
+                                },
+                                "id": {
+                                    "k": "val",
+                                    "v": "frm"
+                                },
+                                "method": {
+                                    "k": "val",
+                                    "v": "POST"
+                                }
+                            },
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "el",
+                                "tag": "input",
+                                "props": {
+                                    "attrs": {
+                                        "type": {
+                                            "k": "val",
+                                            "v": "text"
+                                        },
+                                        "name": {
+                                            "k": "val",
+                                            "v": "name"
+                                        },
+                                        "placeholder": {
+                                            "k": "val",
+                                            "v": "Your name"
+                                        },
+                                        "class": {
+                                            "k": "val",
+                                            "v": "form-control"
+                                        }
+                                    },
+                                    "style": [],
+                                    "on": [
+                                        {
+                                            "event": "input",
+                                            "action": {
+                                                "k": "set",
+                                                "atom": 1,
+                                                "to": {
+                                                    "k": "event",
+                                                    "path": "target.value"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                },
+                                "children": []
+                            },
+                            {
+                                "k": "el",
+                                "tag": "button",
+                                "props": {
+                                    "attrs": {
+                                        "type": {
+                                            "k": "val",
+                                            "v": "submit"
+                                        }
+                                    },
+                                    "style": [],
+                                    "on": [],
+                                    "cls": {
+                                        "k": "val",
+                                        "v": "btn btn-primary"
+                                    }
+                                },
+                                "children": [
+                                    {
+                                        "k": "text",
+                                        "value": {
+                                            "k": "val",
+                                            "v": "Send"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [],
+                            "cls": {
+                                "k": "val",
+                                "v": "mt-3"
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "concat",
+                                    "parts": [
+                                        {
+                                            "k": "val",
+                                            "v": "Name = "
+                                        },
+                                        {
+                                            "k": "read",
+                                            "atom": 1
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "concat",
+                                    "parts": [
+                                        {
+                                            "k": "val",
+                                            "v": "Status = "
+                                        },
+                                        {
+                                            "k": "read",
+                                            "atom": 2
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Response:"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "pre",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [],
+                            "cls": {
+                                "k": "val",
+                                "v": "bg-light p-2"
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "read",
+                                    "atom": 3
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Request Headers:"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "pre",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [],
+                            "cls": {
+                                "k": "val",
+                                "v": "bg-light p-2"
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "read",
+                                    "atom": 4
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Response Headers:"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "pre",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [],
+                            "cls": {
+                                "k": "val",
+                                "v": "bg-light p-2"
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "read",
+                                    "atom": 5
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [],
+                            "cls": {
+                                "k": "val",
+                                "v": "text-muted"
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Submitting should POST, show status/body/headers, then redirect."
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "k": "effect",
+                "triggers": [
+                    {
+                        "type": "event",
+                        "on": "self",
+                        "event": "submit",
+                        "options": {
+                            "passive": false,
+                            "preventDefault": true,
+                            "stopPropagation": true
+                        }
+                    }
+                ],
+                "actions": [
+                    {
+                        "k": "http",
+                        "url": {
+                            "k": "val",
+                            "v": "/api/echo/"
+                        },
+                        "method": "POST",
+                        "parse": "text",
+                        "to": 3,
+                        "status": 2,
+                        "reqHeaders": {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        "resHeaders": 5,
+                        "body": {
+                            "k": "concat",
+                            "parts": [
+                                {
+                                    "k": "val",
+                                    "v": "name="
+                                },
+                                {
+                                    "k": "read",
+                                    "atom": 1
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "k": "delay",
+                        "ms": 1500,
+                        "actions": [
+                            {
+                                "k": "redirect",
+                                "to": {
+                                    "k": "val",
+                                    "v": "/tests/effects-event-self-submit-http/thanks.html"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "target": {
+                    "type": "selector",
+                    "selector": "#frm"
+                }
+            }
+        ]
+    }
+}

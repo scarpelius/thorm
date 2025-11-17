@@ -1,0 +1,151 @@
+{
+    "atoms": [
+        {
+            "id": 1,
+            "initial": "waiting…"
+        },
+        {
+            "id": 2,
+            "initial": 0
+        }
+    ],
+    "root": {
+        "k": "fragment",
+        "children": [
+            {
+                "k": "el",
+                "tag": "div",
+                "props": {
+                    "attrs": {
+                        "class": {
+                            "k": "val",
+                            "v": "container p-3"
+                        }
+                    },
+                    "style": [],
+                    "on": []
+                },
+                "children": [
+                    {
+                        "k": "el",
+                        "tag": "h1",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Effect: timeout + set/inc (once)"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "concat",
+                                    "parts": [
+                                        {
+                                            "k": "val",
+                                            "v": "Status = "
+                                        },
+                                        {
+                                            "k": "read",
+                                            "atom": 1
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "concat",
+                                    "parts": [
+                                        {
+                                            "k": "val",
+                                            "v": "Counter = "
+                                        },
+                                        {
+                                            "k": "read",
+                                            "atom": 2
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [],
+                            "cls": {
+                                "k": "val",
+                                "v": "text-muted"
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "After ~1.5s, Status becomes \"done\" and Counter increments once."
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "k": "effect",
+                "triggers": [
+                    {
+                        "type": "timeout",
+                        "ms": 1500
+                    }
+                ],
+                "actions": [
+                    {
+                        "k": "set",
+                        "atom": 1,
+                        "to": {
+                            "k": "val",
+                            "v": "done"
+                        }
+                    },
+                    {
+                        "k": "inc",
+                        "atom": 2,
+                        "by": 1
+                    }
+                ]
+            }
+        ]
+    }
+}

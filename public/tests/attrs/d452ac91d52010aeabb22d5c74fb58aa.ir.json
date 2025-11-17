@@ -1,0 +1,121 @@
+{
+    "atoms": [
+        {
+            "id": 1,
+            "initial": 0
+        }
+    ],
+    "root": {
+        "k": "el",
+        "tag": "div",
+        "props": {
+            "attrs": [],
+            "style": [],
+            "on": [],
+            "cls": {
+                "k": "val",
+                "v": "container"
+            }
+        },
+        "children": [
+            {
+                "k": "el",
+                "tag": "h2",
+                "props": {
+                    "attrs": [],
+                    "style": [],
+                    "on": []
+                },
+                "children": [
+                    {
+                        "k": "text",
+                        "value": {
+                            "k": "val",
+                            "v": "Reactive attribute demo"
+                        }
+                    }
+                ]
+            },
+            {
+                "k": "el",
+                "tag": "button",
+                "props": {
+                    "attrs": {
+                        "title": {
+                            "k": "concat",
+                            "parts": [
+                                {
+                                    "k": "val",
+                                    "v": "Clicked "
+                                },
+                                {
+                                    "k": "read",
+                                    "atom": 1
+                                },
+                                {
+                                    "k": "val",
+                                    "v": " times"
+                                }
+                            ]
+                        }
+                    },
+                    "style": {
+                        "padding": "8px 12px",
+                        "margin": "6px",
+                        "border": "1px solid #ccc"
+                    },
+                    "on": [
+                        {
+                            "event": "click",
+                            "action": {
+                                "k": "inc",
+                                "atom": 1,
+                                "by": 1
+                            }
+                        }
+                    ],
+                    "cls": {
+                        "k": "val",
+                        "v": "btn btn-primary"
+                    }
+                },
+                "children": [
+                    {
+                        "k": "text",
+                        "value": {
+                            "k": "val",
+                            "v": "Hover me, then click"
+                        }
+                    }
+                ]
+            },
+            {
+                "k": "el",
+                "tag": "div",
+                "props": {
+                    "attrs": [],
+                    "style": [],
+                    "on": []
+                },
+                "children": [
+                    {
+                        "k": "text",
+                        "value": {
+                            "k": "concat",
+                            "parts": [
+                                {
+                                    "k": "val",
+                                    "v": "Count: "
+                                },
+                                {
+                                    "k": "read",
+                                    "atom": 1
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,276 @@
+{
+    "atoms": [
+        {
+            "id": 1,
+            "initial": [
+                {
+                    "id": "home-menu-item",
+                    "link": "/",
+                    "text": "Home"
+                },
+                {
+                    "id": "povesti-menu-item",
+                    "link": "/pove%C8%99ti",
+                    "text": "Povești"
+                },
+                {
+                    "id": "steaua_polara-menu-item",
+                    "link": "steaua_polara",
+                    "text": "Cenaclu"
+                },
+                {
+                    "id": "contact-menu-item",
+                    "link": "/contact",
+                    "text": "Contact"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "initial": [
+                {
+                    "id": 1,
+                    "text": "Și a fost seară peste dealuri, și pământul a suspinat ușor, ca o gură care nu mai știe rugăciune. Atunci ieșiră din văi cuvintele bătrâne, cele ce dorm sub pietre, și se așezară la sfat cu ploaia. „Cine mai ține minte începutul?”, întrebă norul, și tăcerea îi răspunse: „Cel care nu s-a născut încă.” Și așa s-a știut că timpul nu curge, ci se învârte ca o roată fără spițe, sub un soare orb."
+                },
+                {
+                    "id": 2,
+                    "text": "Din codru s-au auzit ielele, bătând pasul pe frunze de lună. Apa s-a speriat și s-a făcut oglinzi multe, ca să poată privi înapoi. Un păstor bătrân, cu toiagul de sârmă și inima grea, a zis că le-a văzut — nu cu ochii, ci cu frica. Și în clipa aceea i s-a stins umbra, căci ielele nu suferă pe cei care înțeleg."
+                },
+                {
+                    "id": 3,
+                    "text": "Apoi veni vântul dinspre miazănoapte, purtând solie de la moroii din cimitirul vechi. Ziceau că lumea s-a tocit la margini, că sufletele ies prea ușor din trupuri și se pierd pe drum. Preoții cei tineri scriau în cărți fără litere, sperând că Domnul le va umple paginile cu sens. Dar cerul, leneș și neînduplecat, doar clipea din când în când — ca un ochi care visează altă lume."
+                },
+                {
+                    "id": 4,
+                    "text": "Și în cele din urmă, din tăcere s-a născut iar satul. Casele au crescut din țărână ca niște rugăciuni cu acoperiș. Copiii au învățat să râdă de umbre, iar femeile au pus busuioc în inimile bărbaților. Iar bătrânii, cu ochii plini de amintiri care nu s-au întâmplat, spuneau încet: „A fost odată o lume fără început. Și poate că încă este.”"
+                }
+            ]
+        }
+    ],
+    "root": {
+        "k": "fragment",
+        "children": [
+            {
+                "k": "el",
+                "tag": "div",
+                "props": {
+                    "attrs": [],
+                    "style": [],
+                    "on": [],
+                    "cls": {
+                        "k": "val",
+                        "v": "container"
+                    }
+                },
+                "children": [
+                    {
+                        "k": "el",
+                        "tag": "h1",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Home"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "ul",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [],
+                            "cls": {
+                                "k": "val",
+                                "v": "nav"
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "repeat",
+                                "items": {
+                                    "k": "read",
+                                    "atom": 1
+                                },
+                                "key": {
+                                    "k": "item",
+                                    "path": "id"
+                                },
+                                "tpl": {
+                                    "k": "el",
+                                    "tag": "li",
+                                    "props": {
+                                        "attrs": {
+                                            "style": {
+                                                "k": "val",
+                                                "v": "max-width:64px;"
+                                            }
+                                        },
+                                        "style": [],
+                                        "on": [],
+                                        "cls": {
+                                            "k": "val",
+                                            "v": "nav-item mx-2"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "k": "el",
+                                            "tag": "a",
+                                            "props": {
+                                                "attrs": {
+                                                    "href": {
+                                                        "k": "item",
+                                                        "path": "link"
+                                                    },
+                                                    "id": {
+                                                        "k": "item",
+                                                        "path": "id"
+                                                    }
+                                                },
+                                                "style": [],
+                                                "on": [],
+                                                "cls": {
+                                                    "k": "concat",
+                                                    "parts": [
+                                                        {
+                                                            "k": "op",
+                                                            "name": "cond",
+                                                            "a": {
+                                                                "k": "op",
+                                                                "name": "eq",
+                                                                "a": {
+                                                                    "k": "item",
+                                                                    "path": "link"
+                                                                },
+                                                                "b": {
+                                                                    "k": "val",
+                                                                    "v": "/"
+                                                                }
+                                                            },
+                                                            "b": {
+                                                                "k": "val",
+                                                                "v": "text-primary "
+                                                            },
+                                                            "c": {
+                                                                "k": "val",
+                                                                "v": ""
+                                                            }
+                                                        },
+                                                        {
+                                                            "k": "val",
+                                                            "v": "d-flex align-items-center flex-column"
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "k": "el",
+                                                    "tag": "div",
+                                                    "props": {
+                                                        "attrs": [],
+                                                        "style": [],
+                                                        "on": [],
+                                                        "cls": {
+                                                            "k": "val",
+                                                            "v": "menu-text fs-5"
+                                                        }
+                                                    },
+                                                    "children": [
+                                                        {
+                                                            "k": "text",
+                                                            "value": {
+                                                                "k": "item",
+                                                                "path": "text"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "k": "el",
+                "tag": "div",
+                "props": {
+                    "attrs": {
+                        "id": {
+                            "k": "val",
+                            "v": "1337"
+                        }
+                    },
+                    "style": [],
+                    "on": [],
+                    "cls": {
+                        "k": "val",
+                        "v": "container content"
+                    }
+                },
+                "children": [
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Paragraphs:"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "repeat",
+                        "items": {
+                            "k": "read",
+                            "atom": 2
+                        },
+                        "key": {
+                            "k": "item",
+                            "path": "id"
+                        },
+                        "tpl": {
+                            "k": "el",
+                            "tag": "p",
+                            "props": {
+                                "attrs": [],
+                                "style": [],
+                                "on": []
+                            },
+                            "children": [
+                                {
+                                    "k": "text",
+                                    "value": {
+                                        "k": "item",
+                                        "path": "text"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

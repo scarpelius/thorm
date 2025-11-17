@@ -1,0 +1,207 @@
+{
+    "atoms": [
+        {
+            "id": 1,
+            "initial": "waiting…"
+        }
+    ],
+    "root": {
+        "k": "fragment",
+        "children": [
+            {
+                "k": "el",
+                "tag": "div",
+                "props": {
+                    "attrs": {
+                        "class": {
+                            "k": "val",
+                            "v": "container p-3"
+                        }
+                    },
+                    "style": [],
+                    "on": []
+                },
+                "children": [
+                    {
+                        "k": "el",
+                        "tag": "h1",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Effect: visible + set"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [],
+                            "cls": {
+                                "k": "val",
+                                "v": "sticky-top"
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "concat",
+                                    "parts": [
+                                        {
+                                            "k": "val",
+                                            "v": "Status = "
+                                        },
+                                        {
+                                            "k": "read",
+                                            "atom": 1
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [],
+                            "cls": {
+                                "k": "val",
+                                "v": "text-muted"
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Scroll down until the gray box enters the viewport."
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "div",
+                        "props": {
+                            "attrs": {
+                                "style": {
+                                    "k": "val",
+                                    "v": "height: 1200px; background: repeating-linear-gradient(45deg,#f8f9fa,#f8f9fa 10px,#ffffff 10px,#ffffff 20px);"
+                                }
+                            },
+                            "style": [],
+                            "on": []
+                        },
+                        "children": []
+                    },
+                    {
+                        "k": "el",
+                        "tag": "div",
+                        "props": {
+                            "attrs": {
+                                "id": {
+                                    "k": "val",
+                                    "v": "sentinel"
+                                },
+                                "style": {
+                                    "k": "val",
+                                    "v": "height: 120px; background: #e9ecef; display:flex; align-items:center; justify-content:center; border-radius:8px;"
+                                }
+                            },
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "👋 I am the sentinel — make me visible"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "div",
+                        "props": {
+                            "attrs": {
+                                "style": {
+                                    "k": "val",
+                                    "v": "height: 600px;"
+                                }
+                            },
+                            "style": [],
+                            "on": []
+                        },
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "k": "effect",
+                "triggers": [
+                    {
+                        "type": "visible",
+                        "threshold": 0.1,
+                        "when": "enter",
+                        "rootMargin": "0px 0px -10% 0%"
+                    }
+                ],
+                "actions": [
+                    {
+                        "k": "set",
+                        "atom": 1,
+                        "to": {
+                            "k": "val",
+                            "v": "visible!"
+                        }
+                    }
+                ],
+                "target": {
+                    "type": "selector",
+                    "selector": "#sentinel"
+                }
+            },
+            {
+                "k": "effect",
+                "triggers": [
+                    {
+                        "type": "visible",
+                        "threshold": 0.1,
+                        "when": "exit",
+                        "rootMargin": "0px"
+                    }
+                ],
+                "actions": [
+                    {
+                        "k": "set",
+                        "atom": 1,
+                        "to": {
+                            "k": "val",
+                            "v": "Invisible!"
+                        }
+                    }
+                ],
+                "target": {
+                    "type": "selector",
+                    "selector": "#sentinel"
+                }
+            }
+        ]
+    }
+}

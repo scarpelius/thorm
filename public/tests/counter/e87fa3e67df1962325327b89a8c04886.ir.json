@@ -1,0 +1,216 @@
+{
+    "atoms": [
+        {
+            "id": 1,
+            "initial": 1
+        }
+    ],
+    "root": {
+        "k": "el",
+        "tag": "div",
+        "props": {
+            "attrs": [],
+            "style": [],
+            "on": [],
+            "cls": {
+                "k": "val",
+                "v": "container mt-5"
+            }
+        },
+        "children": [
+            {
+                "k": "el",
+                "tag": "h1",
+                "props": {
+                    "attrs": [],
+                    "style": [],
+                    "on": []
+                },
+                "children": [
+                    {
+                        "k": "text",
+                        "value": {
+                            "k": "concat",
+                            "parts": [
+                                {
+                                    "k": "val",
+                                    "v": "Count: "
+                                },
+                                {
+                                    "k": "read",
+                                    "atom": 1
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "k": "show",
+                        "when": {
+                            "k": "op",
+                            "name": "eq",
+                            "a": {
+                                "k": "op",
+                                "name": "mod",
+                                "a": {
+                                    "k": "read",
+                                    "atom": 1
+                                },
+                                "b": {
+                                    "k": "val",
+                                    "v": 2
+                                }
+                            },
+                            "b": {
+                                "k": "val",
+                                "v": 0
+                            }
+                        },
+                        "child": {
+                            "k": "el",
+                            "tag": "span",
+                            "props": {
+                                "attrs": [],
+                                "style": [],
+                                "on": [],
+                                "cls": {
+                                    "k": "val",
+                                    "v": ""
+                                }
+                            },
+                            "children": [
+                                {
+                                    "k": "text",
+                                    "value": {
+                                        "k": "val",
+                                        "v": " is even"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "k": "show",
+                        "when": {
+                            "k": "op",
+                            "name": "eq",
+                            "a": {
+                                "k": "op",
+                                "name": "mod",
+                                "a": {
+                                    "k": "read",
+                                    "atom": 1
+                                },
+                                "b": {
+                                    "k": "val",
+                                    "v": 2
+                                }
+                            },
+                            "b": {
+                                "k": "val",
+                                "v": 1
+                            }
+                        },
+                        "child": {
+                            "k": "el",
+                            "tag": "span",
+                            "props": {
+                                "attrs": [],
+                                "style": [],
+                                "on": [],
+                                "cls": {
+                                    "k": "val",
+                                    "v": ""
+                                }
+                            },
+                            "children": [
+                                {
+                                    "k": "text",
+                                    "value": {
+                                        "k": "val",
+                                        "v": " is odd"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "k": "show",
+                        "when": {
+                            "k": "op",
+                            "name": "eq",
+                            "a": {
+                                "k": "op",
+                                "name": "mod",
+                                "a": {
+                                    "k": "read",
+                                    "atom": 1
+                                },
+                                "b": {
+                                    "k": "val",
+                                    "v": 13
+                                }
+                            },
+                            "b": {
+                                "k": "val",
+                                "v": 0
+                            }
+                        },
+                        "child": {
+                            "k": "el",
+                            "tag": "p",
+                            "props": {
+                                "attrs": [],
+                                "style": [],
+                                "on": [],
+                                "cls": {
+                                    "k": "val",
+                                    "v": ""
+                                }
+                            },
+                            "children": [
+                                {
+                                    "k": "text",
+                                    "value": {
+                                        "k": "val",
+                                        "v": "How odd is that 🙃?"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "k": "el",
+                "tag": "button",
+                "props": {
+                    "attrs": [],
+                    "style": [],
+                    "on": [
+                        {
+                            "event": "click",
+                            "action": {
+                                "k": "inc",
+                                "atom": 1,
+                                "by": 1
+                            }
+                        }
+                    ],
+                    "cls": {
+                        "k": "val",
+                        "v": "btn btn-warning"
+                    }
+                },
+                "children": [
+                    {
+                        "k": "text",
+                        "value": {
+                            "k": "val",
+                            "v": "Inc"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

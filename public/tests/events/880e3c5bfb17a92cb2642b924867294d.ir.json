@@ -1,0 +1,396 @@
+{
+    "atoms": [
+        {
+            "id": 1,
+            "initial": 0
+        },
+        {
+            "id": 3,
+            "initial": 0
+        },
+        {
+            "id": 2,
+            "initial": 0
+        },
+        {
+            "id": 5,
+            "initial": null
+        }
+    ],
+    "root": {
+        "k": "fragment",
+        "children": [
+            {
+                "k": "el",
+                "tag": "div",
+                "props": {
+                    "attrs": {
+                        "class": {
+                            "k": "val",
+                            "v": "container p-3"
+                        }
+                    },
+                    "style": [],
+                    "on": []
+                },
+                "children": [
+                    {
+                        "k": "el",
+                        "tag": "h1",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "concat",
+                                    "parts": [
+                                        {
+                                            "k": "val",
+                                            "v": "Effects demo — count="
+                                        },
+                                        {
+                                            "k": "read",
+                                            "atom": 1
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "concat",
+                                    "parts": [
+                                        {
+                                            "k": "val",
+                                            "v": "Window width: "
+                                        },
+                                        {
+                                            "k": "read",
+                                            "atom": 3
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "concat",
+                                    "parts": [
+                                        {
+                                            "k": "val",
+                                            "v": "Tick: "
+                                        },
+                                        {
+                                            "k": "read",
+                                            "atom": 2
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "div",
+                        "props": {
+                            "attrs": {
+                                "class": {
+                                    "k": "val",
+                                    "v": "row gap-2 my-2"
+                                }
+                            },
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "el",
+                                "tag": "button",
+                                "props": {
+                                    "attrs": {
+                                        "class": {
+                                            "k": "val",
+                                            "v": "col-3 btn btn-primary"
+                                        }
+                                    },
+                                    "style": [],
+                                    "on": [
+                                        {
+                                            "event": "click",
+                                            "action": {
+                                                "k": "inc",
+                                                "atom": 1,
+                                                "by": 1
+                                            }
+                                        }
+                                    ]
+                                },
+                                "children": [
+                                    {
+                                        "k": "text",
+                                        "value": {
+                                            "k": "val",
+                                            "v": "Inc"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "k": "el",
+                                "tag": "button",
+                                "props": {
+                                    "attrs": {
+                                        "class": {
+                                            "k": "val",
+                                            "v": "col-3 btn btn-secondary"
+                                        }
+                                    },
+                                    "style": [],
+                                    "on": [
+                                        {
+                                            "event": "click",
+                                            "action": {
+                                                "k": "inc",
+                                                "atom": 1,
+                                                "by": 5
+                                            }
+                                        }
+                                    ]
+                                },
+                                "children": [
+                                    {
+                                        "k": "text",
+                                        "value": {
+                                            "k": "val",
+                                            "v": "Add 5"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "div",
+                        "props": {
+                            "attrs": {
+                                "style": {
+                                    "k": "val",
+                                    "v": "height: 1000px;"
+                                }
+                            },
+                            "style": [],
+                            "on": []
+                        },
+                        "children": []
+                    },
+                    {
+                        "k": "el",
+                        "tag": "div",
+                        "props": {
+                            "attrs": {
+                                "id": {
+                                    "k": "val",
+                                    "v": "lazy"
+                                },
+                                "class": {
+                                    "k": "val",
+                                    "v": "my-3"
+                                }
+                            },
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Scroll this into view to trigger onVisible()…"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "pre",
+                        "props": {
+                            "attrs": {
+                                "class": {
+                                    "k": "val",
+                                    "v": "mt-3 bg-light p-2"
+                                }
+                            },
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "concat",
+                                    "parts": [
+                                        {
+                                            "k": "val",
+                                            "v": "Last HTTP status: "
+                                        },
+                                        {
+                                            "k": "read",
+                                            "atom": 5
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "k": "effect",
+                "triggers": [
+                    {
+                        "type": "mount"
+                    }
+                ],
+                "actions": [
+                    {
+                        "k": "inc",
+                        "atom": 1,
+                        "by": 1
+                    }
+                ]
+            },
+            {
+                "k": "effect",
+                "triggers": [
+                    {
+                        "type": "watch",
+                        "expr": {
+                            "k": "read",
+                            "atom": 1
+                        },
+                        "immediate": false,
+                        "debounceMs": 400
+                    }
+                ],
+                "actions": [
+                    {
+                        "k": "http",
+                        "url": {
+                            "k": "concat",
+                            "parts": [
+                                {
+                                    "k": "val",
+                                    "v": "/api/ping?c="
+                                },
+                                {
+                                    "k": "read",
+                                    "atom": 1
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "parse": "text",
+                        "to": 4,
+                        "status": 5
+                    }
+                ]
+            },
+            {
+                "k": "effect",
+                "triggers": [
+                    {
+                        "type": "interval",
+                        "ms": 1000
+                    }
+                ],
+                "actions": [
+                    {
+                        "k": "inc",
+                        "atom": 2,
+                        "by": 1
+                    }
+                ]
+            },
+            {
+                "k": "effect",
+                "triggers": [
+                    {
+                        "type": "event",
+                        "on": "window",
+                        "event": "resize"
+                    }
+                ],
+                "actions": [
+                    {
+                        "k": "set",
+                        "atom": 3,
+                        "to": {
+                            "k": "event",
+                            "path": "target.innerWidth"
+                        }
+                    }
+                ]
+            },
+            {
+                "k": "effect",
+                "triggers": [
+                    {
+                        "type": "visible",
+                        "threshold": 0.1,
+                        "when": "enter",
+                        "rootMargin": "0px 0px -10% 0px"
+                    }
+                ],
+                "actions": [
+                    {
+                        "k": "navigate",
+                        "to": {
+                            "k": "concat",
+                            "parts": [
+                                {
+                                    "k": "val",
+                                    "v": "/tests/router/search?q="
+                                },
+                                {
+                                    "k": "read",
+                                    "atom": 1
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "target": {
+                    "type": "selector",
+                    "selector": "#lazy"
+                }
+            }
+        ]
+    }
+}

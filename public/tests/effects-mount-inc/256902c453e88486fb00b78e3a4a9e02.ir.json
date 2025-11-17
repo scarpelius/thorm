@@ -1,0 +1,111 @@
+{
+    "atoms": [
+        {
+            "id": 1,
+            "initial": 0
+        }
+    ],
+    "root": {
+        "k": "fragment",
+        "children": [
+            {
+                "k": "el",
+                "tag": "div",
+                "props": {
+                    "attrs": {
+                        "class": {
+                            "k": "val",
+                            "v": "container p-3"
+                        }
+                    },
+                    "style": [],
+                    "on": []
+                },
+                "children": [
+                    {
+                        "k": "el",
+                        "tag": "h1",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Effect: mount + inc"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "concat",
+                                    "parts": [
+                                        {
+                                            "k": "val",
+                                            "v": "Count = "
+                                        },
+                                        {
+                                            "k": "read",
+                                            "atom": 1
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [],
+                            "cls": {
+                                "k": "val",
+                                "v": "text-muted"
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Should read 13 on first paint."
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "k": "effect",
+                "triggers": [
+                    {
+                        "type": "mount"
+                    }
+                ],
+                "actions": [
+                    {
+                        "k": "inc",
+                        "atom": 1,
+                        "by": 13
+                    }
+                ]
+            }
+        ]
+    }
+}

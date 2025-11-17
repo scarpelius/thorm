@@ -1,0 +1,318 @@
+{
+    "atoms": [
+        {
+            "id": 1,
+            "initial": 0
+        },
+        {
+            "id": 2,
+            "initial": 0
+        }
+    ],
+    "root": {
+        "k": "el",
+        "tag": "div",
+        "props": {
+            "attrs": [],
+            "style": [],
+            "on": [],
+            "cls": {
+                "k": "val",
+                "v": "container"
+            }
+        },
+        "children": [
+            {
+                "k": "el",
+                "tag": "h2",
+                "props": {
+                    "attrs": [],
+                    "style": [],
+                    "on": []
+                },
+                "children": [
+                    {
+                        "k": "text",
+                        "value": {
+                            "k": "val",
+                            "v": "Two Counters + Sum"
+                        }
+                    }
+                ]
+            },
+            {
+                "k": "el",
+                "tag": "div",
+                "props": {
+                    "attrs": [],
+                    "style": [],
+                    "on": [],
+                    "cls": {
+                        "k": "val",
+                        "v": "my-2"
+                    }
+                },
+                "children": [
+                    {
+                        "k": "el",
+                        "tag": "div",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [],
+                            "cls": {
+                                "k": "val",
+                                "v": "btn-group "
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "el",
+                                "tag": "button",
+                                "props": {
+                                    "attrs": [],
+                                    "style": [],
+                                    "on": [
+                                        {
+                                            "event": "click",
+                                            "action": {
+                                                "k": "inc",
+                                                "atom": 1,
+                                                "by": -1
+                                            }
+                                        }
+                                    ],
+                                    "cls": {
+                                        "k": "val",
+                                        "v": "btn btn-primary"
+                                    }
+                                },
+                                "children": [
+                                    {
+                                        "k": "text",
+                                        "value": {
+                                            "k": "val",
+                                            "v": "A--"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "k": "el",
+                                "tag": "button",
+                                "props": {
+                                    "attrs": [],
+                                    "style": [],
+                                    "on": [
+                                        {
+                                            "event": "click",
+                                            "action": {
+                                                "k": "inc",
+                                                "atom": 1,
+                                                "by": 1
+                                            }
+                                        }
+                                    ],
+                                    "cls": {
+                                        "k": "val",
+                                        "v": "btn btn-primary"
+                                    }
+                                },
+                                "children": [
+                                    {
+                                        "k": "text",
+                                        "value": {
+                                            "k": "val",
+                                            "v": "A++"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "span",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "concat",
+                                    "parts": [
+                                        {
+                                            "k": "val",
+                                            "v": " A = "
+                                        },
+                                        {
+                                            "k": "read",
+                                            "atom": 1
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "k": "el",
+                "tag": "div",
+                "props": {
+                    "attrs": [],
+                    "style": [],
+                    "on": [],
+                    "cls": {
+                        "k": "val",
+                        "v": "my-2"
+                    }
+                },
+                "children": [
+                    {
+                        "k": "el",
+                        "tag": "div",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [],
+                            "cls": {
+                                "k": "val",
+                                "v": "btn-group "
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "el",
+                                "tag": "button",
+                                "props": {
+                                    "attrs": [],
+                                    "style": [],
+                                    "on": [
+                                        {
+                                            "event": "click",
+                                            "action": {
+                                                "k": "inc",
+                                                "atom": 2,
+                                                "by": -1
+                                            }
+                                        }
+                                    ],
+                                    "cls": {
+                                        "k": "val",
+                                        "v": "btn btn-primary"
+                                    }
+                                },
+                                "children": [
+                                    {
+                                        "k": "text",
+                                        "value": {
+                                            "k": "val",
+                                            "v": "B--"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "k": "el",
+                                "tag": "button",
+                                "props": {
+                                    "attrs": [],
+                                    "style": [],
+                                    "on": [
+                                        {
+                                            "event": "click",
+                                            "action": {
+                                                "k": "inc",
+                                                "atom": 2,
+                                                "by": 1
+                                            }
+                                        }
+                                    ],
+                                    "cls": {
+                                        "k": "val",
+                                        "v": "btn btn-primary"
+                                    }
+                                },
+                                "children": [
+                                    {
+                                        "k": "text",
+                                        "value": {
+                                            "k": "val",
+                                            "v": "B++"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "span",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "concat",
+                                    "parts": [
+                                        {
+                                            "k": "val",
+                                            "v": " B = "
+                                        },
+                                        {
+                                            "k": "read",
+                                            "atom": 2
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "k": "el",
+                "tag": "h3",
+                "props": {
+                    "attrs": [],
+                    "style": [],
+                    "on": []
+                },
+                "children": [
+                    {
+                        "k": "text",
+                        "value": {
+                            "k": "concat",
+                            "parts": [
+                                {
+                                    "k": "val",
+                                    "v": "Sum = "
+                                },
+                                {
+                                    "k": "op",
+                                    "name": "add",
+                                    "a": {
+                                        "k": "read",
+                                        "atom": 1
+                                    },
+                                    "b": {
+                                        "k": "read",
+                                        "atom": 2
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

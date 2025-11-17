@@ -1,0 +1,435 @@
+{
+    "atoms": [
+        {
+            "id": 1,
+            "initial": 0
+        },
+        {
+            "id": 3,
+            "initial": false
+        },
+        {
+            "id": 2,
+            "initial": false
+        }
+    ],
+    "root": {
+        "k": "el",
+        "tag": "div",
+        "props": {
+            "attrs": [],
+            "style": [],
+            "on": [],
+            "cls": {
+                "k": "val",
+                "v": "container py-3"
+            }
+        },
+        "children": [
+            {
+                "k": "el",
+                "tag": "h2",
+                "props": {
+                    "attrs": [],
+                    "style": [],
+                    "on": []
+                },
+                "children": [
+                    {
+                        "k": "text",
+                        "value": {
+                            "k": "val",
+                            "v": "Components: class (string) + style (map) — live updates"
+                        }
+                    }
+                ]
+            },
+            {
+                "k": "el",
+                "tag": "div",
+                "props": {
+                    "attrs": [],
+                    "style": [],
+                    "on": [],
+                    "cls": {
+                        "k": "val",
+                        "v": "my-3 btn-group"
+                    }
+                },
+                "children": [
+                    {
+                        "k": "el",
+                        "tag": "button",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [
+                                {
+                                    "event": "click",
+                                    "action": {
+                                        "k": "inc",
+                                        "atom": 1,
+                                        "by": 1
+                                    }
+                                }
+                            ],
+                            "cls": {
+                                "k": "val",
+                                "v": "btn btn-primary"
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Label++"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "button",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [
+                                {
+                                    "event": "click",
+                                    "action": {
+                                        "k": "set",
+                                        "atom": 3,
+                                        "to": {
+                                            "k": "op",
+                                            "name": "cond",
+                                            "a": {
+                                                "k": "read",
+                                                "atom": 3
+                                            },
+                                            "b": {
+                                                "k": "val",
+                                                "v": false
+                                            },
+                                            "c": {
+                                                "k": "val",
+                                                "v": true
+                                            }
+                                        }
+                                    }
+                                }
+                            ],
+                            "cls": {
+                                "k": "val",
+                                "v": "btn btn-warning"
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Toggle Warning Class"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "button",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [
+                                {
+                                    "event": "click",
+                                    "action": {
+                                        "k": "set",
+                                        "atom": 2,
+                                        "to": {
+                                            "k": "op",
+                                            "name": "cond",
+                                            "a": {
+                                                "k": "read",
+                                                "atom": 2
+                                            },
+                                            "b": {
+                                                "k": "val",
+                                                "v": false
+                                            },
+                                            "c": {
+                                                "k": "val",
+                                                "v": true
+                                            }
+                                        }
+                                    }
+                                }
+                            ],
+                            "cls": {
+                                "k": "val",
+                                "v": "btn btn-outline-danger"
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Toggle Heavy Style"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "k": "component",
+                "tpl": {
+                    "k": "fragment",
+                    "children": [
+                        {
+                            "k": "el",
+                            "tag": "div",
+                            "props": {
+                                "attrs": {
+                                    "id": {
+                                        "k": "val",
+                                        "v": "card"
+                                    }
+                                },
+                                "style": {
+                                    "k": "prop",
+                                    "name": "style"
+                                },
+                                "on": [],
+                                "cls": {
+                                    "k": "prop",
+                                    "name": "class"
+                                }
+                            },
+                            "children": [
+                                {
+                                    "k": "el",
+                                    "tag": "div",
+                                    "props": {
+                                        "attrs": [],
+                                        "style": [],
+                                        "on": [],
+                                        "cls": {
+                                            "k": "val",
+                                            "v": "card-body"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "k": "el",
+                                            "tag": "h3",
+                                            "props": {
+                                                "attrs": [],
+                                                "style": [],
+                                                "on": [],
+                                                "cls": {
+                                                    "k": "val",
+                                                    "v": "card-title"
+                                                }
+                                            },
+                                            "children": [
+                                                {
+                                                    "k": "text",
+                                                    "value": {
+                                                        "k": "prop",
+                                                        "name": "label"
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "k": "slot",
+                                            "name": "default"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "props": {
+                    "label": {
+                        "k": "concat",
+                        "parts": [
+                            {
+                                "k": "val",
+                                "v": "Card #"
+                            },
+                            {
+                                "k": "read",
+                                "atom": 1
+                            }
+                        ]
+                    },
+                    "class": {
+                        "k": "op",
+                        "name": "cond",
+                        "a": {
+                            "k": "op",
+                            "name": "eq",
+                            "a": {
+                                "k": "read",
+                                "atom": 3
+                            },
+                            "b": {
+                                "k": "val",
+                                "v": true
+                            }
+                        },
+                        "b": {
+                            "k": "val",
+                            "v": "card bg-warning"
+                        },
+                        "c": {
+                            "k": "val",
+                            "v": "card"
+                        }
+                    },
+                    "style": {
+                        "k": "op",
+                        "name": "cond",
+                        "a": {
+                            "k": "op",
+                            "name": "eq",
+                            "a": {
+                                "k": "read",
+                                "atom": 2
+                            },
+                            "b": {
+                                "k": "val",
+                                "v": true
+                            }
+                        },
+                        "b": {
+                            "k": "val",
+                            "v": {
+                                "color": "tomato",
+                                "fontWeight": 700
+                            }
+                        },
+                        "c": {
+                            "k": "val",
+                            "v": {
+                                "color": "black",
+                                "fontWeight": 400
+                            }
+                        }
+                    }
+                },
+                "slots": {
+                    "default": [
+                        {
+                            "k": "el",
+                            "tag": "div",
+                            "props": {
+                                "attrs": [],
+                                "style": [],
+                                "on": [],
+                                "cls": {
+                                    "k": "val",
+                                    "v": "row"
+                                }
+                            },
+                            "children": [
+                                {
+                                    "k": "el",
+                                    "tag": "p",
+                                    "props": {
+                                        "attrs": [],
+                                        "style": [],
+                                        "on": [],
+                                        "cls": {
+                                            "k": "val",
+                                            "v": "my-1"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "k": "text",
+                                            "value": {
+                                                "k": "val",
+                                                "v": "Din codru s-au auzit ielele, bătând pasul pe frunze de lună."
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "k": "el",
+                                    "tag": "p",
+                                    "props": {
+                                        "attrs": [],
+                                        "style": [],
+                                        "on": [],
+                                        "cls": {
+                                            "k": "val",
+                                            "v": "my-1"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "k": "text",
+                                            "value": {
+                                                "k": "val",
+                                                "v": "Apa s-a speriat și s-a făcut oglinzi multe, ca să poată privi înapoi."
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "k": "el",
+                                    "tag": "p",
+                                    "props": {
+                                        "attrs": [],
+                                        "style": [],
+                                        "on": [],
+                                        "cls": {
+                                            "k": "val",
+                                            "v": "my-1"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "k": "text",
+                                            "value": {
+                                                "k": "val",
+                                                "v": "Un păstor bătrân, cu toiagul de sârmă și inima grea, a zis că le-a văzut — nu cu ochii, ci cu frica."
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "k": "el",
+                                    "tag": "p",
+                                    "props": {
+                                        "attrs": [],
+                                        "style": [],
+                                        "on": [],
+                                        "cls": {
+                                            "k": "val",
+                                            "v": "my-1"
+                                        }
+                                    },
+                                    "children": [
+                                        {
+                                            "k": "text",
+                                            "value": {
+                                                "k": "val",
+                                                "v": "Și în clipa aceea i s-a stins umbra, căci ielele nu suferă pe cei care înțeleg."
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

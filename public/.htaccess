@@ -1,0 +1,9 @@
+# Enable rewriting
+RewriteEngine On
+
+# Only run these rules if the request is not an actual file or directory
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Match any path starting with /pages/router/ and serve /pages/router.html instead
+RewriteRule ^.*$ index.html [L]

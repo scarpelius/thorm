@@ -54,4 +54,4 @@ Open the generated page in a browser. Clicking **Inc** updates the text and togg
 - The DSL avoids JS-in-strings; instead you compose with PHP helpers that map cleanly to runtime semantics.
 
 ## License
-MIT
+Apache-2.0

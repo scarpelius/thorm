@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use function PhpJs\{el, text, read, cls, state, item, repeat};
+use function PhpJs\{el, text, read, cls, state, item, repeat, val};
 use PhpJs\Renderer;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }

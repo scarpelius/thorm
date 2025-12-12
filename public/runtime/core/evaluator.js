@@ -46,9 +46,11 @@ export function createEvaluator(store) {
         // - Otherwise: undefined is OK 
         
         const ret = a ? a.v : (expr.expect === 'repeat' ? [] : undefined);
-        if(typeof ret === 'object') {
-          return JSON.stringify(ret, null, 2)
-        }
+        if (expr.expect === 'repeat') return Array.isArray(ret) ? ret : (ret ?? []);
+        if (typeof ret === 'object') return ret; // no implicit stringify
+        //if(typeof ret === 'object') {
+        //  return JSON.stringify(ret, null, 2)
+        //}
         return ret;
       };
       case 'not': return !toBool(evaluate(expr.x, e));

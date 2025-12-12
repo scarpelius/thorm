@@ -18,7 +18,7 @@
     import { mount } from '/runtime/index.js';
 
     const RT = (async function () {
-        const res = await fetch('880e3c5bfb17a92cb2642b924867294d.ir.json', { cache: 'no-store' });
+        const res = await fetch('25bb695ff8ac9c3b47bad2433b9fa170.ir.json', { cache: 'no-store' });
         const ir = await res.json();
         const x = mount(ir, document.getElementById('app'));
         const atoms = x?.core?.store?.atoms;

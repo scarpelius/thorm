@@ -5,6 +5,7 @@ namespace Thorm\IR\Node;
 
 use InvalidArgumentException;
 use JsonSerializable;
+use Thorm\IR\AtomCollectable;
 
 /**
  * A FragmentNode is an IR (intermediate representation) node that represents
@@ -27,7 +28,7 @@ use JsonSerializable;
  * - On updates, the runtime diff algorithm patches their children in place.
  * - On unmount, the runtime disposes of all children and cleans up markers.
  */
-final class FragmentNode extends Node implements JsonSerializable
+final class FragmentNode extends Node implements JsonSerializable, AtomCollectable
 {
     /** @param Node[] $children */
     public function __construct(public array $children) 
@@ -39,6 +40,12 @@ final class FragmentNode extends Node implements JsonSerializable
                 );
             }
         }
+    }
+
+    public function collectAtoms(callable $collect): void
+    {
+        // children
+        foreach ($this->children as $c) $collect($c);
     }
 
     public function jsonSerialize(): mixed 

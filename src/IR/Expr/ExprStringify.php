@@ -5,8 +5,9 @@ namespace Thorm\IR\Expr;
 
 use JsonSerializable;
 use Thorm\IR\Atom;
+use Thorm\IR\AtomCollectable;
 
-final class ExprStringify extends Expr implements JsonSerializable
+final class ExprStringify extends Expr implements JsonSerializable, AtomCollectable
 {
     /** @param Expr|int|float|string|bool|null $value */
     public function __construct(
@@ -14,12 +15,18 @@ final class ExprStringify extends Expr implements JsonSerializable
         public readonly int $space = 2
     ) {}
 
+    public function collectAtoms(callable $collect): void
+    {
+        $collect($this->value);
+    }
+
     public function jsonSerialize(): array
     {
-        $val = $this->value instanceof JsonSerializable ? $this->value->jsonSerialize() : $this->value;
         return [
             'k'     => 'stringify',
-            'value' => $val,
+            'value' => $this->value instanceof JsonSerializable 
+                ? $this->value->jsonSerialize() 
+                : $this->value,
             'space' => $this->space,
         ];
     }

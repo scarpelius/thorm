@@ -1,6 +1,7 @@
 <?php 
 namespace Thorm\IR\Node;
 
+use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
 
 /**
@@ -11,12 +12,20 @@ use Thorm\IR\Expr\Expr;
  * - Intercepts same-origin clicks (no modifiers) → pushState + reroute.
  * - Passes through props like attrs/cls/on and nests children as content.
  */
-final class ListNode extends Node {
+final class ListNode extends Node implements AtomCollectable
+{
     public function __construct(
         public Expr $items,
         public Expr $key,
         public Node $template
     ) {}
+
+    public function collectAtoms(callable $collect): void
+    {
+        $collect($this->items);
+        $collect($this->key);
+        $collect($this->template);
+    }
 
     public function jsonSerialize(): mixed {
         return [

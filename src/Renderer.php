@@ -6,7 +6,7 @@ namespace Thorm;
 use Thorm\IR\Atom;
 
 use Thorm\IR\Action\Listener;
-
+use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
 use Thorm\IR\Expr\ExprConcat;
 use Thorm\IR\Expr\ExprItem;
@@ -14,7 +14,7 @@ use Thorm\IR\Expr\ExprOp;
 use Thorm\IR\Expr\ExprRead;
 use Thorm\IR\Expr\ExprStringify;
 use Thorm\IR\Expr\ExprVal;
-
+use Thorm\IR\Node\ComponentNode;
 use Thorm\IR\Node\Node;
 use Thorm\IR\Node\EffectNode;
 use Thorm\IR\Node\ElNode;
@@ -31,99 +31,13 @@ final class Renderer {
         // Direct atoms
         if ($x instanceof Atom) {
             $this->atoms[$x->id] = $x;
-            return;
-        }
-
-        // Expressions
-        if ($x instanceof ExprVal) return;
-        if ($x instanceof ExprRead) { $this->collectAtoms($x->a); return; }
-        if ($x instanceof ExprOp)   { 
-            $this->collectAtoms($x->a);
-            $this->collectAtoms($x->b);
-            $this->collectAtoms($x->c);
-            return; 
-        }
-        if ($x instanceof ExprConcat) {
-            foreach ($x->parts as $p) $this->collectAtoms($p);
-            return;
-        }
-        if($x instanceof ExprStringify) {
-            $this->collectAtoms($x->value);
-        }
-
-        // Event actions
-        if ($x instanceof Listener) {
-            $this->collectAtoms($x->atom);
-            // 'set' payload might be an Expr
-            if (property_exists($x, 'payload') && $x->payload instanceof Expr) {
-                $this->collectAtoms($x->payload);
-            }
-            return;
-        }
-
-        // Nodes
-        if ($x instanceof TextNode) {
-            $this->collectAtoms($x->value);
-            return;
-        }
-        if ($x instanceof ShowNode) {
-            $this->collectAtoms($x->cond);
-            $this->collectAtoms($x->child);
-            return;
-        }
-        if ($x instanceof ElNode) {
-            // children
-            foreach ($x->children as $c) $this->collectAtoms($c);
-            // props come in as helper arrays: ['attrs', ...], ['cls', ...], ['style', ...], ['on', $event, Listener]
-            foreach ($x->props as $p) {
-                //print_r($p);
-                if (!is_array($p) || !isset($p[0])) {
-                    $this->collectAtoms($p->triggers);
-                    if ($p instanceof EffectNode) {
-                        foreach($p->actions as $action)
-                            $this->collectAtoms($action);
-                    }
-                } else {
-                    if ($p[0] === 'attrs') {
-                        foreach (($p[1] ?? []) as $v) if ($v instanceof Expr) $this->collectAtoms($v);
-                    } elseif ($p[0] === 'cls') {
-                        if (($p[1] ?? null) instanceof Expr) $this->collectAtoms($p[1]);
-                    } elseif ($p[0] === 'on') {
-                        if (isset($p[2]) && $p[2] instanceof Listener) $this->collectAtoms($p[2]);
-                    } 
-                }
-            }
-            return;
-        }
-        if($x instanceof FragmentNode){
-            // children
-            foreach ($x->children as $c) $this->collectAtoms($c);
-        }
-        if ($x instanceof EffectNode) {
-            foreach ($x->actions as $a) $this->collectAtoms($a);
-            foreach ($x->triggers as $t) {
-                if (is_array($t) && ($t['type'] ?? null) === 'watch') {
-                    $expr = $t['expr'] ?? null;
-                    if ($expr instanceof Expr) $this->collectAtoms($expr);
-                }
-            }
-            return;
-        }
-
-        // ListNode: walk items expr, key expr, and the template subtree
-        if ($x instanceof ListNode) {
-            $this->collectAtoms($x->items);
-            $this->collectAtoms($x->key);
-            $this->collectAtoms($x->template);
-            return;
-        }
-
-        // ExprItem: nothing to collect (no atoms inside by definition)
-        if ($x instanceof ExprItem) return;
-
-        // Fallback: arrays (shouldn’t be needed if we walk objects)
-        if (is_array($x)) {
+            //return;
+        } elseif($x instanceof AtomCollectable) {
+            $x->collectAtoms(fn($c) => $this->collectAtoms($c));
+        } elseif(is_array($x)) {
             foreach ($x as $v) $this->collectAtoms($v);
+        } else {
+            // no op
         }
     }
 
@@ -140,7 +54,17 @@ final class Renderer {
         return ['atoms' => $atoms, 'root' => $rootJson];
     }
 
-    /** Render a full HTML page with runtime and bootstrap script. */
+    /** 
+     * Render a full HTML page with runtime and bootstrap script. 
+     * @var Node $root, root node 
+     * @var array $opts
+     *      $opts['title'], page title
+     *      $opts['containerId'], container id
+     *      $opts['runtimeSrc'], runtime source
+     *      $opts['iruri_dir'], IR directory path
+     *      $opts['template'], path to html template
+     *      $opts['template_as_string'], template given as string
+    */
     public function renderPage(Node $root, array $opts = []): Array {
         $ir = $this->toIR($root);
         $scope['title'] = htmlspecialchars($opts['title'] ?? 'Thorm App', ENT_QUOTES);
@@ -154,7 +78,9 @@ final class Renderer {
         $scope['irJson'] = json_encode($ir, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
         $scope['runtimeJs'] = $this->runtimeJs();
         
-        $tpl = file_get_contents($opts['template']);
+        $tpl = array_key_exists('template_as_string', $opts) 
+            ? $opts['template'] 
+            : file_get_contents($opts['template']);
         $tpl = preg_replace_callback('/{\$(\w+)}/', function($matches) use($scope)  {
             return $scope[$matches[1]] ?? ''; // look up variable by name
         }, $tpl);

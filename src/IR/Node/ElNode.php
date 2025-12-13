@@ -3,19 +3,46 @@ declare(strict_types=1);
 
 namespace Thorm\IR\Node;
 
+use Thorm\IR\Action\Listener;
+use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
 
 /**
  * @param array<string, mixed> $props
  * @param array<int, Node> $children
  */
-final class ElNode extends Node implements \JsonSerializable {
+final class ElNode extends Node implements \JsonSerializable, AtomCollectable {
     /** @param array<int, Node> $children */
     public function __construct(
         public string $tag,
         public array $props = [],
         public array $children = []
     ) {}
+
+    public function collectAtoms(callable $collect): void
+    {
+        // children
+        foreach ($this->children as $c) $collect($c);
+        // props come in as helper arrays: ['attrs', ...], ['cls', ...], ['style', ...], ['on', $event, Listener]
+        foreach ($this->props as $p) {
+            //print_r($p);
+            if (!is_array($p) || !isset($p[0])) {
+                $collect($p->triggers);
+                if ($p instanceof EffectNode) {
+                    foreach($p->actions as $action)
+                        $collect($action);
+                }
+            } else {
+                if ($p[0] === 'attrs') {
+                    foreach (($p[1] ?? []) as $v) if ($v instanceof Expr) $collect($v);
+                } elseif ($p[0] === 'cls') {
+                    if (($p[1] ?? null) instanceof Expr) $collect($p[1]);
+                } elseif ($p[0] === 'on') {
+                    if (isset($p[2]) && $p[2] instanceof Listener) $collect($p[2]);
+                } 
+            }
+        }
+    }
 
     public function jsonSerialize(): mixed {
         $props = ['attrs'=>[], 'cls'=>null, 'style'=>[], 'on'=>[]];

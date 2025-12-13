@@ -7,8 +7,10 @@ use InvalidArgumentException;
 use Thorm\IR\Effect\EffectTrigger;
 use Thorm\IR\Effect\EffectTarget;
 use Thorm\IR\Action\Action;
+use Thorm\IR\AtomCollectable;
+use Thorm\IR\Expr\Expr;
 
-final class EffectNode extends Node implements \JsonSerializable
+final class EffectNode extends Node implements \JsonSerializable, AtomCollectable
 {
     /** @param EffectTrigger[] $triggers @param Action[] $actions */
     public function __construct(
@@ -30,6 +32,17 @@ final class EffectNode extends Node implements \JsonSerializable
         foreach ($this->actions as $i => $a) {
             if (!$a instanceof Action) {
                 throw new InvalidArgumentException("EffectNode: action at index {$i} must implement Action.");
+            }
+        }
+    }
+
+    public function collectAtoms(callable $collect): void
+    {
+        foreach ($this->actions as $a) $collect($a);
+        foreach ($this->triggers as $t) {
+            if (is_array($t) && ($t['type'] ?? null) === 'watch') {
+                $expr = $t['expr'] ?? null;
+                if ($expr instanceof Expr) $collect($expr);
             }
         }
     }

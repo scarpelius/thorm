@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Thorm\IR\Node;
 
 use InvalidArgumentException;
+use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
 
 /**
@@ -19,7 +20,7 @@ use Thorm\IR\Expr\Expr;
  *   "key": [ ... Expr ... ]
  * }
  */
-final class ComponentNode extends Node
+final class ComponentNode extends Node implements AtomCollectable
 {
     /** @param Node[] $children */
     public function __construct(
@@ -52,6 +53,14 @@ final class ComponentNode extends Node
                 }
             }
         }
+    }
+
+    public function collectAtoms(callable $collect): void
+    {
+        $collect($this->template);
+        foreach ($this->props as $expr) $collect($expr);
+        foreach ($this->slots as $nodes) foreach ($nodes as $n) $collect($n);
+        if ($this->key) $collect($this->key);
     }
 
     public function jsonSerialize(): mixed

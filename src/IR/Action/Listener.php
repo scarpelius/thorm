@@ -6,16 +6,26 @@ namespace Thorm\IR\Action;
 use JsonSerializable;
 use \InvalidArgumentException;
 use Thorm\IR\Atom;
+use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
 use Thorm\IR\Expr\ExprVal;
 
-final class Listener implements \JsonSerializable
+final class Listener implements \JsonSerializable, AtomCollectable
 {
     private function __construct(
         public string $kind,
         public ?Atom $atom = null,
         public mixed $payload = null
     ) {}
+
+    public function collectAtoms(callable $collect): void
+    {
+        $collect($this->atom);
+        // 'set' payload might be an Expr
+        if (property_exists($this, 'payload') && $this->payload instanceof Expr) {
+            $collect($this->payload);
+        }
+    }
     
     public function kind(): string
     {

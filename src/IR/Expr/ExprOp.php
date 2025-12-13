@@ -3,7 +3,10 @@ declare(strict_types=1);
 
 namespace Thorm\IR\Expr;
 
-final class ExprOp extends Expr {
+use Thorm\IR\AtomCollectable;
+
+final class ExprOp extends Expr implements AtomCollectable
+{
     public string $name;
     public ?Expr $a = null; // operation name
     public ?Expr $b = null; // operand
@@ -19,6 +22,13 @@ final class ExprOp extends Expr {
         if (isset($args[0])) $this->a = $args[0];
         if (isset($args[1])) $this->b = $args[1];
         if (isset($args[2])) $this->c = $args[2];
+    }
+
+    public function collectAtoms(callable $collect): void
+    {
+        $collect($this->a);
+        $collect($this->b);
+        $collect($this->c);
     }
 
     public function jsonSerialize(): array

@@ -6,6 +6,7 @@ import * as nav from './core/nav.js';
 import { createHttp } from './core/http.js';
 
 import TextMount   from './primitives/TextMount.js';
+import HtmlMount   from './primitives/HtmlMount.js';
 import ElMount     from './primitives/ElMount.js';
 import ShowMount   from './primitives/ShowMount.js';
 import RepeatMount from './primitives/RepeatMount.js';
@@ -22,6 +23,7 @@ function createCore(ir) {
   const http  = createHttp({ atoms: evalr.atoms, evaluate: evalr.evaluate, ensureAtom: evalr.ensureAtom, notify: evalr.notify });
   const registry = new PrimitiveRegistry({
     text: TextMount,
+    html: HtmlMount,
     el: ElMount,
     show: ShowMount,
     repeat: RepeatMount,

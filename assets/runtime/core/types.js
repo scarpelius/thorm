@@ -72,6 +72,15 @@
  * }} TextIR
  */
 
+/** Html */
+/// { k:'html', value: Expr }
+/**
+ * @typedef {IRNodeBase & {
+ *   k: 'html',
+ *   value: any
+ * }} HtmlIR
+ */
+
 /** El (element) */
 /// { k:'el', tag:string, props?:{ attrs?: [any, string, any][], style?: [any, string, any][], cls?: any, on?: {event:string, action:any}[] }, children?: IRNode[] }
 /**
@@ -137,7 +146,7 @@
 /**
  * Union of all IR nodes supported by the runtime.
  * Add new kinds here when you add new primitives (e.g., FragmentIR, ComponentIR).
- * @typedef {TextIR | ElIR | ShowIR | RepeatIR | LinkIR | RouteIR} IRNode
+ * @typedef {TextIR | HtmlIR | ElIR | ShowIR | RepeatIR | LinkIR | RouteIR} IRNode
  */
 
 /**

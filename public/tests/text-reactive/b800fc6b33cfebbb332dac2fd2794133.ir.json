@@ -1,0 +1,54 @@
+{
+    "atoms": [],
+    "root": {
+        "k": "el",
+        "tag": "div",
+        "props": {
+            "attrs": [],
+            "style": [],
+            "on": [],
+            "cls": {
+                "k": "val",
+                "v": "container"
+            }
+        },
+        "children": [
+            {
+                "k": "el",
+                "tag": "h1",
+                "props": {
+                    "attrs": [],
+                    "style": [],
+                    "on": []
+                },
+                "children": [
+                    {
+                        "k": "text",
+                        "value": {
+                            "k": "val",
+                            "v": "HTML content"
+                        }
+                    }
+                ]
+            },
+            {
+                "k": "el",
+                "tag": "p",
+                "props": {
+                    "attrs": [],
+                    "style": [],
+                    "on": []
+                },
+                "children": [
+                    {
+                        "k": "html",
+                        "value": {
+                            "k": "val",
+                            "v": "<em>ut aute velit</em><br/><p>sit laboris ut anim</p><span>magna tempor irure nostrud lorem amet in ut minim in ipsum</span><p>voluptate incididunt quis in irure amet laborum ipsum sint mollit</p><p>irure non deserunt voluptate ut lorem amet aliquip velit voluptate</p><em>cillum eiusmod ex dolor adipiscing aliquip sit</em><mark>irure reprehenderit est proident ea sint eiusmod</mark><br/><p>ut pariatur sint</p><br/><small>consectetur est aliquip aliqua dolor quis tempor tempor</small><small>amet cillum dolor ullamco elit magna sint aliqua</small><u>reprehenderit velit incididunt tempor aliquip sunt magna nostrud laboris aute occaecat</u><p>consectetur magna sunt aute sunt id sed dolor</p><span>mollit</span>"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -12,7 +12,7 @@ use PhpJs\IR\Atom as AtomDef;
 
 use PhpJs\IR\Expr\{Expr, ExprOp, ExprParam, ExprQuery, ExprProp, ExprStringify};
 
-use PhpJs\IR\Node\{Node, ElNode, TextNode, ShowNode, ListNode, 
+use PhpJs\IR\Node\{Node, ElNode, TextNode, HtmlNode, ShowNode, ListNode, 
     FragmentNode, LinkNode, RouteNode, SlotNode, ComponentNode,
     EffectNode
 };
@@ -81,6 +81,10 @@ function el(string $tag, array $props = [], array $children = []): Node {
 
 function text(Expr|string $value): Node {
     return new TextNode($value);
+}
+
+function html(Expr|string $value): Node {
+    return new HtmlNode($value);
 }
 
 function show(Expr|bool $cond, Node $child): Node {

@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs\IR\Node;
+namespace Thorm\IR\Node;
 
 use InvalidArgumentException;
-use PhpJs\IR\Expr\Expr;
+use Thorm\IR\Expr\Expr;
 
 /**
  * ComponentNode represents a reusable IR subtree instantiated with its own

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs\IR\Node;
+namespace Thorm\IR\Node;
 
 /**
  * SlotNode represents a placeholder inside a component template

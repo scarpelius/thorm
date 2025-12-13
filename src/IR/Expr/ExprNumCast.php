@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs\IR\Expr;
+namespace Thorm\IR\Expr;
 
 final class ExprNumCast extends Expr {
     public function __construct(public Expr $x) {}

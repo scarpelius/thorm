@@ -28,7 +28,7 @@ else (
       //}
       /*
       // 1) Obvious top-level candidates
-      const seeds = [window.app, window.runtime, window.PJP, window.PHPJS, window.Thorm, window.thorm, window.services, window];
+      const seeds = [window.app, window.runtime, window.PJP, window.Thorm, window.Thorm, window.thorm, window.services, window];
       const seen = new Set();
       const q = [];
 

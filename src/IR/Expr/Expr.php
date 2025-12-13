@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs\IR\Expr;
+namespace Thorm\IR\Expr;
 
 use JsonSerializable;
-use PhpJs\IR\Atom;
+use Thorm\IR\Atom;
 
 abstract class Expr implements JsonSerializable 
 {

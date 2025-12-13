@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs\IR\Action;
+namespace Thorm\IR\Action;
 
 use JsonSerializable;
 use \InvalidArgumentException;
-use PhpJs\IR\Atom;
-use PhpJs\IR\Expr\Expr;
-use PhpJs\IR\Expr\ExprVal;
+use Thorm\IR\Atom;
+use Thorm\IR\Expr\Expr;
+use Thorm\IR\Expr\ExprVal;
 
 final class Listener implements \JsonSerializable
 {

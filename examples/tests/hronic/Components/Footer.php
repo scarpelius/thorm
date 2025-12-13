@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Hronic\Components;
 
-use function PhpJs\{state,el,text,on,eq,read,val,concat,addTo,set,attrs,num,ev,cls,repeat,item,cond};
-use PhpJs\IR\Node\Node;
+use function Thorm\{state,el,text,on,eq,read,val,concat,addTo,set,attrs,num,ev,cls,repeat,item,cond};
+use Thorm\IR\Node\Node;
 
 class Footer
 {

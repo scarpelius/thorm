@@ -1,23 +1,23 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs;
+namespace Thorm;
 
-use PhpJs\IR\Action\{Listener, Action, IncAction, AddAction,
+use Thorm\IR\Action\{Listener, Action, IncAction, AddAction,
     DelayAction,
     SetAction, HttpAction, NavigateAction,
     RedirectAction
 };
-use PhpJs\IR\Atom as AtomDef;
+use Thorm\IR\Atom as AtomDef;
 
-use PhpJs\IR\Expr\{Expr, ExprOp, ExprParam, ExprQuery, ExprProp, ExprStringify};
+use Thorm\IR\Expr\{Expr, ExprOp, ExprParam, ExprQuery, ExprProp, ExprStringify};
 
-use PhpJs\IR\Node\{Node, ElNode, TextNode, HtmlNode, ShowNode, ListNode, 
+use Thorm\IR\Node\{Node, ElNode, TextNode, HtmlNode, ShowNode, ListNode, 
     FragmentNode, LinkNode, RouteNode, SlotNode, ComponentNode,
     EffectNode
 };
 
-use PhpJs\IR\Effect\{EffectTrigger,EffectTarget,MountTrigger,WatchTrigger,
+use Thorm\IR\Effect\{EffectTrigger,EffectTarget,MountTrigger,WatchTrigger,
     IntervalTrigger,TimeoutTrigger,VisibleTrigger,EventTrigger,
     WindowTarget,DocumentTarget,SelectorTarget
 };
@@ -217,7 +217,7 @@ function str(Expr|int|float|string|bool $x): Expr
 }
 
 // if you added add() as an action earlier:
-function addTo(\PhpJs\IR\Atom $atom, Expr|int|float $by): Expr 
+function addTo(\Thorm\IR\Atom $atom, Expr|int|float $by): Expr 
 {
     return Listener::add($atom, $by instanceof Expr ? $by : Expr::val($by));
 }
@@ -304,7 +304,7 @@ function cond(Expr $if, Expr|string $then, Expr|string $else): Expr {
  * - Works with any reactive atom created via `state()`.
  * - Does not require runtime changes — handled entirely by existing `attrs` and `on`.
  *
- * @param \PhpJs\IR\Atom $a     Reactive atom representing input state.
+ * @param \Thorm\IR\Atom $a     Reactive atom representing input state.
  * @param array                 $opts Optional binding configuration (type, debounceMs).
  * @return array                Attribute/event definitions to spread into `el()`.
  */

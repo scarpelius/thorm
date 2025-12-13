@@ -15,17 +15,17 @@ For local dev without Packagist, copy this folder into your project and ensure C
 <?php
 require __DIR__ . '/vendor/autoload.php';
 
-use function PhpJs\state;
-use function PhpJs\el;
-use function PhpJs\text;
-use function PhpJs\on;
-use function PhpJs\read;
-use function PhpJs\concat;
-use function PhpJs\mod;
-use function PhpJs\eq;
-use function PhpJs\show;
-use function PhpJs\inc;
-use PhpJs\Renderer;
+use function Thorm\state;
+use function Thorm\el;
+use function Thorm\text;
+use function Thorm\on;
+use function Thorm\read;
+use function Thorm\concat;
+use function Thorm\mod;
+use function Thorm\eq;
+use function Thorm\show;
+use function Thorm\inc;
+use Thorm\Renderer;
 
 $cnt = state(0);
 

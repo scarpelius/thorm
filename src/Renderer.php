@@ -1,27 +1,27 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs;
+namespace Thorm;
 
-use PhpJs\IR\Atom;
+use Thorm\IR\Atom;
 
-use PhpJs\IR\Action\Listener;
+use Thorm\IR\Action\Listener;
 
-use PhpJs\IR\Expr\Expr;
-use PhpJs\IR\Expr\ExprConcat;
-use PhpJs\IR\Expr\ExprItem;
-use PhpJs\IR\Expr\ExprOp;
-use PhpJs\IR\Expr\ExprRead;
-use PhpJs\IR\Expr\ExprStringify;
-use PhpJs\IR\Expr\ExprVal;
+use Thorm\IR\Expr\Expr;
+use Thorm\IR\Expr\ExprConcat;
+use Thorm\IR\Expr\ExprItem;
+use Thorm\IR\Expr\ExprOp;
+use Thorm\IR\Expr\ExprRead;
+use Thorm\IR\Expr\ExprStringify;
+use Thorm\IR\Expr\ExprVal;
 
-use PhpJs\IR\Node\Node;
-use PhpJs\IR\Node\EffectNode;
-use PhpJs\IR\Node\ElNode;
-use PhpJs\IR\Node\FragmentNode;
-use PhpJs\IR\Node\ListNode;
-use PhpJs\IR\Node\ShowNode;
-use PhpJs\IR\Node\TextNode;
+use Thorm\IR\Node\Node;
+use Thorm\IR\Node\EffectNode;
+use Thorm\IR\Node\ElNode;
+use Thorm\IR\Node\FragmentNode;
+use Thorm\IR\Node\ListNode;
+use Thorm\IR\Node\ShowNode;
+use Thorm\IR\Node\TextNode;
 
 final class Renderer {
     /** @var Atom[] */
@@ -143,9 +143,9 @@ final class Renderer {
     /** Render a full HTML page with runtime and bootstrap script. */
     public function renderPage(Node $root, array $opts = []): Array {
         $ir = $this->toIR($root);
-        $scope['title'] = htmlspecialchars($opts['title'] ?? 'PhpJs App', ENT_QUOTES);
+        $scope['title'] = htmlspecialchars($opts['title'] ?? 'Thorm App', ENT_QUOTES);
         $scope['containerId'] = htmlspecialchars($opts['containerId'] ?? 'app', ENT_QUOTES);
-        $scope['runtimeSrc'] = $opts['runtimeSrc'] ?? '/assets/phpjs-runtime.js';
+        $scope['runtimeSrc'] = $opts['runtimeSrc'] ?? '/assets/Thorm-runtime.js';
         $scope['iruri_dir'] = $opts['iruri_dir']??'';
 
         // ensure the unicity of the iruri

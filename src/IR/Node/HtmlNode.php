@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs\IR\Node;
+namespace Thorm\IR\Node;
 
-use PhpJs\IR\Expr\Expr;
+use Thorm\IR\Expr\Expr;
 
 final class HtmlNode extends Node {
     public function __construct(public Expr|string $value) {}

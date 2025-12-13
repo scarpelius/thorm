@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use function PhpJs\{
+use function Thorm\{
   el, text, concat, on, inc, set, read, state, cls,eq,
   fragment, slot, prop, component, repeat, item, cond, val, show, style, attrs
 };
-use PhpJs\Renderer;
+use Thorm\Renderer;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }

@@ -25,7 +25,7 @@
         (async function(){
             const res = await fetch('/{$iruri}', { cache: 'no-store' });
             const ir = await res.json();
-            window.PHPJS.mount(ir, document.getElementById("{$containerId}"));
+            window.Thorm.mount(ir, document.getElementById("{$containerId}"));
         })();
         </script>
     </body>

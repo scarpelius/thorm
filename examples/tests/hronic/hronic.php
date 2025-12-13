@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 require __DIR__ . '/../../../vendor/autoload.php';
-use function PhpJs\{fragment};
-use PhpJs\Renderer;
+use function Thorm\{fragment};
+use Thorm\Renderer;
 use Hronic\Components\Header;
 use Hronic\Components\Content;
 use Hronic\Components\Footer;

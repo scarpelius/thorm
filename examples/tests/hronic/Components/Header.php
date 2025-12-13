@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Hronic\Components;
 
-use function PhpJs\{el,text,attrs,cls};
-use PhpJs\IR\Node\Node;
+use function Thorm\{el,text,attrs,cls};
+use Thorm\IR\Node\Node;
 
 class Header
 {

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs\IR\Action;
+namespace Thorm\IR\Action;
 
 final class IncAction implements Action
 {

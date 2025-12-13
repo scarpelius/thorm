@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Hronic\Components;
 
-use function PhpJs\{state,el,text,on,read,concat,addTo,set,attrs,num,ev,cls,repeat, item};
-use PhpJs\IR\Node\Node;
+use function Thorm\{state,el,text,on,read,concat,addTo,set,attrs,num,ev,cls,repeat, item};
+use Thorm\IR\Node\Node;
 
 class Content 
 {

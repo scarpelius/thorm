@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace PhpJs\IR\Effect;
+namespace Thorm\IR\Effect;
 
 final class MountTrigger implements EffectTrigger {
     public function type(): string { return 'mount'; }

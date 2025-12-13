@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
-namespace PhpJs\IR\Effect;
+namespace Thorm\IR\Effect;
 
 use InvalidArgumentException;
-use PhpJs\IR\Expr\Expr;
+use Thorm\IR\Expr\Expr;
 
 final class WatchTrigger implements EffectTrigger {
     public function __construct(

@@ -1,7 +1,7 @@
 <?php 
-namespace PhpJs\IR\Node;
+namespace Thorm\IR\Node;
 
-use PhpJs\IR\Expr\Expr;
+use Thorm\IR\Expr\Expr;
 
 /**
  * LinkNode

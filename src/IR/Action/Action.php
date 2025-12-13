@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs\IR\Action;
+namespace Thorm\IR\Action;
 
 /**
  * Base contract for Action IR nodes (inc, set, add, http, navigate, ...).

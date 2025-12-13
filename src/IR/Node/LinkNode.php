@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs\IR\Node;
+namespace Thorm\IR\Node;
 
-use PhpJs\IR\Expr\Expr;
+use Thorm\IR\Expr\Expr;
 
 final class LinkNode extends Node implements \JsonSerializable {
     /** @param array<int, mixed> $props  same shape as ElNode props: ['attrs', map], ['cls', expr], ... */

@@ -1,5 +1,5 @@
 <?php
-namespace PhpJs\IR\Expr;
+namespace Thorm\IR\Expr;
 
 final class ExprItem extends Expr {
     public function __construct(public string $path) {}

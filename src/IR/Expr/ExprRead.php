@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs\IR\Expr;
+namespace Thorm\IR\Expr;
 
-use PhpJs\IR\Atom;
+use Thorm\IR\Atom;
 
 final class ExprRead extends Expr {
     public function __construct(public Atom $a) {}

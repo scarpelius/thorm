@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs\IR\Action;
+namespace Thorm\IR\Action;
 
-use PhpJs\IR\Expr\Expr;
+use Thorm\IR\Expr\Expr;
 
 final class HttpAction implements Action
 {

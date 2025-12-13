@@ -34,11 +34,11 @@ bash cli/watch.sh
 (Use `WATCH_MODE=poll` on filesystems without inotify.)
 
 ## Authoring UIs in PHP
-Build views with the DSL from `PhpJs\` (autoloaded via composer files):
+Build views with the DSL from `Thorm\` (autoloaded via composer files):
 ```php
 <?php
-use PhpJs\Renderer;
-use function PhpJs\{state, el, text, attrs, cls, on, inc, read};
+use Thorm\Renderer;
+use function Thorm\{state, el, text, attrs, cls, on, inc, read};
 
 $cnt = state(0);
 $app = el('div', [cls('p-3')], [
@@ -76,7 +76,7 @@ file_put_contents(__DIR__ . '/public/tests/counter/index.html', $res['tpl']);
 - `router.php`, `fragments.php`, `search-box-live.php`, `bid.php`: Routing, fragments, form bindings, more realistic flows.
 
 ## Runtime & templates
-- Runtime entry: `assets/runtime/index.js` (bundles core/primitives/utils/devtools) and is expected to be available at `/assets/phpjs-runtime.js` or copied to `public/runtime/`.
+- Runtime entry: `assets/runtime/index.js` (bundles core/primitives/utils/devtools) and is expected to be available at `/assets/Thorm-runtime.js` or copied to `public/runtime/`.
 - Templates: `assets/index.tpl.html` (default), `assets/index-test.tpl.html`, `assets/index-old.tpl.html`, `assets/index-hronic.tpl.html` (legacy). Tokens are replaced by `Renderer::renderPage()`.
 
 ## Serving and packaging

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs\IR\Expr;
+namespace Thorm\IR\Expr;
 
 final class ExprVal extends Expr {
     public function __construct(public mixed $v) {}

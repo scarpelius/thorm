@@ -1,5 +1,5 @@
 <?php
-namespace PhpJs\IR\Expr;
+namespace Thorm\IR\Expr;
 
 final class ExprNot extends Expr implements \JsonSerializable {
     public function __construct(public Expr $x) {}

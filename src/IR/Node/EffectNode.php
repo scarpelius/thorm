@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs\IR\Node;
+namespace Thorm\IR\Node;
 
 use InvalidArgumentException;
-use PhpJs\IR\Effect\EffectTrigger;
-use PhpJs\IR\Effect\EffectTarget;
-use PhpJs\IR\Action\Action;
+use Thorm\IR\Effect\EffectTrigger;
+use Thorm\IR\Effect\EffectTarget;
+use Thorm\IR\Action\Action;
 
 final class EffectNode extends Node implements \JsonSerializable
 {

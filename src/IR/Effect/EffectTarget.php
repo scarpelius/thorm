@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace PhpJs\IR\Effect;
+namespace Thorm\IR\Effect;
 
 interface EffectTarget extends \JsonSerializable
 {

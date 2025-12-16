@@ -139,14 +139,14 @@ function http(
     ?AtomDef $resHeaders = null
 ): Listener|Action {
     $reqHeaders = is_array($headers) ? $headers : null;
-    $resHdrAtom = $resHeaders?->id ?? ($headers instanceof AtomDef ? $headers->id : null);
+    $resHdrAtom = $resHeaders ?? ($headers instanceof AtomDef ? $headers : null);
 
     if ($asAction) {
         return new HttpAction(
             $url,
             $method,
-            $to?->id,
-            $status?->id,
+            $to,
+            $status,
             $reqHeaders,
             $resHdrAtom,
             $body,

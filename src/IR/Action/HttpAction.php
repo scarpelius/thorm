@@ -3,22 +3,40 @@ declare(strict_types=1);
 
 namespace Thorm\IR\Action;
 
+use Thorm\IR\Atom;
+use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
 
-final class HttpAction implements Action
+final class HttpAction implements Action, AtomCollectable
 {
     public function __construct(
         public readonly Expr|string $url,
         public readonly string $method = 'GET',
-        public readonly ?int $to = null,
-        public readonly ?int $status = null,
+        public readonly Atom|int|null $to = null,
+        public readonly Atom|int|null $status = null,
         public readonly array|null $reqHeaders = null, // assoc array of scalar|Expr
-        public readonly ?int $resHeaders = null,       // atom id to store response headers
+        public readonly Atom|int|null $resHeaders = null,       // atom id to store response headers
         public readonly Expr|int|float|string|bool|array|null $body = null,
         public readonly string $parse = 'json'
     ) {}
 
     public function kind(): string { return 'http'; }
+
+    public function collectAtoms(callable $collect): void
+    {
+        if ($this->to instanceof Atom) $collect($this->to);
+        if ($this->status instanceof Atom) $collect($this->status);
+        if ($this->resHeaders instanceof Atom) $collect($this->resHeaders);
+
+        if ($this->url instanceof Expr) $collect($this->url);
+        if ($this->body instanceof Expr) $collect($this->body);
+
+        if (is_array($this->reqHeaders)) {
+            foreach ($this->reqHeaders as $v) {
+                if ($v instanceof Expr) $collect($v);
+            }
+        }
+    }
 
     public function jsonSerialize(): array
     {
@@ -30,8 +48,8 @@ final class HttpAction implements Action
             'method' => strtoupper($this->method),
             'parse'  => $this->parse,
         ];
-        if ($this->to      !== null) $out['to']      = $this->to;
-        if ($this->status  !== null) $out['status']  = $this->status;
+        if ($this->to      !== null) $out['to']      = $this->to instanceof Atom ? $this->to->id : $this->to;
+        if ($this->status  !== null) $out['status']  = $this->status instanceof Atom ? $this->status->id : $this->status;
         
         // Request headers
         if (is_array($this->reqHeaders)) {
@@ -45,7 +63,7 @@ final class HttpAction implements Action
 
         // Response headers atom
         if ($this->resHeaders !== null) {
-            $out['resHeaders'] = $this->resHeaders;
+            $out['resHeaders'] = $this->resHeaders instanceof Atom ? $this->resHeaders->id : $this->resHeaders;
         }
 
         if ($this->body instanceof \JsonSerializable) {

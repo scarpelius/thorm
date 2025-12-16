@@ -12,6 +12,7 @@ export default class ComponentMount extends PrimitiveMount {
     this.services   = services;
     this.ctx        = services.ctx || [];
     this.registry   = registry;
+    this.http       = services.http;
 
     this.propsVal   = [];
     this.slots      = [];
@@ -33,7 +34,12 @@ export default class ComponentMount extends PrimitiveMount {
     });
     
     const frag = document.createDocumentFragment();
-    this.childInst = this.registry.mount(frag, this.ir.tpl, this.childScope, {evalr: this.services.evalr, ctx: childCtx});
+    this.childInst = this.registry.mount(
+      frag,
+      this.ir.tpl,
+      this.childScope,
+      {evalr: this.services.evalr, http:this.http, ctx: childCtx}
+    );
     this.parent.insertBefore(frag, this.end);
 
     this.bindProps(this.ir.props || {});

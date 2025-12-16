@@ -119,11 +119,11 @@ export default class EffectMount {
   }
 
   _nearestElementAncestor() {
-    let p = this.parent;
-    while (p) {
-      if (p.node instanceof Element) return p.node;
-      if (p.start && p.start.parentNode instanceof Element) return p.start.parentNode;
-      p = p.parent || null;
+    // Walk up the DOM tree starting from the known parent/anchor to find the closest element.
+    let node = this.parent;
+    while (node) {
+      if (node instanceof Element) return node;
+      node = node.parentNode || null;
     }
     return null;
   }

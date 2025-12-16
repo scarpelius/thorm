@@ -390,19 +390,6 @@
                                 }
                             ]
                         }
-                    },
-                    {
-                        "k": "delay",
-                        "ms": 1500,
-                        "actions": [
-                            {
-                                "k": "redirect",
-                                "to": {
-                                    "k": "val",
-                                    "v": "/tests/effects-event-self-submit-http/thanks.html"
-                                }
-                            }
-                        ]
                     }
                 ],
                 "target": {

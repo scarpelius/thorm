@@ -33,14 +33,14 @@ export default class EffectMount {
         }
         case 'interval': {
           const id = setInterval(() => {
-            runActions(this.evalr, this.scope, this.ctx, this.ir.actions, null);
+            runActions(this.evalr, this.services, this.ctx, this.ir.actions, null);
           }, Math.max(1, Number(trig.ms || 0)));
           this.disposers.push(() => clearInterval(id));
           break;
         }
         case 'timeout': {
           const id = setTimeout(() => {
-            runActions(this.evalr, this.scope, this.ctx, this.ir.actions, null);
+            runActions(this.evalr, this.services, this.ctx, this.ir.actions, null);
           }, Math.max(1, Number(trig.ms || 0)));
           this.disposers.push(() => clearTimeout(id));
           break;
@@ -85,6 +85,86 @@ export default class EffectMount {
           };
           target.addEventListener(trig.event, handler, opts);
           this.disposers.push(() => target.removeEventListener(trig.event, handler, opts));
+          break;
+        }
+        case 'sse': { // Server Side Events
+          const parseMode = trig.parse || 'json';     // 'json' | 'text' | 'raw'
+          const eventName = trig.event || 'message';
+          const withCreds = !!trig.withCredentials;
+          const urlExprOrStr = trig.url;
+          const sinceIdExprOrVal = trig.sinceId ?? null;
+
+          let es = null;
+
+          const close = () => { try { es?.close(); } catch {} es = null; };
+
+          const buildUrl = (rawUrl) => {
+            if (!rawUrl) return '';
+            let u = String(rawUrl);
+
+            if (sinceIdExprOrVal != null) {
+              const sid = (sinceIdExprOrVal && typeof sinceIdExprOrVal === 'object' && sinceIdExprOrVal.k)
+                ? this.evalr.evaluate(sinceIdExprOrVal, null, this.ctx)
+                : sinceIdExprOrVal;
+
+              if (sid != null && String(sid) !== '' && Number(sid) !== 0) {
+                const sep = u.includes('?') ? '&' : '?';
+                u = u + sep + 'sinceId=' + encodeURIComponent(String(sid));
+              }
+            }
+
+            return u;
+          };
+
+          const open = (rawUrl) => {
+            const url = buildUrl(rawUrl);
+            close();
+            if (!url) return;
+
+            es = new EventSource(url, { withCredentials: withCreds });
+
+            const handler = (msgEvt) => {
+              const raw = msgEvt?.data ?? '';
+              let parsed = raw;
+
+              if (parseMode === 'json') {
+                try { parsed = JSON.parse(raw); } catch { parsed = null; }
+              } else if (parseMode === 'raw') {
+                parsed = raw;
+              }
+
+              // Important: pass a *plain object* so ev('parsed.id') etc works via getByPath()
+              const evtObj = {
+                type: msgEvt?.type,
+                lastEventId: msgEvt?.lastEventId,
+                data: raw,
+                parsed,
+              };
+
+              runActions(this.evalr, this.services, this.ctx, this.ir.actions, evtObj);
+            };
+
+            es.addEventListener(eventName, handler);
+            es.addEventListener('error', (e) => {
+              if (this.scope.dev) console.warn('[sse] error', e);
+            });
+
+            this.disposers.push(() => {
+              try { es?.removeEventListener(eventName, handler); } catch {}
+              close();
+            });
+          };
+
+          if (urlExprOrStr && typeof urlExprOrStr === 'object' && urlExprOrStr.k && typeof this.evalr?.bindReactive === 'function') {
+            const unbind = this.evalr.bindReactive(urlExprOrStr, () => {
+              const u = this.evalr.evaluate(urlExprOrStr, null, this.ctx);
+              open(u);
+            }, this);
+            this.disposers.push(() => { try { unbind(); } catch {} });
+          } else {
+            open(urlExprOrStr);
+          }
+
           break;
         }
         default: {
@@ -145,7 +225,7 @@ export default class EffectMount {
   }
 
   _setupWatch(trig) {
-    const apply = () => runActions(this.evalr, this.scope, this.ctx, this.ir.actions, null);
+    const apply = () => runActions(this.evalr, this.services, this.ctx, this.ir.actions, null);
     const wrapped = this._wrapDebounceThrottle(apply, trig.debounceMs ?? null, trig.throttleMs ?? null);
 
     if (typeof this.evalr?.bindReactive === 'function') {

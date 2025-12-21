@@ -1,198 +1,246 @@
 {
     "atoms": [
         {
-            "id": 5,
+            "id": 1,
             "initial": 10
         },
         {
-            "id": 7,
+            "id": 3,
             "initial": ""
         }
     ],
     "root": {
         "k": "el",
-        "tag": "form",
+        "tag": "div",
         "props": {
             "attrs": [],
             "style": [],
-            "on": [
-                {
-                    "event": "submit",
-                    "action": {
-                        "k": "http",
-                        "url": {
-                            "k": "val",
-                            "v": "/api/bid/"
-                        },
-                        "method": "POST",
-                        "headers": {
-                            "Content-Type": {
-                                "k": "val",
-                                "v": "application/x-www-form-urlencoded"
-                            }
-                        },
-                        "body": {
-                            "k": "concat",
-                            "parts": [
-                                {
-                                    "k": "val",
-                                    "v": "amount="
-                                },
-                                {
-                                    "k": "read",
-                                    "atom": 5
-                                }
-                            ]
-                        },
-                        "to": 7,
-                        "status": 6,
-                        "parse": "json"
-                    }
-                }
-            ],
+            "on": [],
             "cls": {
                 "k": "val",
-                "v": "m-5"
+                "v": "container"
             }
         },
         "children": [
             {
                 "k": "el",
-                "tag": "input",
+                "tag": "h1",
                 "props": {
-                    "attrs": {
-                        "type": {
-                            "k": "val",
-                            "v": "number"
-                        },
+                    "attrs": [],
+                    "style": [],
+                    "on": []
+                },
+                "children": [
+                    {
+                        "k": "text",
                         "value": {
-                            "k": "read",
-                            "atom": 5
+                            "k": "val",
+                            "v": "Bid example"
                         }
-                    },
+                    }
+                ]
+            },
+            {
+                "k": "el",
+                "tag": "form",
+                "props": {
+                    "attrs": [],
                     "style": [],
                     "on": [
                         {
-                            "event": "input",
+                            "event": "submit",
                             "action": {
-                                "k": "set",
-                                "atom": 5,
-                                "to": {
-                                    "k": "num",
-                                    "x": {
-                                        "k": "event",
-                                        "path": "target.value"
+                                "k": "http",
+                                "url": {
+                                    "k": "val",
+                                    "v": "/api/bid/"
+                                },
+                                "method": "POST",
+                                "headers": {
+                                    "Content-Type": {
+                                        "k": "val",
+                                        "v": "application/x-www-form-urlencoded"
                                     }
-                                }
+                                },
+                                "body": {
+                                    "k": "concat",
+                                    "parts": [
+                                        {
+                                            "k": "val",
+                                            "v": "amount="
+                                        },
+                                        {
+                                            "k": "read",
+                                            "atom": 1
+                                        }
+                                    ]
+                                },
+                                "to": 3,
+                                "status": 2,
+                                "parse": "json"
                             }
                         }
                     ],
                     "cls": {
                         "k": "val",
-                        "v": "form-control"
-                    }
-                },
-                "children": []
-            },
-            {
-                "k": "el",
-                "tag": "button",
-                "props": {
-                    "attrs": [],
-                    "style": [],
-                    "on": [],
-                    "cls": {
-                        "k": "val",
-                        "v": "btn btn-primary"
+                        "v": "my-5"
                     }
                 },
                 "children": [
                     {
-                        "k": "text",
-                        "value": {
-                            "k": "val",
-                            "v": "Place bid"
-                        }
-                    }
-                ]
-            },
-            {
-                "k": "el",
-                "tag": "p",
-                "props": {
-                    "attrs": [],
-                    "style": [],
-                    "on": []
-                },
-                "children": [
-                    {
-                        "k": "text",
-                        "value": {
-                            "k": "op",
-                            "name": "get",
-                            "a": {
-                                "k": "read",
-                                "atom": 7
-                            },
-                            "b": {
+                        "k": "el",
+                        "tag": "div",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [],
+                            "cls": {
                                 "k": "val",
-                                "v": "message"
+                                "v": "col col-lg-2"
                             }
-                        }
-                    }
-                ]
-            },
-            {
-                "k": "el",
-                "tag": "p",
-                "props": {
-                    "attrs": [],
-                    "style": [],
-                    "on": []
-                },
-                "children": [
-                    {
-                        "k": "text",
-                        "value": {
-                            "k": "op",
-                            "name": "cond",
-                            "a": {
-                                "k": "op",
-                                "name": "get",
-                                "a": {
-                                    "k": "read",
-                                    "atom": 7
+                        },
+                        "children": [
+                            {
+                                "k": "el",
+                                "tag": "input",
+                                "props": {
+                                    "attrs": {
+                                        "type": {
+                                            "k": "val",
+                                            "v": "number"
+                                        },
+                                        "value": {
+                                            "k": "read",
+                                            "atom": 1
+                                        }
+                                    },
+                                    "style": [],
+                                    "on": [
+                                        {
+                                            "event": "input",
+                                            "action": {
+                                                "k": "set",
+                                                "atom": 1,
+                                                "to": {
+                                                    "k": "num",
+                                                    "x": {
+                                                        "k": "event",
+                                                        "path": "target.value"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "cls": {
+                                        "k": "val",
+                                        "v": "form-control shadow col-3"
+                                    }
                                 },
-                                "b": {
-                                    "k": "val",
-                                    "v": "ok"
-                                }
-                            },
-                            "b": {
+                                "children": []
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "button",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": [],
+                            "cls": {
                                 "k": "val",
-                                "v": "Thanks!"
-                            },
-                            "c": {
-                                "k": "op",
-                                "name": "get",
-                                "a": {
+                                "v": "btn btn-primary mt-3"
+                            }
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "val",
+                                    "v": "Place bid"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
                                     "k": "op",
                                     "name": "get",
                                     "a": {
                                         "k": "read",
-                                        "atom": 7
+                                        "atom": 3
                                     },
                                     "b": {
                                         "k": "val",
-                                        "v": "error"
+                                        "v": "message"
                                     }
-                                },
-                                "b": {
-                                    "k": "val",
-                                    "v": "message"
                                 }
                             }
-                        }
+                        ]
+                    },
+                    {
+                        "k": "el",
+                        "tag": "p",
+                        "props": {
+                            "attrs": [],
+                            "style": [],
+                            "on": []
+                        },
+                        "children": [
+                            {
+                                "k": "text",
+                                "value": {
+                                    "k": "op",
+                                    "name": "cond",
+                                    "a": {
+                                        "k": "op",
+                                        "name": "get",
+                                        "a": {
+                                            "k": "read",
+                                            "atom": 3
+                                        },
+                                        "b": {
+                                            "k": "val",
+                                            "v": "ok"
+                                        }
+                                    },
+                                    "b": {
+                                        "k": "val",
+                                        "v": "Thanks!"
+                                    },
+                                    "c": {
+                                        "k": "op",
+                                        "name": "get",
+                                        "a": {
+                                            "k": "op",
+                                            "name": "get",
+                                            "a": {
+                                                "k": "read",
+                                                "atom": 3
+                                            },
+                                            "b": {
+                                                "k": "val",
+                                                "v": "error"
+                                            }
+                                        },
+                                        "b": {
+                                            "k": "val",
+                                            "v": "message"
+                                        }
+                                    }
+                                }
+                            }
+                        ]
                     }
                 ]
             }

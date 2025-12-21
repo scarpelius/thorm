@@ -55,6 +55,17 @@ export async function runAction(evalr, services, ctx, action, evt = null) {
       }
       break;
     }
+    case 'push': {
+      const a = evalr.atoms.get(action.atom);
+      const val = (action.value && typeof action.value === 'object' && action.value !== null)
+        ? evalr.evaluate(action.value, evt, ctx)
+        : action.value;
+
+      const arr = Array.isArray(a.v) ? a.v : (a.v == null ? [] : [a.v]);
+      a.v = [...arr, val];
+      evalr.notify(action.atom);
+      break;
+    }
     default: {
       if (services.dev) console.warn('[actions] unknown action', action);
     }

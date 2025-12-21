@@ -9,42 +9,53 @@ use Thorm\Renderer;
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
 
-$cnt = state(0);
-
-$q = state('');
-$status = state(0);
-$results = state([]);
+//$cnt = state(0);
 
 $amount = state(10);
 $status = state(0);
 $out = state('');
 
-$app = el('form', [
-    cls('m-5'),
-    on('submit', http(
-        val('/api/bid/'),
-        'POST',
-        $out,
-        $status,
-        ['Content-Type' => 'application/x-www-form-urlencoded'],
-        concat('amount=', read($amount)),
-        'json'
-    ))
+$app = el('div', [
+    cls('container'),
 ], [
-    el('input', [ cls('form-control'), attrs(['type'=>'number']), ...bind($amount, ['type'=>'number']) ]),
-    el('button', [ cls('btn btn-primary') ], [ text('Place bid') ]),
-    el('p', [], [ text(get(read($out), 'message')) ]),
-
-    el('p', [], [
-        text(
-            cond(
-                get(read($out), 'ok'),
-                'Thanks!',
-                get(get(read($out), 'error'), 'message')
+    el('h1',[], [ text('Bid example') ]),
+    el('form', [
+        cls('my-5'),
+        on('submit', 
+            http(
+                val('/api/bid/'),
+                'POST',
+                $out,
+                $status,
+                ['Content-Type' => 'application/x-www-form-urlencoded'],
+                concat('amount=', read($amount)),
+                'json'
             )
         )
+    ], [
+        el('div', [ cls('col col-lg-2')], [
+            el('input', 
+                [ 
+                    cls('form-control shadow col-3'), 
+                    attrs(['type'=>'number']), ...bind($amount, ['type'=>'number']) 
+                ]
+            ),
+        ] ),
+        el('button', [ cls('btn btn-primary mt-3') ], [ text('Place bid') ]),
+        el('p', [], [ text(get(read($out), 'message')) ]),
+
+        el('p', [], [
+            text(
+                cond(
+                    get(read($out), 'ok'),
+                    'Thanks!',
+                    get(get(read($out), 'error'), 'message')
+                )
+            )
+        ])
     ])
 ]);
+;
 
 $test = strtolower(pathinfo(__FILE__, PATHINFO_FILENAME));
 $path = __DIR__.'/../../public/tests/'.$test.'/';

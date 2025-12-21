@@ -6,7 +6,8 @@ namespace Thorm;
 use Thorm\IR\Action\{Listener, Action, IncAction, AddAction,
     DelayAction,
     SetAction, HttpAction, NavigateAction,
-    RedirectAction
+    RedirectAction,
+    PushAction
 };
 use Thorm\IR\Atom as AtomDef;
 
@@ -19,7 +20,7 @@ use Thorm\IR\Node\{Node, ElNode, TextNode, HtmlNode, ShowNode, ListNode,
 
 use Thorm\IR\Effect\{EffectTrigger,EffectTarget,MountTrigger,WatchTrigger,
     IntervalTrigger,TimeoutTrigger,VisibleTrigger,EventTrigger,
-    WindowTarget,DocumentTarget,SelectorTarget
+    WindowTarget,DocumentTarget,SelectorTarget,SseTrigger
 };
 
 /**
@@ -497,6 +498,30 @@ function onDocument(string $event, array $actions, ?array $options=null): Effect
 function onSelf(string $event, array $actions, ?array $options=null, ?EffectTarget $target = null): EffectNode {
     return effect([new EventTrigger('self',$event,$options)], $actions, $target);
 }
+
+function push(AtomDef $atom, Expr|int|float|string|bool|array|null $value, bool $asAction = false)
+{
+    // This is meant for Effect actions (Action list)
+    if (!$asAction) {
+        throw new \InvalidArgumentException('push(): currently supported only as an Action (use $asAction=true).');
+    }
+    $v = $value instanceof Expr ? $value : Expr::val($value);
+    return new PushAction($atom->id, $v);
+}
+
+function onSse(
+    Expr|string $url,
+    array $actions,
+    string $event = 'message',
+    string $parse = 'json',
+    bool $withCredentials = false,
+    Expr|int|null $sinceId = null,
+    ?EffectTarget $target = null
+): EffectNode {
+    $u = $url instanceof Expr ? $url : Expr::val($url);
+    return effect([new SseTrigger($u, $event, $parse, $withCredentials, $sinceId)], $actions, $target);
+}
+
 
 /* target creators */
 function windowTarget(): EffectTarget   { return new WindowTarget(); }

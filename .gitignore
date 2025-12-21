@@ -3,3 +3,4 @@
 assets/runtime.zip
 src.zip
 /public/tests
+/public/tests/*

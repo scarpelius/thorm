@@ -31,6 +31,21 @@ export function createHttp({ atoms, evaluate, ensureAtom, notify }) {
       body = evaluate(body, e, ctx);
     }
 
+    const isPlainObjectBody = body != null
+      && typeof body === 'object'
+      && !(body instanceof FormData)
+      && !(body instanceof Blob)
+      && !(body instanceof ArrayBuffer)
+      && !(body instanceof URLSearchParams);
+
+    if (isPlainObjectBody) {
+      if (!('Content-Type' in headers) && !('content-type' in headers)) {
+        headers['Content-Type'] = 'application/json';
+      }
+      body = JSON.stringify(body);
+    }
+
+
     // ---- Optional: mark status "in flight"
     if (typeof action.status === 'number') {
       ensureAtom(action.status, 0);

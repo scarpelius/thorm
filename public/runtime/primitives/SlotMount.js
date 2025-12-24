@@ -2,7 +2,7 @@ import PrimitiveMount from "./PrimitiveMount.js";
 
 export default class SlotMount extends PrimitiveMount {
   constructor(parent, ir, scope, services, registry) {
-    super(parent);
+    super(parent, services);
     this.parent = parent;
     this.ir = ir;
     this.scope = scope;
@@ -32,6 +32,8 @@ export default class SlotMount extends PrimitiveMount {
     if(this.fallbackIR.length > 0) {
       this.renderFallback();
     }
+
+    if (this.services?.hydrate?.active) this.finishHydrate();
 
     return this;
   }

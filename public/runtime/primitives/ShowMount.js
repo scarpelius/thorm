@@ -46,38 +46,45 @@ export default class ShowMount {
    * @param {{ evalr:any, nav?:any, http?:any, ctx?:any }} services
    * @param {import('../core/registry.js').PrimitiveRegistry} registry
    */
-  constructor(parent, ir, scope, { evalr, nav, http, ctx }, registry) {
+  constructor(parent, ir, scope, services, registry) {
     this.parent = parent;
     this.ir = ir;
     this.scope = scope;
-    this.evalr = evalr;
-    this.nav = nav;
-    this.http = http;
-    this.ctx = ctx || {};
+    this.evalr = services.evalr;
+    this.nav = services.nav;
+    this.http = services.http;
+    this.ctx = services.ctx || {};
+    this.services = services;
     this.registry = registry;
 
-    this.start = document.createComment('show:start');
-    this.end   = document.createComment('show:end');
+    this.start = null;
+    this.end   = null;
     this.childInstance = null;     // mounted child primitive instance
     this.childScope = null;        // forked scope for the child
   }
 
   mount() {
-    this.parent.append(this.start, this.end);
+    const hydration = this.services.hydrate;
+    const cursor = hydration?.cursor;
+    if (hydration?.active && cursor) {
+      this.start = cursor.nextComment(this.parent, 'show:start');
+    } else {
+      this.start = document.createComment('show:start');
+      this.end = document.createComment('show:end');
+      this.parent.append(this.start, this.end);
+    }
 
     const run = () => {
       const visible = !!this.evalr.evaluate(this.ir.when, null, this.ctx);
       if (visible && !this.childInstance) {
-        // mount child
-        const frag = document.createDocumentFragment();
         this.childScope = this.scope.fork();
-        this.childInstance = this.registry.mount(frag, this.ir.child, this.childScope, {
-          evalr: this.evalr,
-          nav: this.nav,
-          http: this.http,
-          ctx: this.ctx               // pass ctx unchanged
+        const useHydrate = hydration?.active && cursor;
+        const mountParent = useHydrate ? this.parent : document.createDocumentFragment();
+        this.childInstance = this.registry.mount(mountParent, this.ir.child, this.childScope, {
+          ...this.services,
+          ctx: this.ctx
         });
-        this.end.before(frag);
+        if (!useHydrate) this.end.before(mountParent);
       } else if (!visible && this.childInstance) {
         // unmount child and clear DOM region
         this.childInstance.dispose?.();
@@ -89,6 +96,9 @@ export default class ShowMount {
     };
 
     run();
+    if (hydration?.active && cursor) {
+      this.end = cursor.nextComment(this.parent, 'show:end');
+    }
     // Re-evaluate when cond deps change; scope handles listener cleanup
     this.evalr.bindReactive(this.ir.when, run, this.scope);
   }

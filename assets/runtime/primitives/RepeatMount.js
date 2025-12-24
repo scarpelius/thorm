@@ -48,19 +48,20 @@ export default class RepeatMount {
    * @param {{ evalr:any, nav?:any, http?:any, ctx?:any }} services
    * @param {import('../core/registry.js').PrimitiveRegistry} registry
    */
-  constructor(parent, ir, scope, { evalr, nav, http, ctx }, registry) {
+  constructor(parent, ir, scope, services, registry) {
     this.parent = parent;
     this.ir = ir;
     this.scope = scope;
-    this.evalr = evalr;
-    this.nav = nav;
-    this.http = http;
-    this.ctx = ctx || {};
+    this.evalr = services.evalr;
+    this.nav = services.nav;
+    this.http = services.http;
+    this.ctx = services.ctx || {};
+    this.services = services;
     this.registry = registry;
 
     // Block delimiters for the whole repeat region
-    this.start = document.createComment('repeat:start');
-    this.end   = document.createComment('repeat:end');
+    this.start = null;
+    this.end   = null;
 
     /**
      * Map<key, Row>
@@ -70,7 +71,15 @@ export default class RepeatMount {
   }
 
   mount() {
-    this.parent.append(this.start, this.end);
+    const hydration = this.services.hydrate;
+    const cursor = hydration?.cursor;
+    if (hydration?.active && cursor) {
+      this.start = cursor.nextComment(this.parent, 'repeat:start');
+    } else {
+      this.start = document.createComment('repeat:start');
+      this.end   = document.createComment('repeat:end');
+      this.parent.append(this.start, this.end);
+    }
 
     const apply = () => this._reconcile();
     // react to any deps from items or key expression
@@ -84,6 +93,10 @@ export default class RepeatMount {
       this.evalr.subscribeMany(deps, apply, this.scope);
     } else {
       apply();
+    }
+
+    if (hydration?.active && cursor) {
+      this.end = cursor.nextComment(this.parent, 'repeat:end');
     }
   }
 
@@ -108,10 +121,38 @@ export default class RepeatMount {
   _reconcile() {
     const arr = this.evalr.evaluate(this.ir.items, null, this.ctx) || [];
     const next = new Map();
+    const hydration = this.services.hydrate;
+    const domCursor = hydration?.cursor;
+    const isHydrating = !!(hydration?.active && domCursor);
 
-    // Cursor marks where to insert next row range. We insert before `cursor`.
+    if (isHydrating) {
+      for (let index = 0; index < arr.length; index++) {
+        const item = arr[index];
+        const rowCtx = { ...this.ctx, item, index };
+        const key = this.evalr.evaluate(this.ir.key, null, rowCtx);
+
+        const rowStart = domCursor.nextComment(this.parent, `repeat:row:${String(key)}:start`);
+        const childIR =
+          this.ir.tpl ??
+          this.ir.child ??
+          (Array.isArray(this.ir.children) ? this.ir.children[0] : undefined);
+        if (!childIR) continue;
+
+        const childScope = this.scope.fork();
+        const inst = this.registry.mount(this.parent, childIR, childScope, {
+          ...this.services,
+          ctx: rowCtx
+        });
+        const rowEnd = domCursor.nextComment(this.parent, `repeat:row:${String(key)}:end`);
+        next.set(key, { key, start: rowStart, end: rowEnd, scope: childScope, inst });
+      }
+      this.keyed = next;
+      return;
+    }
+
+    // Cursor marks where to insert next row range. We insert before `insertBefore`.
     // Start with the end marker of the repeat block, and move rows in order.
-    let cursor = this.end;
+    let insertBefore = this.end;
 
     for (let index = 0; index < arr.length; index++) {
       const item = arr[index];
@@ -139,25 +180,23 @@ export default class RepeatMount {
 
         const childScope = this.scope.fork();
         const inst = this.registry.mount(frag, childIR, childScope, {
-          evalr: this.evalr,
-          nav: this.nav,
-          http: this.http,
+          ...this.services,
           ctx: rowCtx
         });
 
         frag.append(rowEnd);
         // Insert the whole row range before the cursor (maintains order)
-        this.parent.insertBefore(frag, cursor);
+        this.parent.insertBefore(frag, insertBefore);
 
         row = { key, start: rowStart, end: rowEnd, scope: childScope, inst };
       } else {
         // Existing row: ensure child context is updated when evaluated next time
         // (Expressions always re-evaluate with current ctx; we only need to move DOM.)
-        this._moveRangeBefore(row.start, row.end, cursor);
+        this._moveRangeBefore(row.start, row.end, insertBefore);
       }
 
       // Advance cursor to just after the row range we’ve placed
-      cursor = row.end.nextSibling || this.end;
+      insertBefore = row.end.nextSibling || this.end;
 
       next.set(key, row);
     }

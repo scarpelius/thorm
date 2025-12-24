@@ -59,24 +59,32 @@ export default class LinkMount {
    * @param {{ evalr:any, nav?:any, http?:any, ctx?:any }} services
    * @param {import('../core/registry.js').PrimitiveRegistry} registry
    */
-  constructor(parent, ir, scope, { evalr, nav, http, ctx }, registry) {
+  constructor(parent, ir, scope, services, registry) {
     this.parent = parent;
     this.ir = ir;
     this.scope = scope;
-    this.evalr = evalr;
-    this.nav = nav;
-    this.http = http;
-    this.ctx = ctx || {};
+    this.evalr = services.evalr;
+    this.nav = services.nav;
+    this.http = services.http;
+    this.ctx = services.ctx || {};
+    this.services = services;
     this.registry = registry;
 
-    this.a = document.createElement('a');
+    this.a = null;
     this.listeners = [];
     this.childInstances = [];
   }
 
   mount() {
+    const hydration = this.services.hydrate;
+    const cursor = hydration?.cursor;
+    if (hydration?.active && cursor) {
+      this.a = cursor.nextElement(this.parent, 'a');
+    } else {
+      this.a = document.createElement('a');
+      this.parent.appendChild(this.a);
+    }
     const a = this.a;
-    this.parent.appendChild(a);
     const { attrs, cls, style, on } = normalizeProps(this.ir.props);
 
     // -----------------------
@@ -147,9 +155,7 @@ export default class LinkMount {
     // -----------------------
     for (const child of (this.ir.children || [])) {
       const inst = this.registry.mount(a, child, this.scope, {
-        evalr: this.evalr,
-        nav: this.nav,
-        http: this.http,
+        ...this.services,
         ctx: this.ctx
       });
       this.childInstances.push(inst);

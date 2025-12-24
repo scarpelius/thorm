@@ -66,25 +66,32 @@ export default class ElMount {
    * @param {{ evalr:any, nav?:any, http?:any, ctx?:any }} services
    * @param {import('../core/registry.js').PrimitiveRegistry} registry
    */
-  constructor(parent, ir, scope, { evalr, nav, http, ctx }, registry) {
+  constructor(parent, ir, scope, services, registry) {
     this.parent = parent;
     this.ir = ir;
     this.scope = scope;
-    this.evalr = evalr;
-    this.nav = nav;
-    this.http = http;
-    this.ctx = ctx || {};
-    this.services =  { evalr, nav, http, ctx };
+    this.evalr = services.evalr;
+    this.nav = services.nav;
+    this.http = services.http;
+    this.ctx = services.ctx || {};
+    this.services = services;
     this.registry = registry;
 
-    this.el = document.createElement(ir.tag);
+    this.el = null;
     this.listeners = [];
     this.childInstances = [];
   }
 
   mount() {
+    const hydration = this.services.hydrate;
+    const cursor = hydration?.cursor;
+    if (hydration?.active && cursor) {
+      this.el = cursor.nextElement(this.parent, this.ir.tag);
+    } else {
+      this.el = document.createElement(this.ir.tag);
+      this.parent.appendChild(this.el);
+    }
     const el = this.el;
-    this.parent.appendChild(el);
     const { attrs, cls, style, on } = normalizeProps(this.ir.props);
     
     if(style && style.length) el.style = style;
@@ -157,9 +164,7 @@ export default class ElMount {
     // -----------------------
     for (const child of (this.ir.children || [])) {
       const inst = this.registry.mount(el, child, this.scope, {
-        evalr: this.evalr,
-        nav: this.nav,
-        http: this.http,
+        ...this.services,
         ctx: this.ctx
       });
       this.childInstances.push(inst);

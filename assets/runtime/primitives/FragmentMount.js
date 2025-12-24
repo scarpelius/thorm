@@ -43,24 +43,32 @@ export default class FragmentMount {
    * @param {import('../core/registry.js').PrimitiveRegistry} registry
    */
 
-    constructor(parent, ir, scope, { evalr, nav, http, ctx }, registry) {
+    constructor(parent, ir, scope, services, registry) {
 			this.parent = parent;
 			this.ir = ir;
 			this.scope = scope;
-			this.evalr = evalr;
-			this.nav = nav;
-			this.http = http;
-			this.ctx = ctx || {};
+			this.evalr = services.evalr;
+			this.nav = services.nav;
+			this.http = services.http;
+			this.ctx = services.ctx || {};
+			this.services = services;
 			this.registry = registry;
 
-			this.start = document.createComment('fragment:start');
-			this.end = document.createComment('fragment:end');
+			this.start = null;
+			this.end = null;
 			
 			this.childInstances = [];
 		}
 
 		mount(){
-			this.parent.appendChild(this.start);
+			const hydration = this.services.hydrate;
+			const cursor = hydration?.cursor;
+			if (hydration?.active && cursor) {
+				this.start = cursor.nextComment(this.parent, 'fragment:start');
+			} else {
+				this.start = document.createComment('fragment:start');
+				this.parent.appendChild(this.start);
+			}
 
 			// -----------------------
 			// CHILDREN
@@ -68,17 +76,20 @@ export default class FragmentMount {
 			// -----------------------
 			for (const child of (this.ir.children || [])) {
 				const inst = this.registry.mount(this.parent, child, this.scope, {
-					evalr: this.evalr,
-					nav: this.nav,
-					http: this.http,
+					...this.services,
 					ctx: this.ctx
 				});
 				this.childInstances.push(inst);
 			}
-			this.parent.appendChild(this.end);
+			if (hydration?.active && cursor) {
+				this.end = cursor.nextComment(this.parent, 'fragment:end');
+			} else {
+				this.end = document.createComment('fragment:end');
+				this.parent.appendChild(this.end);
+			}
 		}
 
-		update(){
+		update(nextIr){
 			this.ir = nextIr;
 		}
 

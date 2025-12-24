@@ -15,22 +15,40 @@ export default class HtmlMount {
    * @param {{ evalr: any, nav?: any, http?: any, ctx?: any }} services
    * @param {import('../core/registry.js').PrimitiveRegistry} registry
    */
-  constructor(parent, ir, scope, { evalr, nav, http, ctx }, registry) {
+  constructor(parent, ir, scope, services, registry) {
     this.parent = parent;
     this.ir = ir;
     this.scope = scope;
-    this.evalr = evalr;
-    this.nav = nav;
-    this.http = http;
-    this.ctx = ctx || {};
+    this.evalr = services.evalr;
+    this.nav = services.nav;
+    this.http = services.http;
+    this.ctx = services.ctx || {};
+    this.services = services;
     this.registry = registry;
 
-    this.start = document.createComment('html:start');
-    this.end = document.createComment('html:end');
+    this.start = null;
+    this.end = null;
   }
 
   mount() {
-    this.parent.append(this.start, this.end);
+    const hydration = this.services.hydrate;
+    const cursor = hydration?.cursor;
+    if (hydration?.active && cursor) {
+      this.start = cursor.nextComment(this.parent, 'html:start');
+      // Consume and skip all nodes until the closing anchor
+      let n = null;
+      do {
+        n = cursor.nextNode(this.parent);
+        if (!n) {
+          throw new Error('[hydrate] expected comment html:end but no node found');
+        }
+      } while (n.nodeType !== 8 || n.nodeValue !== 'html:end');
+      this.end = n;
+    } else {
+      this.start = document.createComment('html:start');
+      this.end = document.createComment('html:end');
+      this.parent.append(this.start, this.end);
+    }
     const expr = resolveProps(this.ir.value, this.ctx);
 
     const apply = () => {

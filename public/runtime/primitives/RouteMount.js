@@ -78,21 +78,23 @@ export default class RouteMount {
    * @param {{ evalr:any, nav?:any, http?:any, ctx?:any }} services
    * @param {import('../core/registry.js').PrimitiveRegistry} registry
    */
-  constructor(parent, ir, scope, { evalr, nav, http, ctx }, registry) {
+  constructor(parent, ir, scope, services, registry) {
     this.parent = parent;
     this.ir = ir;
     this.scope = scope;
-    this.evalr = evalr;
-    this.nav = nav;
-    this.http = http;
-    this.ctx = ctx || {};
+    this.evalr = services.evalr;
+    this.nav = services.nav;
+    this.http = services.http;
+    this.ctx = services.ctx || {};
+    this.services = services;
     this.registry = registry;
 
     this.base = ir.base || '/';
-    this.start = document.createComment('route:start');
-    this.end   = document.createComment('route:end');
+    this.start = null;
+    this.end   = null;
     this.childScope = null;
     this.childInstance = null;
+    this._hydrating = false;
 
     // Compile routing table once
     const table = ir.table || [];
@@ -108,7 +110,16 @@ export default class RouteMount {
   }
 
   mount() {
-    this.parent.append(this.start, this.end);
+    const hydration = this.services.hydrate;
+    const cursor = hydration?.cursor;
+    if (hydration?.active && cursor) {
+      this.start = cursor.nextComment(this.parent, 'route:start');
+      this._hydrating = true;
+    } else {
+      this.start = document.createComment('route:start');
+      this.end = document.createComment('route:end');
+      this.parent.append(this.start, this.end);
+    }
 
     // Install global reroute hook (legacy contract)
     this.prevReroute = typeof window.__THORM_REROUTE__ === 'function' ? window.__THORM_REROUTE__ : null;
@@ -176,15 +187,20 @@ export default class RouteMount {
     this._unmountView();
 
     // Mount fresh view
-    const frag = document.createDocumentFragment();
+    const hydration = this.services.hydrate;
+    const cursor = hydration?.cursor;
+    const useHydrate = hydration?.active && cursor;
+    const mountParent = useHydrate ? this.parent : document.createDocumentFragment();
     this.childScope = this.scope.fork();
-    this.childInstance = this.registry.mount(frag, viewIr, this.childScope, {
-      evalr: this.evalr,
-      nav: this.nav,
-      http: this.http,
+    this.childInstance = this.registry.mount(mountParent, viewIr, this.childScope, {
+      ...this.services,
       ctx: childCtx
     });
-    this.end.before(frag);
+    if (!useHydrate) this.end.before(mountParent);
+    if (useHydrate && this._hydrating && !this.end) {
+      this.end = cursor.nextComment(this.parent, 'route:end');
+      this._hydrating = false;
+    }
   }
 
   _unmountView() {

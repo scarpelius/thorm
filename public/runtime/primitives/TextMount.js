@@ -48,21 +48,36 @@ export default class TextMount {
    * @param {{ evalr: any, nav?: any, http?: any, ctx?: any }} services
    * @param {import('../core/registry.js').PrimitiveRegistry} registry
    */
-  constructor(parent, ir, scope, { evalr, nav, http, ctx }, registry) {
+  constructor(parent, ir, scope, services, registry) {
     this.parent = parent;
     this.ir = ir;
     this.scope = scope;
-    this.evalr = evalr;
-    this.nav = nav;
-    this.http = http;
-    this.ctx = ctx || {};
+    this.evalr = services.evalr;
+    this.nav = services.nav;
+    this.http = services.http;
+    this.ctx = services.ctx || {};
+    this.services = services;
     this.registry = registry;
 
-    this.node = document.createTextNode('');
+    this.node = null;
   }
 
   mount() {
-    this.parent.appendChild(this.node);
+    const hydration = this.services.hydrate;
+    const cursor = hydration?.cursor;
+    if (hydration?.active && cursor) {
+      const next = cursor.nextNode(this.parent);
+      if (next && next.nodeType === 3) {
+        this.node = next;
+      } else {
+        this.node = document.createTextNode('');
+        if (next) this.parent.insertBefore(this.node, next);
+        else this.parent.appendChild(this.node);
+      }
+    } else {
+      this.node = document.createTextNode('');
+      this.parent.appendChild(this.node);
+    }
     const expr = resolveProps(this.ir.value, this.ctx);
 
     const apply = () => {

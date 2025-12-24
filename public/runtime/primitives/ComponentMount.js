@@ -5,7 +5,7 @@ export default class ComponentMount extends PrimitiveMount {
 
 
   constructor(parent, ir, scope, services, registry) {
-    super(parent);
+    super(parent, services);
     this.parent     = parent;
     this.ir         = ir;
     this.scope      = scope;
@@ -33,14 +33,18 @@ export default class ComponentMount extends PrimitiveMount {
       __propsExpr: this.ir.props || {},
     });
     
-    const frag = document.createDocumentFragment();
+    const hydration = this.services.hydrate;
+    const cursor = hydration?.cursor;
+    const useHydrate = hydration?.active && cursor;
+    const mountParent = useHydrate ? this.parent : document.createDocumentFragment();
     this.childInst = this.registry.mount(
-      frag,
+      mountParent,
       this.ir.tpl,
       this.childScope,
-      {evalr: this.services.evalr, http:this.http, ctx: childCtx}
+      { ...this.services, http: this.http, ctx: childCtx }
     );
-    this.parent.insertBefore(frag, this.end);
+    if (!useHydrate) this.parent.insertBefore(mountParent, this.end);
+    if (useHydrate) this.finishHydrate();
 
     this.bindProps(this.ir.props || {});
     //this.seedSlots();

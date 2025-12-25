@@ -13,15 +13,20 @@ export function createEvaluator(store) {
   }
 
   function deps(expr, out = new Set()) {
+    if (!expr || typeof expr !== 'object') return out;
     switch (expr.k) {
       case 'read': out.add(expr.atom); break;
       case 'not':  deps(expr.x, out); break;
       case 'op':
         deps(expr.a, out); 
         deps(expr.b, out); 
+        deps(expr.c, out);
         break;
       case 'concat':
         for (const p of expr.parts) deps(p, out); 
+        break;
+      case 'stringify':
+        deps(expr.value, out);
         break;
       case 'val': break;
       case 'get': {

@@ -7,7 +7,8 @@ use Thorm\IR\Action\{Listener, Action, IncAction, AddAction,
     DelayAction,
     SetAction, HttpAction, NavigateAction,
     RedirectAction,
-    PushAction
+    PushAction,
+    TaskAction
 };
 use Thorm\IR\Atom as AtomDef;
 
@@ -93,7 +94,7 @@ function show(Expr|bool $cond, Node $child): Node {
 }
 
 // Event helpers
-function on(string $event, Listener $action): array {
+function on(string $event, Listener|Action $action): array {
     return ['on', $event, $action];
 }
 
@@ -180,6 +181,15 @@ function redirect (Expr|string $to, bool $replace = false): Action {
 /** delay an action by given mili-secons */
 function delay(int $ms, array $actions): Action {
     return new DelayAction($ms, $actions);
+}
+
+/**
+ * Task: compose multiple actions sequentially.
+ *
+ * @param Action[] $actions
+ */
+function task(array $actions): Action {
+    return new TaskAction($actions);
 }
 
 // Props helpers

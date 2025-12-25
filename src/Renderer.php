@@ -4,24 +4,8 @@ declare(strict_types=1);
 namespace Thorm;
 
 use Thorm\IR\Atom;
-
-use Thorm\IR\Action\Listener;
 use Thorm\IR\AtomCollectable;
-use Thorm\IR\Expr\Expr;
-use Thorm\IR\Expr\ExprConcat;
-use Thorm\IR\Expr\ExprItem;
-use Thorm\IR\Expr\ExprOp;
-use Thorm\IR\Expr\ExprRead;
-use Thorm\IR\Expr\ExprStringify;
-use Thorm\IR\Expr\ExprVal;
-use Thorm\IR\Node\ComponentNode;
 use Thorm\IR\Node\Node;
-use Thorm\IR\Node\EffectNode;
-use Thorm\IR\Node\ElNode;
-use Thorm\IR\Node\FragmentNode;
-use Thorm\IR\Node\ListNode;
-use Thorm\IR\Node\ShowNode;
-use Thorm\IR\Node\TextNode;
 
 final class Renderer {
     /** @var Atom[] */
@@ -69,7 +53,7 @@ final class Renderer {
         $ir = $this->toIR($root);
         $scope['title'] = htmlspecialchars($opts['title'] ?? 'Thorm App', ENT_QUOTES);
         $scope['containerId'] = htmlspecialchars($opts['containerId'] ?? 'app', ENT_QUOTES);
-        $scope['runtimeSrc'] = $opts['runtimeSrc'] ?? '/assets/Thorm-runtime.js';
+        //$scope['runtimeSrc'] = $opts['runtimeSrc'] ?? '/assets/Thorm-runtime.js';
         $scope['iruri_dir'] = $opts['iruri_dir']??'';
 
         // ensure the unicity of the iruri

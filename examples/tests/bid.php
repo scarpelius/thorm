@@ -10,8 +10,6 @@ use Thorm\RenderSsr;
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
 
-//$cnt = state(0);
-
 $amount = state(10);
 $status = state(0);
 $out = state('');
@@ -69,7 +67,7 @@ $ssrRes = $ssr->renderIr($ir);
 
 $title = 'Bid';
 $containerId = 'app';
-$templatePath = __DIR__.'/../../assets/index-test.tpl.html';
+$templatePath = __DIR__.'/../../assets/index-test-ssr.tpl.html';
 
 // ensure the unicity of the iruri
 $callerId = md5(__FILE__);
@@ -83,27 +81,11 @@ $scope = [
     'iruri'         => $iruri,
     'iruri_dir'     => '',
     'html'          => $ssrRes['html']??'',
+    'stateJson'     => json_encode($ssrRes['state'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
 ];
 $tpl = preg_replace_callback('/{\$(\w+)}/', function($matches) use($scope)  {
     return $scope[$matches[1]] ?? '';
 }, $tpl);
-
-// Inject SSR HTML into container
-//$ssrHtml = $ssrRes['html'];
-
-//$containerOpen = '<div id="' . $containerId . '">';
-//$containerWithSsr = '<div id="' . $containerId . '">' . $ssrHtml . '</div>';
-//$tpl = str_replace($containerOpen . '</div>', $containerWithSsr, $tpl);
-
-// Inject hydration state before module script
-$stateJson = json_encode($ssrRes['state'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-$stateScript = "<script>window.__THORM_STATE__ = {$stateJson};</script>";
-$tpl = preg_replace('/<script type="module">/', $stateScript . "\n<script type=\"module\">", $tpl, 1);
-
-// Switch mount to hydrate
-$tpl = str_replace("import { mount } from '/runtime/index.js';", "import { hydrate } from '/runtime/index.js';", $tpl);
-$tpl = str_replace("document.getElementById('app')", "document.getElementById('{$containerId}')", $tpl);
-$tpl = str_replace("const x = mount(ir, document.getElementById('{$containerId}'));", "const x = hydrate(ir, document.getElementById('{$containerId}'), window.__THORM_STATE__ || {});", $tpl);
 
 // save the bootstrap data
 $html = file_put_contents($path . $iruri, $irJson);

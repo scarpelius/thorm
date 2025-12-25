@@ -42,6 +42,11 @@ function setAttr(el, name, value) {
   el.setAttribute(name, String(value));
 }
 
+function setStyle(el, name, value) {
+  if (value == null || value === false) { el.style.removeProperty(name); return; }
+  el.style.setProperty(name, String(value));
+}
+
 function preHandleEvent(e, event, action) {
   if (event === 'submit') {
     e.preventDefault();
@@ -93,8 +98,11 @@ export default class ElMount {
     }
     const el = this.el;
     const { attrs, cls, style, on } = normalizeProps(this.ir.props);
-    
-    if(style && style.length) el.style = style;
+    const hasStyleExpr = (
+      this.ir.props?.style
+      && typeof this.ir.props.style === 'object'
+      && this.ir.props.style.k
+    );
 
     // -----------------------
     // Dynamic ATTR bindings
@@ -121,6 +129,18 @@ export default class ElMount {
     // -----------------------
     // Dynamic STYLE binding
     // -----------------------
+    if (!hasStyleExpr) {
+      for (const [name, expr] of (style || [])) {
+        const isExpr = expr && typeof expr === 'object' && expr.k;
+        if (isExpr) {
+          const apply = () => setStyle(el, name, this.evalr.evaluate(expr, null, this.ctx));
+          this.evalr.bindReactive(expr, apply, this.scope);
+        } else {
+          setStyle(el, name, expr);
+        }
+      }
+    }
+
     if (
       this.ir.props?.style 
       && typeof this.ir.props.style === 'object'

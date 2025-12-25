@@ -117,10 +117,14 @@ export default class LinkMount {
     // -----------------------
     // Additional ATTRS (optional)
     // -----------------------
-    for (const p of (this.ir.attrs || this.ir.props?.attrs || [])) {
-      const name = p[1], expr = p[2];
-      const apply = () => setAttr(a, name, this.evalr.evaluate(expr, null, this.ctx));
-      this.evalr.bindReactive(expr, apply, this.scope);
+    for (const [name, expr] of (attrs || [])) {
+      const isExpr = expr && typeof expr === 'object' && expr.k;
+      if (isExpr) {
+        const apply = () => setAttr(a, name, this.evalr.evaluate(expr, null, this.ctx));
+        this.evalr.bindReactive(expr, apply, this.scope);
+      } else {
+        setAttr(a, name, expr);
+      }
     }
 
     // -----------------------

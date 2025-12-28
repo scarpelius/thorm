@@ -3,6 +3,7 @@ export function createEvaluator(store) {
 
   function getByPath(obj, path) {
     if (!obj) return undefined;
+    if (path === '') return obj;
     const parts = path.split('.');
     let current = obj;
     for (const p of parts){

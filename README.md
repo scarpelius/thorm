@@ -59,7 +59,7 @@ file_put_contents(__DIR__ . '/public/tests/counter/index.html', $res['tpl']);
 `renderPage()` returns the IR JSON (atoms + root) and an HTML page with the runtime bootstrap embedded. Serve the output and the runtime under `public/runtime`.
 
 ## DSL highlights (see `src/functions.php`)
-- State & expressions: `state`, `read`, `val/num/str/not/concat/cond`, `item` inside `repeat`.
+- State & expressions: `state`, `read`, `val/num/str/not/concat/cond`, `item` inside `repeat` (`item('')` returns the full item).
 - DOM nodes: `el`, `text`, `fragment`, `show`, `repeat` (lists), `attrs`, `cls`, `style`, `on` (events).
 - Routing & links: `route` with path table + fallback, `link`, `navigate`, `redirect`, `param`, `query`.
 - Components & slots: `component`, `slot`, `prop` for props + named or default slots.

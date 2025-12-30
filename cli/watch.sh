@@ -8,7 +8,7 @@ RESET=$'\033[0m'
 # --- PATHS ---
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EXAMPLES_DIR="$ROOT_DIR/examples"
-RUNTIME_SRC="$ROOT_DIR/assets/runtime"
+RUNTIME_SRC="$ROOT_DIR/src/runtime"
 RUNTIME_DST="$ROOT_DIR/public/runtime"
 
 COOLDOWN_MS=300

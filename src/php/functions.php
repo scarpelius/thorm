@@ -66,6 +66,25 @@ function eq(Expr|int|float|string|bool $a, Expr|int|float|string|bool $b): Expr 
     return Expr::op('eq', $a, $b);
 }
 
+/**
+ * Comparison helper.
+ *
+ * Supported ops: >, <, >=, <=, ==
+ */
+function cmp(string $op, Expr|int|float|string|bool $a, Expr|int|float|string|bool $b): Expr {
+    $map = [
+        '>'  => 'gt',
+        '<'  => 'lt',
+        '>=' => 'gte',
+        '<=' => 'lte',
+        '==' => 'eq',
+    ];
+    if (!isset($map[$op])) {
+        throw new \InvalidArgumentException('cmp: unknown op ' . $op);
+    }
+    return Expr::op($map[$op], $a, $b);
+}
+
 function concat(Expr|string ...$parts): Expr {
     return Expr::concat(...$parts);
 }

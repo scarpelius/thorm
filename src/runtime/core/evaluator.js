@@ -70,6 +70,10 @@ export function createEvaluator(store) {
           case 'add': return Number(a) + Number(b);
           case 'mod': return Number(a) % Number(b);
           case 'eq': return a === b;
+          case 'gt': return Number(a) > Number(b);
+          case 'lt': return Number(a) < Number(b);
+          case 'gte': return Number(a) >= Number(b);
+          case 'lte': return Number(a) <= Number(b);
           case 'cond': {
             const test = evaluate(expr.a ?? expr.a, e, ctx);
             return !!test

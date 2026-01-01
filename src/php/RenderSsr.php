@@ -374,6 +374,14 @@ final class RenderSsr
                 return $a == $b;
             case 'mod':
                 return ((int)$a) % ((int)$b);
+            case 'gt':
+                return (float)$a > (float)$b;
+            case 'lt':
+                return (float)$a < (float)$b;
+            case 'gte':
+                return (float)$a >= (float)$b;
+            case 'lte':
+                return (float)$a <= (float)$b;
             case 'num':
                 return (float)$a;
             default:

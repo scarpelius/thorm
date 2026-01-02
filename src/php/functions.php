@@ -127,7 +127,7 @@ function inc(AtomDef $atom, int|float $by = 1, bool $asAction = false): Listener
 
 function set(AtomDef $atom, Expr|int|float|string|bool $to, bool $asAction = false): Listener|Action {
     if($asAction)
-        return new SetAction($atom->id, $to);
+        return new SetAction($atom, $to);
     else
         return Listener::set($atom, $to);
 }

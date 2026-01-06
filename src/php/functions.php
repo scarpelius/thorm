@@ -8,6 +8,7 @@ use Thorm\IR\Action\{Listener, Action, IncAction, AddAction,
     SetAction, HttpAction, NavigateAction,
     RedirectAction,
     PushAction,
+    RuntimeAction,
     TaskAction
 };
 use Thorm\IR\Atom as AtomDef;
@@ -209,6 +210,26 @@ function delay(int $ms, array $actions): Action {
  */
 function task(array $actions): Action {
     return new TaskAction($actions);
+}
+
+/**
+ * runtime()
+ *
+ * Invoke a browser/runtime capability.
+ *
+ * Examples:
+ *   runtime('Date.getFullYear', to: $year)
+ *
+ * IR emitted:
+ *   { k:'cap', name:'Date.getFullYear', args?:..., to?: atomId, error?: atomId }
+ */
+function runtime(
+    string $name,
+    mixed $args = null,
+    ?AtomDef $to = null,
+    ?AtomDef $error = null
+): Action {
+    return new RuntimeAction($name, $args, $to, $error);
 }
 
 // Props helpers

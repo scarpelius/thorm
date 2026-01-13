@@ -8,7 +8,48 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
 <body>
-<div id="app"><div class="container"><h1>Bid example</h1><form class="my-5"><div class="col col-lg-2"><input class="form-control shadow col-3" type="number" value="10"></div><button class="btn btn-primary mt-3">Place bid</button><p></p><p></p></form></div></div>
+<div id="app"><div class="container"><h1>Bid example</h1><form class="my-5"><div class="col col-lg-2"><input class="form-control shadow col-3" type="number" value="10"></div><button class="btn btn-primary mt-3">Place bid</button><p></p><p></p></form><div class="bg-body-secondary p-3 rounded-4 border mt-5"><!--html:start--><pre><code style="color: #000000"><span style="color: #0000BB">&lt;?php
+$app </span><span style="color: #007700">= </span><span style="color: #0000BB">el</span><span style="color: #007700">(</span><span style="color: #DD0000">'div'</span><span style="color: #007700">, [
+    </span><span style="color: #0000BB">cls</span><span style="color: #007700">(</span><span style="color: #DD0000">'container'</span><span style="color: #007700">),
+], [
+    </span><span style="color: #0000BB">el</span><span style="color: #007700">(</span><span style="color: #DD0000">'h1'</span><span style="color: #007700">,[], [ </span><span style="color: #0000BB">text</span><span style="color: #007700">(</span><span style="color: #DD0000">'Bid example'</span><span style="color: #007700">) ]),
+    </span><span style="color: #0000BB">el</span><span style="color: #007700">(</span><span style="color: #DD0000">'form'</span><span style="color: #007700">, [
+        </span><span style="color: #0000BB">cls</span><span style="color: #007700">(</span><span style="color: #DD0000">'my-5'</span><span style="color: #007700">),
+        </span><span style="color: #0000BB">on</span><span style="color: #007700">(</span><span style="color: #DD0000">'submit'</span><span style="color: #007700">, 
+            </span><span style="color: #0000BB">http</span><span style="color: #007700">(
+                </span><span style="color: #0000BB">val</span><span style="color: #007700">(</span><span style="color: #DD0000">'/api/bid/'</span><span style="color: #007700">),
+                </span><span style="color: #DD0000">'POST'</span><span style="color: #007700">,
+                </span><span style="color: #0000BB">$out</span><span style="color: #007700">,
+                </span><span style="color: #0000BB">$status</span><span style="color: #007700">,
+                [</span><span style="color: #DD0000">'Content-Type' </span><span style="color: #007700">=&gt; </span><span style="color: #DD0000">'application/x-www-form-urlencoded'</span><span style="color: #007700">],
+                </span><span style="color: #0000BB">concat</span><span style="color: #007700">(</span><span style="color: #DD0000">'amount='</span><span style="color: #007700">, </span><span style="color: #0000BB">read</span><span style="color: #007700">(</span><span style="color: #0000BB">$amount</span><span style="color: #007700">)),
+                </span><span style="color: #DD0000">'json'
+            </span><span style="color: #007700">)
+        )
+    ], [
+        </span><span style="color: #0000BB">el</span><span style="color: #007700">(</span><span style="color: #DD0000">'div'</span><span style="color: #007700">, [ </span><span style="color: #0000BB">cls</span><span style="color: #007700">(</span><span style="color: #DD0000">'col col-lg-2'</span><span style="color: #007700">)], [
+            </span><span style="color: #0000BB">el</span><span style="color: #007700">(</span><span style="color: #DD0000">'input'</span><span style="color: #007700">, 
+                [ 
+                    </span><span style="color: #0000BB">cls</span><span style="color: #007700">(</span><span style="color: #DD0000">'form-control shadow col-3'</span><span style="color: #007700">), 
+                    </span><span style="color: #0000BB">attrs</span><span style="color: #007700">([</span><span style="color: #DD0000">'type'</span><span style="color: #007700">=&gt;</span><span style="color: #DD0000">'number'</span><span style="color: #007700">]), ...</span><span style="color: #0000BB">bind</span><span style="color: #007700">(</span><span style="color: #0000BB">$amount</span><span style="color: #007700">, [</span><span style="color: #DD0000">'type'</span><span style="color: #007700">=&gt;</span><span style="color: #DD0000">'number'</span><span style="color: #007700">]) 
+                ]
+            ),
+        ] ),
+        </span><span style="color: #0000BB">el</span><span style="color: #007700">(</span><span style="color: #DD0000">'button'</span><span style="color: #007700">, [ </span><span style="color: #0000BB">cls</span><span style="color: #007700">(</span><span style="color: #DD0000">'btn btn-primary mt-3'</span><span style="color: #007700">) ], [ </span><span style="color: #0000BB">text</span><span style="color: #007700">(</span><span style="color: #DD0000">'Place bid'</span><span style="color: #007700">) ]),
+        </span><span style="color: #0000BB">el</span><span style="color: #007700">(</span><span style="color: #DD0000">'p'</span><span style="color: #007700">, [], [ </span><span style="color: #0000BB">text</span><span style="color: #007700">(</span><span style="color: #0000BB">get</span><span style="color: #007700">(</span><span style="color: #0000BB">read</span><span style="color: #007700">(</span><span style="color: #0000BB">$out</span><span style="color: #007700">), </span><span style="color: #DD0000">'message'</span><span style="color: #007700">)) ]),
+
+        </span><span style="color: #0000BB">el</span><span style="color: #007700">(</span><span style="color: #DD0000">'p'</span><span style="color: #007700">, [], [
+            </span><span style="color: #0000BB">text</span><span style="color: #007700">(
+                </span><span style="color: #0000BB">cond</span><span style="color: #007700">(
+                    </span><span style="color: #0000BB">get</span><span style="color: #007700">(</span><span style="color: #0000BB">read</span><span style="color: #007700">(</span><span style="color: #0000BB">$out</span><span style="color: #007700">), </span><span style="color: #DD0000">'ok'</span><span style="color: #007700">),
+                    </span><span style="color: #DD0000">'Thanks!'</span><span style="color: #007700">,
+                    </span><span style="color: #0000BB">get</span><span style="color: #007700">(</span><span style="color: #0000BB">get</span><span style="color: #007700">(</span><span style="color: #0000BB">read</span><span style="color: #007700">(</span><span style="color: #0000BB">$out</span><span style="color: #007700">), </span><span style="color: #DD0000">'error'</span><span style="color: #007700">), </span><span style="color: #DD0000">'message'</span><span style="color: #007700">)
+                )
+            )
+        ])
+    ])
+]);
+</span></code></pre><!--html:end--></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 <script>
     window.__THORM_DEV__ = true;

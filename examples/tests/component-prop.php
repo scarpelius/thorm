@@ -3,13 +3,44 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use function Thorm\{el, text, fragment, slot, val, prop, component, cls, state, inc, read, on, concat};
+use function Thorm\{el, text, fragment, slot, val, prop, component, cls, state, inc, read, on, concat, html};
 use Thorm\Renderer;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
 
+$code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(highlight_string("<?php
+\$i = state(1);
 
+// Optional: a template that also reads a prop, e.g. title
+\$CardTpl = fragment([
+    el('div', [ cls('card mt-5') ], [
+        el('h2', [], [ text(prop('title')) ]),  // reads ctx.props.title at runtime
+        el('button', [ 
+            cls('btn btn-primary col-3 mx-auto'),
+            on('click', inc(\$i, 1)),
+        ], [ text(val('Inc.')) ]),
+        slot(),                                 // default body
+    ]),
+]);
+
+// A component that passes PROPS and default slot content
+\$CardInstance = component(\$CardTpl, /* props */ [
+    'title' => concat('Hello, Props! ', read(\$i)),
+], [
+    el('p', [], [ text(val('This is the card body.')) ]),
+]);
+
+// Compose a page IR that uses the three component instances
+\$app = el('div', [ cls('container') ], [
+    \$CardInstance,
+    el('p', [ 
+        cls('text-muted fs-1')
+    ], [
+        text(concat('i=', read(\$i)))
+    ]),
+]);
+", true))]);
 
 
 $i = state(1);
@@ -41,6 +72,7 @@ $app = el('div', [ cls('container') ], [
     ], [
         text(concat('i=', read($i)))
     ]),
+    $code
 ]);
 
 

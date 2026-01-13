@@ -72,6 +72,29 @@ export async function runAction(evalr, services, ctx, action, evt = null) {
       evalr.notify(action.atom);
       break;
     }
+    case 'cap': {
+      try {
+        const { invokeCapability } = await import('../capabilities/invoke.js');
+        const args = (action.args && typeof action.args === 'object' && action.args !== null && action.args.k)
+          ? evalr.evaluate(action.args, evt, ctx)
+          : action.args;
+
+        const value = await invokeCapability(action.name, args);
+        if (action.to != null) {
+          const a = evalr.atoms.get(action.to);
+          a.v = value;
+          evalr.notify(action.to);
+        }
+      } catch (e) {
+        if (action.error != null) {
+          const a = evalr.atoms.get(action.error);
+          a.v = String(e?.message ?? e);
+          evalr.notify(action.error);
+        }
+        if (services.dev) console.warn('[actions] cap failed', action, e);
+      }
+      break;
+    }
     default: {
       if (services.dev) console.warn('[actions] unknown action', action);
     }

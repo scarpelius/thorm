@@ -3,11 +3,56 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use function Thorm\{el, text, fragment, slot, val, prop, component, cls};
+use function Thorm\{el, text, fragment, slot, val, prop, component, cls, html};
 use Thorm\Renderer;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
+
+$code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(highlight_string("<?php
+\$Layout = fragment([
+    el('header', [], [ slot('header') ]),
+    el('main',   [], [ slot() ]),
+    el('footer', [], [ slot('footer') ]),
+]);
+
+// Optional: a template that also reads a prop, e.g. title
+\$CardTpl = fragment([
+    el('div', [ cls('card') ], [
+        el('h2', [], [ text(prop('title')) ]),  // reads ctx.props.title at runtime
+        slot(),                                 // default body
+    ]),
+]);
+
+// Use the component with NAMED slots (including 'default')
+\$NamedSlotsInstance = component(\$Layout, [], [
+    'header'  => [ el('h1', [], [ text(val('Top')) ]) ],
+    'default' => [ el('p',  [], [ text(val('Body')) ]) ],
+    'footer'  => [ el('p',  [], [ text(val('Bottom')) ]) ],
+]);
+
+// Use the component with ONLY DEFAULT slot (unnamed children form)
+// This becomes slots: { \"default\": [...] } in the IR.
+\$DefaultOnlyInstance = component(\$Layout, [], [
+    el('p', [], [ text(val('Only default content')) ])
+]);
+
+// A component that passes PROPS and default slot content
+\$CardInstance = component(\$CardTpl, /* props */ [
+    'title' => val('Hello, Props!'),
+], [
+    el('p', [], [ text(val('This is the card body.')) ]),
+]);
+
+// Compose a page IR that uses the three component instances
+\$app = fragment([
+    el('div', [ cls('container') ], [
+        \$NamedSlotsInstance,
+        \$DefaultOnlyInstance,
+        \$CardInstance,
+    ]),
+]);
+", true))]);
 
 $Layout = fragment([
     el('header', [], [ slot('header') ]),
@@ -49,6 +94,7 @@ $app = fragment([
         $NamedSlotsInstance,
         $DefaultOnlyInstance,
         $CardInstance,
+        $code
     ]),
 ]);
 

@@ -128,8 +128,14 @@ final class RenderSsr
                 $condExpr = $node['when'] ?? ($node['cond'] ?? null);
                 $visible = (bool)$this->evalExpr($condExpr, $ctx);
                 $child = '';
-                if ($visible && isset($node['child']) && is_array($node['child'])) {
-                    $child = $this->renderNode($node['child'], $ctx);
+                if ($visible && isset($node['child'])) {
+                    $childNode = $node['child'];
+                    if ($childNode instanceof \JsonSerializable) {
+                        $childNode = $childNode->jsonSerialize();
+                    }
+                    if (is_array($childNode)) {
+                        $child = $this->renderNode($childNode, $ctx);
+                    }
                 }
                 return $this->comment('show:start') . $child . $this->comment('show:end');
             }
@@ -138,8 +144,14 @@ final class RenderSsr
                 $arr = is_array($items) ? $items : [];
                 $out = $this->comment('repeat:start');
                 $tpl = $node['tpl'] ?? ($node['child'] ?? null);
+                if ($tpl instanceof \JsonSerializable) {
+                    $tpl = $tpl->jsonSerialize();
+                }
                 if (!is_array($tpl)) {
                     $tpl = is_array($node['children'] ?? null) ? ($node['children'][0] ?? null) : null;
+                    if ($tpl instanceof \JsonSerializable) {
+                        $tpl = $tpl->jsonSerialize();
+                    }
                 }
                 foreach ($arr as $index => $item) {
                     $rowCtx = $ctx;

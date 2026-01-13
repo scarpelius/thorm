@@ -232,6 +232,17 @@ function runtime(
     return new RuntimeAction($name, $args, $to, $error);
 }
 
+/**
+ * declareGlobal
+ *
+ * Register a runtime value under window.Thorm[name] after hydration.
+ * Source uses dot-paths from the hydrate() return value, e.g. "core.nav.currentPath".
+ */
+function declareGlobal(string $name, string $source): void
+{
+    Globals::declare($name, $source);
+}
+
 // Props helpers
 /**
  * @param array<string, Expr|string|int|float|bool> $map

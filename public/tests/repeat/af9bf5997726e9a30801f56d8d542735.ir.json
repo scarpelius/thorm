@@ -100,6 +100,28 @@
                         }
                     }
                 ]
+            },
+            {
+                "k": "el",
+                "tag": "div",
+                "props": {
+                    "attrs": [],
+                    "style": [],
+                    "on": [],
+                    "cls": {
+                        "k": "val",
+                        "v": "bg-body-secondary p-3 rounded-4 border mt-5"
+                    }
+                },
+                "children": [
+                    {
+                        "k": "html",
+                        "value": {
+                            "k": "val",
+                            "v": "<pre><code style=\"color: #000000\"><span style=\"color: #0000BB\">&lt;?php\n    $items </span><span style=\"color: #007700\">= </span><span style=\"color: #0000BB\">state</span><span style=\"color: #007700\">([\n    [</span><span style=\"color: #DD0000\">'id' </span><span style=\"color: #007700\">=&gt; </span><span style=\"color: #0000BB\">1</span><span style=\"color: #007700\">, </span><span style=\"color: #DD0000\">'name' </span><span style=\"color: #007700\">=&gt; </span><span style=\"color: #DD0000\">'First item'</span><span style=\"color: #007700\">],\n    [</span><span style=\"color: #DD0000\">'id' </span><span style=\"color: #007700\">=&gt; </span><span style=\"color: #0000BB\">2</span><span style=\"color: #007700\">, </span><span style=\"color: #DD0000\">'name' </span><span style=\"color: #007700\">=&gt; </span><span style=\"color: #DD0000\">'Second item'</span><span style=\"color: #007700\">],\n    [</span><span style=\"color: #DD0000\">'id' </span><span style=\"color: #007700\">=&gt; </span><span style=\"color: #0000BB\">3</span><span style=\"color: #007700\">, </span><span style=\"color: #DD0000\">'name' </span><span style=\"color: #007700\">=&gt; </span><span style=\"color: #DD0000\">'Third item'</span><span style=\"color: #007700\">],\n    [</span><span style=\"color: #DD0000\">'id' </span><span style=\"color: #007700\">=&gt; </span><span style=\"color: #0000BB\">4</span><span style=\"color: #007700\">, </span><span style=\"color: #DD0000\">'name' </span><span style=\"color: #007700\">=&gt; </span><span style=\"color: #DD0000\">'Fourth item'</span><span style=\"color: #007700\">],\n]);\n\n</span><span style=\"color: #0000BB\">$item </span><span style=\"color: #007700\">= </span><span style=\"color: #0000BB\">el</span><span style=\"color: #007700\">(</span><span style=\"color: #DD0000\">'li'</span><span style=\"color: #007700\">, [ </span><span style=\"color: #0000BB\">cls</span><span style=\"color: #007700\">(</span><span style=\"color: #DD0000\">'nav-link'</span><span style=\"color: #007700\">) ], [ </span><span style=\"color: #0000BB\">text</span><span style=\"color: #007700\">(</span><span style=\"color: #0000BB\">item</span><span style=\"color: #007700\">(</span><span style=\"color: #DD0000\">'name'</span><span style=\"color: #007700\">)) ]);\n\n</span><span style=\"color: #0000BB\">$app </span><span style=\"color: #007700\">= </span><span style=\"color: #0000BB\">el</span><span style=\"color: #007700\">(</span><span style=\"color: #DD0000\">'div'</span><span style=\"color: #007700\">, [ </span><span style=\"color: #0000BB\">cls</span><span style=\"color: #007700\">(</span><span style=\"color: #DD0000\">'container'</span><span style=\"color: #007700\">) ], [\n    </span><span style=\"color: #0000BB\">el</span><span style=\"color: #007700\">(</span><span style=\"color: #DD0000\">'h1'</span><span style=\"color: #007700\">, [], [ </span><span style=\"color: #0000BB\">text</span><span style=\"color: #007700\">(</span><span style=\"color: #DD0000\">'Repeat aka List'</span><span style=\"color: #007700\">)]),\n    </span><span style=\"color: #0000BB\">el</span><span style=\"color: #007700\">(</span><span style=\"color: #DD0000\">'ul'</span><span style=\"color: #007700\">, [ </span><span style=\"color: #0000BB\">cls</span><span style=\"color: #007700\">(</span><span style=\"color: #DD0000\">'nav'</span><span style=\"color: #007700\">) ], [\n        </span><span style=\"color: #0000BB\">repeat</span><span style=\"color: #007700\">(\n            </span><span style=\"color: #0000BB\">read</span><span style=\"color: #007700\">(</span><span style=\"color: #0000BB\">$items</span><span style=\"color: #007700\">),\n            </span><span style=\"color: #0000BB\">item</span><span style=\"color: #007700\">(</span><span style=\"color: #DD0000\">'id'</span><span style=\"color: #007700\">),\n            </span><span style=\"color: #0000BB\">$item\n        </span><span style=\"color: #007700\">),\n    ]),\n]);\n</span></code></pre>"
+                        }
+                    }
+                ]
             }
         ]
     }

@@ -3,11 +3,33 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use function Thorm\{el, text, read, cls, state, item, repeat, val};
+use function Thorm\{el, text, read, cls, html, state, item, repeat, val};
 use Thorm\Renderer;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
+
+$code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(highlight_string("<?php
+    \$items = state([
+    ['id' => 1, 'name' => 'First item'],
+    ['id' => 2, 'name' => 'Second item'],
+    ['id' => 3, 'name' => 'Third item'],
+    ['id' => 4, 'name' => 'Fourth item'],
+]);
+
+\$item = el('li', [ cls('nav-link') ], [ text(item('name')) ]);
+
+\$app = el('div', [ cls('container') ], [
+    el('h1', [], [ text('Repeat aka List')]),
+    el('ul', [ cls('nav') ], [
+        repeat(
+            read(\$items),
+            item('id'),
+            \$item
+        ),
+    ]),
+]);
+", true))]);
 
 $items = state([
     ['id' => 1, 'name' => 'First item'],
@@ -27,6 +49,7 @@ $app = el('div', [ cls('container') ], [
             $item
         ),
     ]),
+    $code
 ]);
 
 $test = strtolower(pathinfo(__FILE__, PATHINFO_FILENAME));

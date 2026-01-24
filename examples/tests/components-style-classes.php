@@ -56,10 +56,10 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
     // default slot content
     'default' => [
         el('div', [ cls('row') ], [ 
-            el('p',[cls('my-1')], [text('Din codru s-au auzit ielele, bătând pasul pe frunze de lună.')]),
-            el('p',[cls('my-1')], [text('Apa s-a speriat și s-a făcut oglinzi multe, ca să poată privi înapoi.')]),
-            el('p',[cls('my-1')], [text('Un păstor bătrân, cu toiagul de sârmă și inima grea, a zis că le-a văzut — nu cu ochii, ci cu frica.')]),
-            el('p',[cls('my-1')], [text('Și în clipa aceea i s-a stins umbra, căci ielele nu suferă pe cei care înțeleg.')]),
+            el('p',[cls('my-1')], [text('From the forest the fairies were heard, stepping on leaves of moonlight.')]),
+            el('p',[cls('my-1')], [text('The water grew afraid and turned into many mirrors, so it could look back.')]),
+            el('p',[cls('my-1')], [text('An old shepherd, with a wire staff and a heavy heart, said he had seen them -- not with his eyes, but with fear.')]),
+            el('p',[cls('my-1')], [text('And in that moment his shadow faded, for the fairies do not spare those who understand.')]),
         ])
     ],
 ]);
@@ -123,10 +123,10 @@ $card = component($CardTpl, [
     // default slot content
     'default' => [
         el('div', [ cls('row') ], [ 
-            el('p',[cls('my-1')], [text('Din codru s-au auzit ielele, bătând pasul pe frunze de lună.')]),
-            el('p',[cls('my-1')], [text('Apa s-a speriat și s-a făcut oglinzi multe, ca să poată privi înapoi.')]),
-            el('p',[cls('my-1')], [text('Un păstor bătrân, cu toiagul de sârmă și inima grea, a zis că le-a văzut — nu cu ochii, ci cu frica.')]),
-            el('p',[cls('my-1')], [text('Și în clipa aceea i s-a stins umbra, căci ielele nu suferă pe cei care înțeleg.')]),
+            el('p',[cls('my-1')], [text('From the forest the fairies were heard, stepping on leaves of moonlight.')]),
+            el('p',[cls('my-1')], [text('The water grew afraid and turned into many mirrors, so it could look back.')]),
+            el('p',[cls('my-1')], [text('An old shepherd, with a wire staff and a heavy heart, said he had seen them -- not with his eyes, but with fear.')]),
+            el('p',[cls('my-1')], [text('And in that moment his shadow faded, for the fairies do not spare those who understand.')]),
         ])
     ],
 ]);
@@ -167,3 +167,5 @@ $json_data = file_put_contents($path . 'index.html', $res['tpl']);
 if($html !== false ) { echo green("Wrote html file\n"); } else { echo red("Bad luck, could not write html file.\n"); }
 if($json_data !== false ) { echo green("Wrote JSON data file\n"); } else { echo red("Bad luck, could not write JSON file.\n"); }
 echo "\n";
+
+

@@ -53,7 +53,7 @@ $renderer = new Renderer();
 $res = $renderer->renderPage($app, [
     'title'         => 'Bid',
     'containerId'   => 'app',
-    'template'      => __DIR__.'/../../assets/index-test.tpl.html',
+    'template'      => __DIR__.'/thorm/assets/index.tpl.html',
 ]);
 // save the bootstrap data
 $html = file_put_contents($path . $res['iruri'], $res['irJson']);

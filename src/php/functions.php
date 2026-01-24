@@ -9,6 +9,8 @@ use Thorm\IR\Action\{Listener, Action, IncAction, AddAction,
     RedirectAction,
     PushAction,
     RuntimeAction,
+    PersistAction,
+    HydrateAction,
     TaskAction
 };
 use Thorm\IR\Atom as AtomDef;
@@ -30,8 +32,11 @@ use Thorm\IR\Effect\{EffectTrigger,EffectTarget,MountTrigger,WatchTrigger,
  * These are autoloaded via composer "files".
  */
 
-function state(mixed $initial): AtomDef {
-    return new AtomDef($initial);
+/**
+ * @param array<string, mixed> $meta
+ */
+function state(mixed $initial, array $meta = []): AtomDef {
+    return new AtomDef($initial, $meta);
 }
 
 function read(AtomDef $atom): Expr {
@@ -230,6 +235,27 @@ function runtime(
     ?AtomDef $error = null
 ): Action {
     return new RuntimeAction($name, $args, $to, $error);
+}
+
+/**
+ * persist
+ *
+ * Persist the current value of an atom into a storage source.
+ * Source is a URL-like string (e.g. "local://key", "cookie://key", "https://...").
+ */
+function persist(AtomDef $atom, Expr|string $source): Action
+{
+    return new PersistAction($atom, $source);
+}
+
+/**
+ * hydrate
+ *
+ * Load a value from a storage source into an atom, with optional default.
+ */
+function hydrate(AtomDef $atom, Expr|string $source, mixed $default = null): Action
+{
+    return new HydrateAction($atom, $source, $default);
 }
 
 /**

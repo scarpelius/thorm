@@ -9,13 +9,23 @@ final class Atom implements JsonSerializable {
     private static int $nextId = 1;
     public readonly int $id;
     public mixed $initial;
+    /** @var array<string, mixed> */
+    public array $meta;
 
-    public function __construct(mixed $initial) {
+    /**
+     * @param array<string, mixed> $meta
+     */
+    public function __construct(mixed $initial, array $meta = []) {
         $this->id = self::$nextId++;
         $this->initial = $initial;
+        $this->meta = $meta;
     }
 
     public function jsonSerialize(): mixed {
-        return ['id' => $this->id, 'initial' => $this->initial];
+        $out = ['id' => $this->id, 'initial' => $this->initial];
+        if (!empty($this->meta)) {
+            $out['meta'] = $this->meta;
+        }
+        return $out;
     }
 }

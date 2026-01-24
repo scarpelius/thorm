@@ -14,14 +14,32 @@
     window.__THORM_DEV__ = true;
 </script>
 <script type="module">
-import { mount } from '/runtime/index.js';
+    import { mount } from '/runtime/index.js';
 
-(async function () {
-    const res = await fetch('3fae10a0602568acc91f839069d65fea.ir.json', { cache: 'no-store' });
-    const ir = await res.json();
-    const x = mount(ir, document.getElementById('app'));
-})();
+    const RT = (async function () {
+        const res = await fetch('c559e899a4efdd40250012ee4669001e.ir.json', { cache: 'no-store' });
+        const ir = await res.json();
+        const x = mount(ir, document.getElementById('app'));
+        const atoms = x?.core?.store?.atoms;
+        const subs = x?.core?.store?.subs;
+        const notify = typeof x?.core?.store?.notify === 'function'
+            ? x.core.store.notify.bind(x.core.store)
+            : (typeof x?.core?.notify === 'function'
+                ? x.core.notify.bind(x.core)
+                : null)
+        return {
+        atoms:  atoms ?? null,
+        subs:   subs  ?? null,
+        // if notify exists, bind it to its host to preserve `this`
+        notify: notify
+        };
+    })();
+    RT.then(result => {
+        window.__THORM_RUNTIME__ = result;
+        import('/runtime/devtools/devtools.js');
+        return result;
+    });
+
 </script>
-
 </body>
 </html>

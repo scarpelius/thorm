@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use function Thorm\{el, text, fragment, slot, val, prop, component, cls, state, inc, read, on, concat, html};
+use function Thorm\{attrs, el, text, fragment, slot, val, prop, component, cls, state, inc, read, on, concat, html};
 use Thorm\Renderer;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
@@ -15,12 +15,34 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 // Optional: a template that also reads a prop, e.g. title
 \$CardTpl = fragment([
     el('div', [ cls('card mt-5') ], [
-        el('h2', [], [ text(prop('title')) ]),  // reads ctx.props.title at runtime
-        el('button', [ 
-            cls('btn btn-primary col-3 mx-auto'),
-            on('click', inc(\$i, 1)),
-        ], [ text(val('Inc.')) ]),
-        slot(),                                 // default body
+        el('div', [cls('card-header')], [
+            el('h2', [cls('card-title')], [ text(prop('title')) ]), // reads ctx.props.title at runtime
+        ]),
+        slot(),                                                     // default component slot
+    ]),
+]);
+
+\$bodySlot = el('div', [cls('card-body')], [
+    el('button', [ 
+        cls('btn btn-primary col-3 mx-auto'),
+        on('click', inc(\$i, 1)),
+    ], [ text(val('Inc.')) ]),
+    el('p', [cls('my-3')], [ 
+        text(val('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et 
+        dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea 
+        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla 
+        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est 
+        laborum.')),
+        el('a', [
+            cls('px-3 link-opacity-50 link-underline link-underline-opacity-50'), 
+            attrs([
+                'href'      => 'https://www.lipsum.com/',
+                'target'    => '_blank',
+                'rel'       => 'nofollow'
+            ]),
+        ], [
+            text('https://www.lipsum.com/')
+        ])
     ]),
 ]);
 
@@ -28,7 +50,7 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 \$CardInstance = component(\$CardTpl, /* props */ [
     'title' => concat('Hello, Props! ', read(\$i)),
 ], [
-    el('p', [], [ text(val('This is the card body.')) ]),
+    \$bodySlot,
 ]);
 
 // Compose a page IR that uses the three component instances
@@ -48,12 +70,30 @@ $i = state(1);
 // Optional: a template that also reads a prop, e.g. title
 $CardTpl = fragment([
     el('div', [ cls('card mt-5') ], [
-        el('h2', [], [ text(prop('title')) ]),  // reads ctx.props.title at runtime
-        el('button', [ 
-            cls('btn btn-primary col-3 mx-auto'),
-            on('click', inc($i, 1)),
-        ], [ text(val('Inc.')) ]),
-        slot(),                                 // default body
+        el('div', [cls('card-header')], [
+            el('h2', [cls('card-title')], [ text(prop('title')) ]),  // reads ctx.props.title at runtime
+        ]),
+        slot(),                                     // default component slot
+    ]),
+]);
+
+$bodySlot = el('div', [cls('card-body')], [
+    el('button', [ 
+        cls('btn btn-primary col-3 mx-auto'),
+        on('click', inc($i, 1)),
+    ], [ text(val('Inc.')) ]),
+    el('p', [cls('my-3')], [ 
+        text(val('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.')),
+        el('a', [
+            cls('px-3 link-opacity-50 link-underline link-underline-opacity-50'), 
+            attrs([
+                'href'      => 'https://www.lipsum.com/',
+                'target'    => '_blank',
+                'rel'       => 'nofollow'
+            ]),
+        ], [
+            text('https://www.lipsum.com/')
+        ])
     ]),
 ]);
 
@@ -61,7 +101,7 @@ $CardTpl = fragment([
 $CardInstance = component($CardTpl, /* props */ [
     'title' => concat('Hello, Props! ', read($i)),
 ], [
-    el('p', [], [ text(val('This is the card body.')) ]),
+    $bodySlot,
 ]);
 
 // Compose a page IR that uses the three component instances

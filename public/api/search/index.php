@@ -11,8 +11,20 @@ $response = [
     ['id' => 2, 'title' => 'Storks and sparrows'],
     ['id' => 3, 'title' => 'Light of Elune'],
     ['id' => 4, 'title' => 'Drowned in the middle of desert'],
-    ['id' => 5, 'title' => 'Pilbara, țara cangurului nebun'],
-    ['id' => 6, 'title' => 'Hoții din adâncuri'],
+    ['id' => 5, 'title' => 'Pilbara, crazy kangaroo land'],
+    ['id' => 6, 'title' => 'Thiefs from bellow'],
 ];
 
-echo json_encode($response);
+$return = [];
+foreach($response as $r){
+    $pattern = '/' . preg_quote($search, '/') . '/i';
+
+    if (preg_match($pattern, $r['title']) === 1) {
+        $return[] = $r;
+    }
+} 
+if(count($return) == 0) {
+    $return[] = ['id' => 1, 'title' => 'No match.'];
+}
+
+echo json_encode($return);

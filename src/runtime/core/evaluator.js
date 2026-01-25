@@ -43,6 +43,7 @@ export function createEvaluator(store) {
   }
 
   function evaluate(expr, e, ctx) {
+    if (!expr || typeof expr !== 'object') return expr;
     switch (expr.k) {
       case 'val': return expr.v;
       case 'read': {
@@ -65,15 +66,80 @@ export function createEvaluator(store) {
       case 'str': return String(evaluate(expr.x, e, ctx));
       case 'item':  return getByPath(ctx && ctx.item, expr.path);
       case 'op': {
-        const a = evaluate(expr.a, e, ctx), b = evaluate(expr.b, e, ctx);
+        const a = evaluate(expr.a, e, ctx);
+        const b = evaluate(expr.b, e, ctx);
+        const c = evaluate(expr.c, e, ctx);
         switch (expr.name) {
           case 'add': return Number(a) + Number(b);
+          case 'sub': return Number(a) - Number(b);
+          case 'mul': return Number(a) * Number(b);
+          case 'div': return Number(a) / Number(b);
           case 'mod': return Number(a) % Number(b);
           case 'eq': return a === b;
           case 'gt': return Number(a) > Number(b);
           case 'lt': return Number(a) < Number(b);
           case 'gte': return Number(a) >= Number(b);
           case 'lte': return Number(a) <= Number(b);
+          case 'abs': return Math.abs(Number(a));
+          case 'min': {
+            if (b == null && Array.isArray(a)) return Math.min(...a);
+            return Math.min(Number(a), Number(b));
+          }
+          case 'max': {
+            if (b == null && Array.isArray(a)) return Math.max(...a);
+            return Math.max(Number(a), Number(b));
+          }
+          case 'round': return Math.round(Number(a));
+          case 'floor': return Math.floor(Number(a));
+          case 'ceil': return Math.ceil(Number(a));
+          case 'sqrt': return Math.sqrt(Number(a));
+          case 'pow': return Math.pow(Number(a), Number(b));
+          case 'trunc': return Math.trunc(Number(a));
+          case 'sign': return Math.sign(Number(a));
+          case 'log': return Math.log(Number(a));
+          case 'log10': return Math.log10(Number(a));
+          case 'log2': return Math.log2(Number(a));
+          case 'exp': return Math.exp(Number(a));
+          case 'strlen': return String(a ?? '').length;
+          case 'substr': {
+            const s = String(a ?? '');
+            const start = Number(b ?? 0);
+            if (c == null) return s.slice(start);
+            const len = Number(c);
+            return s.slice(start, start + len);
+          }
+          case 'strpos': return String(a ?? '').indexOf(String(b ?? ''));
+          case 'str_replace': {
+            const search = String(a ?? '');
+            const replace = String(b ?? '');
+            const subject = String(c ?? '');
+            return subject.split(search).join(replace);
+          }
+          case 'strtolower': return String(a ?? '').toLowerCase();
+          case 'strtoupper': return String(a ?? '').toUpperCase();
+          case 'trim': return String(a ?? '').trim();
+          case 'ltrim': return String(a ?? '').trimStart();
+          case 'rtrim': return String(a ?? '').trimEnd();
+          case 'explode': return String(b ?? '').split(String(a ?? ''));
+          case 'implode': return Array.isArray(b) ? b.join(String(a ?? '')) : '';
+          case 'in_array': return Array.isArray(b) ? b.includes(a) : false;
+          case 'count': {
+            if (Array.isArray(a)) return a.length;
+            if (a && typeof a === 'object') return Object.keys(a).length;
+            return 0;
+          }
+          case 'array_keys': return (a && typeof a === 'object') ? Object.keys(a) : [];
+          case 'array_values': return (a && typeof a === 'object') ? Object.values(a) : [];
+          case 'json_encode': return JSON.stringify(a);
+          case 'parseInt': return Number.parseInt(String(a ?? ''), 10);
+          case 'parseFloat': return Number.parseFloat(String(a ?? ''));
+          case 'intval': return Number.parseInt(String(a ?? ''), 10);
+          case 'floatval': return Number.parseFloat(String(a ?? ''));
+          case 'boolval': return Boolean(a);
+          case 'strval': return String(a ?? '');
+          case 'is_numeric': return Number.isFinite(Number(a));
+          case 'is_string': return typeof a === 'string';
+          case 'is_array': return Array.isArray(a);
           case 'cond': {
             const test = evaluate(expr.a ?? expr.a, e, ctx);
             return !!test

@@ -382,6 +382,13 @@ final class RenderSsr
                 return $a ? $b : $c;
             case 'add':
                 return (float)$a + (float)$b;
+            case 'sub':
+                return (float)$a - (float)$b;
+            case 'mul':
+                return (float)$a * (float)$b;
+            case 'div':
+                if ((float)$b == 0.0) return null;
+                return (float)$a / (float)$b;
             case 'eq':
                 return $a == $b;
             case 'mod':
@@ -394,6 +401,93 @@ final class RenderSsr
                 return (float)$a >= (float)$b;
             case 'lte':
                 return (float)$a <= (float)$b;
+            case 'abs':
+                return abs((float)$a);
+            case 'min':
+                if (is_array($a) && $b === null) return min($a);
+                return min((float)$a, (float)$b);
+            case 'max':
+                if (is_array($a) && $b === null) return max($a);
+                return max((float)$a, (float)$b);
+            case 'round':
+                return round((float)$a);
+            case 'floor':
+                return floor((float)$a);
+            case 'ceil':
+                return ceil((float)$a);
+            case 'sqrt':
+                return sqrt((float)$a);
+            case 'pow':
+                return pow((float)$a, (float)$b);
+            case 'trunc':
+                return (float)$a < 0 ? ceil((float)$a) : floor((float)$a);
+            case 'sign':
+                return (float)$a < 0 ? -1 : ((float)$a > 0 ? 1 : 0);
+            case 'log':
+                return log((float)$a);
+            case 'log10':
+                return log10((float)$a);
+            case 'log2':
+                return log((float)$a, 2);
+            case 'exp':
+                return exp((float)$a);
+            case 'strlen':
+                return strlen((string)$a);
+            case 'substr':
+                if ($b === null) return (string)$a;
+                return $c === null
+                    ? substr((string)$a, (int)$b)
+                    : substr((string)$a, (int)$b, (int)$c);
+            case 'strpos': {
+                $pos = strpos((string)$a, (string)$b);
+                return $pos === false ? -1 : $pos;
+            }
+            case 'str_replace':
+                return str_replace((string)$a, (string)$b, (string)$c);
+            case 'strtolower':
+                return strtolower((string)$a);
+            case 'strtoupper':
+                return strtoupper((string)$a);
+            case 'trim':
+                return trim((string)$a);
+            case 'ltrim':
+                return ltrim((string)$a);
+            case 'rtrim':
+                return rtrim((string)$a);
+            case 'explode':
+                return explode((string)$a, (string)$b);
+            case 'implode':
+                return is_array($b) ? implode((string)$a, $b) : '';
+            case 'in_array':
+                return is_array($b) ? in_array($a, $b, true) : false;
+            case 'count':
+                if (is_array($a)) return count($a);
+                if (is_object($a)) return count(get_object_vars($a));
+                return 0;
+            case 'array_keys':
+                return is_array($a) ? array_keys($a) : (is_object($a) ? array_keys(get_object_vars($a)) : []);
+            case 'array_values':
+                return is_array($a) ? array_values($a) : (is_object($a) ? array_values(get_object_vars($a)) : []);
+            case 'json_encode':
+                return json_encode($a, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            case 'parseInt':
+                return (int)$a;
+            case 'parseFloat':
+                return (float)$a;
+            case 'intval':
+                return (int)$a;
+            case 'floatval':
+                return (float)$a;
+            case 'boolval':
+                return (bool)$a;
+            case 'strval':
+                return (string)$a;
+            case 'is_numeric':
+                return is_numeric($a);
+            case 'is_string':
+                return is_string($a);
+            case 'is_array':
+                return is_array($a);
             case 'num':
                 return (float)$a;
             default:

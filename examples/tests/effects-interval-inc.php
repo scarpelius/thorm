@@ -6,7 +6,8 @@ require __DIR__ . '/../../vendor/autoload.php';
 use function Thorm\{
     el, text, attrs, cls, concat, read, state, fragment,
     every,         // effect helper
-    inc            // unified helper (Listener|Action). We'll pass asAction=true
+    inc,           // unified helper (Listener|Action). We'll pass asAction=true
+    html
 };
 use Thorm\Renderer;
 
@@ -15,6 +16,21 @@ function red($s){ return "\033[31m{$s}\033[0m"; }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // model
+
+$code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(highlight_string("<?php
+\$tick = state(0);
+
+\$app = fragment([
+    el('div', [attrs(['class' => 'container p-3'])], [
+        el('h1', [], [ text('Effect: interval + inc') ]),
+        el('p', [], [ text(concat('Tick = ', read(\$tick))) ]),
+        el('p', [cls('text-muted')], [ text('Should increment once per second.') ]),
+    ]),
+
+    // EFFECT: every 1000ms increment tick
+    every(1000, [ inc(\$tick, 1, true) ]), // asAction = true
+]);
+", true))]);
 
 $tick = state(0);
 
@@ -26,6 +42,7 @@ $app = fragment([
         el('h1', [], [ text('Effect: interval + inc') ]),
         el('p', [], [ text(concat('Tick = ', read($tick))) ]),
         el('p', [cls('text-muted')], [ text('Should increment once per second.') ]),
+        $code
     ]),
 
     // EFFECT: every 1000ms increment tick

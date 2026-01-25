@@ -10,7 +10,8 @@ use function Thorm\{
     // effects
     watch,
     // actions (via unified helpers with $asAction = true)
-    set
+    set,
+    html
 };
 use Thorm\Renderer;
 
@@ -19,6 +20,85 @@ function red($s){ return "\033[31m{$s}\033[0m"; }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // model
+
+$code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(highlight_string("<?php
+\$count      = state(0);
+\$label      = state('idle');
+\$delay      = state(300);
+\$throttle   = state(500);
+
+\$app = fragment([
+    el('div', [attrs(['class' => 'container p-3'])], [
+        el('h1', [], [ text('Effect: watch + set (debounced)') ]),
+        el('div', [ cls('row') ], [
+            el('label', [ attrs([ 'for' => 'debounce' ]) ], [ 
+                el('a', [
+                    attrs([
+                        'href'  => 'https://developer.mozilla.org/en-US/docs/Glossary/Debounce',
+                        'rel'   => 'nofollow',
+                        'target' => '_blank',
+                    ]),
+                ], [text('Debounce')]),
+             ]),
+            el('input', [ 
+                attrs([
+                    'id'    => 'debounce', 
+                    'type'  => 'range', 
+                    'min'   => 0, 
+                    'max'   => 3000,
+                    'value' => read(\$delay)
+                ]),
+                on('change', set(\$delay, ev('target.value'))),
+             ], []),
+        ]),
+        el('div', [ cls('row') ], [
+            el('label', [ attrs([ 'for' => 'throttle' ]) ], [ 
+                el('a', [
+                    attrs([
+                        'href'  => 'https://developer.mozilla.org/en-US/docs/Glossary/Throttle',
+                        'rel'   => 'nofollow',
+                        'target' => '_blank',
+                    ]),
+                ], [text('Throttle')]),
+            ]),
+            el('input', [ 
+                attrs([
+                    'id'    => 'throttle', 
+                    'type'  => 'range', 
+                    'min'   => 0, 
+                    'max'   => 3000,
+                    'value' => read(\$throttle)
+                ]),
+                on('change', set(\$throttle, ev('target.value'))),
+             ], []),
+        ]),
+        el('p', [], [ text(concat('Count = ', read(\$count))) ]),
+        el('p', [], [ text(concat('Label = ', read(\$label))) ]),
+        el('div', [cls('row gap-2 my-2 d-flex justify-content-center')], [
+            el('button', [
+                cls('btn btn-primary col-4'),
+                on('click', inc(\$count, 1)) // normal Listener path (props)
+            ], [ text('Inc') ]),
+            el('button', [
+                cls('btn btn-secondary col-4'),
+                on('click', inc(\$count, -1))
+            ], [ text('Dec') ]),
+        ]),
+        el('p', [cls('text-muted')], [
+            text(concat('Clicking Inc/Dec quickly should update Label after ', read(\$delay), 'ms debounce.'))
+        ]),
+    ]),
+
+    // EFFECT: watch \$count; update \$label to \"Count: <n>\" (debounced 300ms)
+    watch(
+        read(\$count),
+        [ set(\$label, concat('Count: ', read(\$count)), true) ], // <- asAction = true
+        immediate: true,
+        debounceMs: read(\$delay),
+        throttleMs: read(\$throttle),
+    ),
+]);
+", true))]);
 
 $count      = state(0);
 $label      = state('idle');
@@ -32,7 +112,15 @@ $app = fragment([
     el('div', [attrs(['class' => 'container p-3'])], [
         el('h1', [], [ text('Effect: watch + set (debounced)') ]),
         el('div', [ cls('row') ], [
-            el('label', [ attrs([ 'for' => 'debounce' ]) ], [ text('Debounce') ]),
+            el('label', [ attrs([ 'for' => 'debounce' ]) ], [ 
+                el('a', [
+                    attrs([
+                        'href'  => 'https://developer.mozilla.org/en-US/docs/Glossary/Debounce',
+                        'rel'   => 'nofollow',
+                        'target' => '_blank',
+                    ]),
+                ], [text('Debounce')]),
+             ]),
             el('input', [ 
                 attrs([
                     'id'    => 'debounce', 
@@ -45,7 +133,15 @@ $app = fragment([
              ], []),
         ]),
         el('div', [ cls('row') ], [
-            el('label', [ attrs([ 'for' => 'throttle' ]) ], [ text('Throttle') ]),
+            el('label', [ attrs([ 'for' => 'throttle' ]) ], [ 
+                el('a', [
+                    attrs([
+                        'href'  => 'https://developer.mozilla.org/en-US/docs/Glossary/Throttle',
+                        'rel'   => 'nofollow',
+                        'target' => '_blank',
+                    ]),
+                ], [text('Throttle')]),
+            ]),
             el('input', [ 
                 attrs([
                     'id'    => 'throttle', 
@@ -72,6 +168,7 @@ $app = fragment([
         el('p', [cls('text-muted')], [
             text(concat('Clicking Inc/Dec quickly should update Label after ', read($delay), 'ms debounce.'))
         ]),
+        $code
     ]),
 
     // EFFECT: watch $count; update $label to "Count: <n>" (debounced 300ms)

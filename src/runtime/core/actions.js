@@ -75,8 +75,11 @@ export async function runAction(evalr, services, ctx, action, evt = null) {
     }
     case 'set': {
       const a = evalr.atoms.get(action.atom);
-      a.v = evalMaybe(evalr, evt, ctx, action.to);
-      evalr.notify(action.atom);
+      const next = evalMaybe(evalr, evt, ctx, action.to);
+      if (!Object.is(a.v, next)) {
+        a.v = next;
+        evalr.notify(action.atom);
+      }
       break;
     }
     case 'add': {

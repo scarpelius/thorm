@@ -95,6 +95,104 @@ function concat(Expr|string ...$parts): Expr {
     return Expr::concat(...$parts);
 }
 
+/**
+ * thorm
+ *
+ * Build an IR expression from a declarative array tree.
+ * Shape: [op, arg1, arg2, ...]
+ */
+function thorm(array $code): Expr
+{
+    return thorm_build($code);
+}
+
+/**
+ * transphorm (alias of thorm)
+ */
+function transphorm(array $code): Expr
+{
+    return thorm($code);
+}
+
+/**
+ * @internal
+ */
+function thorm_build(mixed $node): Expr
+{
+    if ($node instanceof Expr) {
+        return $node;
+    }
+    if ($node instanceof AtomDef) {
+        return Expr::read($node);
+    }
+    if (!is_array($node)) {
+        return Expr::val($node);
+    }
+    if (!isset($node[0]) || !is_string($node[0])) {
+        throw new \InvalidArgumentException('thorm(): first element must be an op string.');
+    }
+
+    $aliases = [
+        '+' => 'add',
+        '-' => 'sub',
+        '*' => 'mul',
+        '/' => 'div',
+        '%' => 'mod',
+        '==' => 'eq',
+        '>' => 'gt',
+        '<' => 'lt',
+        '>=' => 'gte',
+        '<=' => 'lte',
+        'mulx' => 'mul',
+        'divx' => 'div',
+    ];
+    $allowed = [
+        'add','sub','mul','div','mod','eq','gt','lt','gte','lte','cond','get',
+        'abs','min','max','round','floor','ceil','sqrt','pow','trunc','sign','log','log10','log2','exp',
+        'strlen','substr','strpos','str_replace','strtolower','strtoupper','trim','ltrim','rtrim','explode','implode',
+        'in_array','count','array_keys','array_values','json_encode',
+        'parseInt','parseFloat','intval','floatval','boolval','strval','is_numeric','is_string','is_array',
+        'val','read',
+    ];
+
+    $op = $aliases[$node[0]] ?? $node[0];
+    if (!in_array($op, $allowed, true)) {
+        throw new \InvalidArgumentException('thorm(): op not allowed: ' . $op);
+    }
+
+    $args = array_slice($node, 1);
+    if ($op === 'val') {
+        $raw = $args[0] ?? null;
+        if ($raw instanceof Expr) {
+            return $raw;
+        }
+        if ($raw instanceof AtomDef) {
+            return Expr::read($raw);
+        }
+        return Expr::val($raw);
+    }
+    if ($op === 'read') {
+        $raw = $args[0] ?? null;
+        if ($raw instanceof AtomDef) {
+            return Expr::read($raw);
+        }
+        if ($raw instanceof Expr) {
+            return $raw;
+        }
+        throw new \InvalidArgumentException('thorm(): read expects an Atom.');
+    }
+
+    $exprArgs = [];
+    foreach ($args as $arg) {
+        $exprArgs[] = thorm_build($arg);
+    }
+    if (count($exprArgs) > 3) {
+        throw new \InvalidArgumentException('thorm(): supports up to 3 operands.');
+    }
+
+    return new ExprOp($op, ...$exprArgs);
+}
+
 // Node builders
 /**
  * @param array<string, mixed> $props

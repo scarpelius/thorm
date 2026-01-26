@@ -88,8 +88,6 @@ for ($i = 0; $i < $framesCount; $i++) {
 }
 
 $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-4')], [html(highlight_string("<?php
-// Precompute frames in PHP and render a frame index in the UI.
-
 \$frameIndex = state(0);
 \$speed = state(1);
 \$running = state(true);
@@ -104,6 +102,85 @@ every(200, [
     set(\$frameIndex, \$tickIndex, true),
     set(\$currentFrame, \$nextFrame, true)
 ]);
+", true))]);
+
+$precomputeCode = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-4')], [html(highlight_string("<?php
+// Precompute frames in PHP and render a frame index in the UI.
+
+function makeGrid(int \$rows, int \$cols): array {
+    \$grid = [];
+    for (\$r = 0; \$r < \$rows; \$r++) {
+        \$row = [];
+        for (\$c = 0; \$c < \$cols; \$c++) {
+            \$row[] = 0;
+        }
+        \$grid[] = \$row;
+    }
+    return \$grid;
+}
+
+function seedGlider(array \$grid, int \$r, int \$c): array {
+    \$grid[\$r + 0][\$c + 1] = 1;
+    \$grid[\$r + 1][\$c + 2] = 1;
+    \$grid[\$r + 2][\$c + 0] = 1;
+    \$grid[\$r + 2][\$c + 1] = 1;
+    \$grid[\$r + 2][\$c + 2] = 1;
+    return \$grid;
+}
+
+function nextGen(array \$grid): array {
+    \$rows = count(\$grid);
+    \$cols = count(\$grid[0] ?? []);
+    \$out = \$grid;
+
+    \$count = function(int \$r, int \$c) use (\$grid, \$rows, \$cols): int {
+        \$n = 0;
+        for (\$dr = -1; \$dr <= 1; \$dr++) {
+            for (\$dc = -1; \$dc <= 1; \$dc++) {
+                if (\$dr === 0 && \$dc === 0) continue;
+                \$rr = (\$r + \$dr + \$rows) % \$rows;
+                \$cc = (\$c + \$dc + \$cols) % \$cols;
+                \$n += \$grid[\$rr][\$cc] ? 1 : 0;
+            }
+        }
+        return \$n;
+    };
+
+    for (\$r = 0; \$r < \$rows; \$r++) {
+        for (\$c = 0; \$c < \$cols; \$c++) {
+            \$alive = \$grid[\$r][\$c] === 1;
+            \$nbrs = \$count(\$r, \$c);
+            if (\$alive && (\$nbrs < 2 || \$nbrs > 3)) \$out[\$r][\$c] = 0;
+            if (!\$alive && \$nbrs === 3) \$out[\$r][\$c] = 1;
+        }
+    }
+    return \$out;
+}
+
+function frameFromGrid(array \$grid): array {
+    \$frame = [];
+    foreach (\$grid as \$r => \$row) {
+        \$cells = [];
+        foreach (\$row as \$c => \$alive) {
+            \$cells[] = ['id' => \$c, 'alive' => \$alive ? 1 : 0];
+        }
+        \$frame[] = ['id' => \$r, 'cells' => \$cells];
+    }
+    return \$frame;
+}
+
+\$rows = 20;
+\$cols = 20;
+\$framesCount = 60;
+
+\$grid = makeGrid(\$rows, \$cols);
+\$grid = seedGlider(\$grid, 2, 2);
+
+\$frames = [];
+for (\$i = 0; \$i < \$framesCount; \$i++) {
+    \$frames[] = frameFromGrid(\$grid);
+    \$grid = nextGen(\$grid);
+}
 ", true))]);
 
 $framesAtom = state($frames);
@@ -155,7 +232,8 @@ $app = fragment([
         el('div', [style(['display' => 'inline-block', 'padding' => '8px', 'background' => '#0d0d0d'])], [
             repeat(read($currentFrame), concat(read($frameIndex), '-', item('id')), $rowTpl)
         ]),
-        $code
+        $code,
+        $precomputeCode,
     ]),
 
     every(200, [

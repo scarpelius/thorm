@@ -1,3 +1,5 @@
+import { exprHandlers, opHandlers } from './handlers/handlers.generated.js';
+
 export function createEvaluator(store) {
   const { atoms, ensureAtom, notify, subscribeMany } = store;
 
@@ -42,7 +44,7 @@ export function createEvaluator(store) {
     return out;
   }
 
-  function evaluate(expr, e, ctx) {
+  function old_evaluate(expr, e, ctx) {
     if (!expr || typeof expr !== 'object') return expr;
     switch (expr.k) {
       case 'val': return expr.v;
@@ -60,15 +62,15 @@ export function createEvaluator(store) {
         //}
         return ret;
       };
-      case 'not': return !toBool(evaluate(expr.x, e));
+      case 'not': return !toBool(old_evaluate(expr.x, e));
       case 'event': return getByPath(e, expr.path);
-      case 'num': return Number(evaluate(expr.x, e, ctx));
-      case 'str': return String(evaluate(expr.x, e, ctx));
+      case 'num': return Number(old_evaluate(expr.x, e, ctx));
+      case 'str': return String(old_evaluate(expr.x, e, ctx));
       case 'item':  return getByPath(ctx && ctx.item, expr.path);
       case 'op': {
-        const a = evaluate(expr.a, e, ctx);
-        const b = evaluate(expr.b, e, ctx);
-        const c = evaluate(expr.c, e, ctx);
+        const a = old_evaluate(expr.a, e, ctx);
+        const b = old_evaluate(expr.b, e, ctx);
+        const c = old_evaluate(expr.c, e, ctx);
         switch (expr.name) {
           case 'add': return Number(a) + Number(b);
           case 'sub': return Number(a) - Number(b);
@@ -141,20 +143,20 @@ export function createEvaluator(store) {
           case 'is_string': return typeof a === 'string';
           case 'is_array': return Array.isArray(a);
           case 'cond': {
-            const test = evaluate(expr.a ?? expr.a, e, ctx);
+            const test = old_evaluate(expr.a ?? expr.a, e, ctx);
             return !!test
-              ? evaluate(expr.b ?? expr.b, e, ctx)
-              : evaluate(expr.c ?? expr.c, e, ctx);
+              ? old_evaluate(expr.b ?? expr.b, e, ctx)
+              : old_evaluate(expr.c ?? expr.c, e, ctx);
           }
           case 'get': {
-            const obj = evaluate(expr.a, e, ctx);
-            const key = evaluate(expr.b, e, ctx);
+            const obj = old_evaluate(expr.a, e, ctx);
+            const key = old_evaluate(expr.b, e, ctx);
             if (obj == null) return undefined;
             const k = (typeof key === 'number') ? key : String(key);
             try { return obj[k]; } catch { return undefined; }
           }
           case 'navigate': {
-            const to = evaluate(action.to, e, ctx) ?? "/";
+            const to = old_evaluate(action.to, e, ctx) ?? "/";
             if (typeof to === 'string') {
               history.pushState(null, "", to);
               if (typeof window.__THORM_REROUTE__ === 'function') window.__THORM_REROUTE__();
@@ -165,7 +167,7 @@ export function createEvaluator(store) {
         }
       }
       case 'concat': {
-        return expr.parts.map(p => evaluate(p, e, ctx)).join('');
+        return expr.parts.map(p => old_evaluate(p, e, ctx)).join('');
       }
       case 'param': return (ctx && ctx.route && ctx.route.params || {})[expr.name];
       case 'query': return (ctx && ctx.route && ctx.route.query  || {})[expr.name];
@@ -186,12 +188,12 @@ export function createEvaluator(store) {
 
         // if prop value is an IR expression, evaluate it
         if (v && typeof v === 'object' && v.k) {
-          return evaluate(v, e, ctx);
+          return old_evaluate(v, e, ctx);
         }
 
         // optional fallback support: { k:"prop", name:"title", fallback:{k:"val",v:"Untitled"} }
         if (v === undefined && expr.fallback) {
-          return evaluate(expr.fallback, e, ctx);
+          return old_evaluate(expr.fallback, e, ctx);
         }
 
         return v;
@@ -199,9 +201,9 @@ export function createEvaluator(store) {
       case 'stringify': {
         const space = Number(expr.space ?? 0) | 0;
         const v = (expr.value && typeof expr.value === 'object' && expr.k)
-          ? evaluate(expr.value, e, ctx)
+          ? old_evaluate(expr.value, e, ctx)
           : expr.value;
-        //console.log(evaluate(expr.value, e, ctx));
+        //console.log(old_evaluate(expr.value, e, ctx));
         try {
           return JSON.stringify(v, null, space);
         } catch {
@@ -211,6 +213,13 @@ export function createEvaluator(store) {
       }
       default: throw new Error('Unknown expr kind '+expr.k+' '+ expr);
     }
+  }
+
+  function evaluate(expr, e, ctx) {
+    if (!expr || typeof expr !== 'object') return expr;
+    const handler = exprHandlers[expr.k];
+    if (!handler) throw new Error('Unknown expr kind '+expr.k+' '+ expr);
+    return handler(expr, e, ctx, { evaluate, old_evaluate, getByPath, toBool, atoms, opHandlers });
   }
 
   function bindReactive(expr, apply, scope) {
@@ -237,5 +246,5 @@ export function createEvaluator(store) {
     return !!v;
   }
 
-  return { atoms, ensureAtom, notify, subscribeMany, evaluate, deps, bindReactive, getByPath, toBool };
+  return { atoms, ensureAtom, notify, subscribeMany, evaluate, old_evaluate, deps, bindReactive, getByPath, toBool };
 }

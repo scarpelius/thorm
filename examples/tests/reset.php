@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use function Thorm\{el, text, concat, attrs, on, cls, set, num, read, state, ev, addTo};
+use function Thorm\{add, el, text, concat, attrs, on, cls, set, num, read, state, ev, addTo};
 use Thorm\Renderer;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
@@ -23,7 +23,7 @@ $app = el('div', [cls('container')], [
     el('div', [cls('d-flex justify-content-around p-5')], [
         el('button', [ 
             cls('btn btn-primary'), 
-            on('click', addTo($count, read($step))) ], [ text('Inc by input') 
+            on('click', add($count, read($step), true)) ], [ text('Inc by input') 
         ]),
         el('button', [
             cls('btn btn-danger'),

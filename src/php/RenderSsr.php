@@ -200,6 +200,9 @@ final class RenderSsr
                 $childCtx['__propsExpr'] = $propsExpr;
                 $childCtx['__slots'] = is_array($node['slots'] ?? null) ? $node['slots'] : [];
                 $tpl = $node['tpl'] ?? null;
+                if ($tpl instanceof \JsonSerializable) {
+                    $tpl = $tpl->jsonSerialize();
+                }
                 $inner = is_array($tpl) ? $this->renderNode($tpl, $childCtx) : '';
                 return $this->comment('component:start') . $inner . $this->comment('component:end');
             }

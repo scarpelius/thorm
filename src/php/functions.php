@@ -204,6 +204,14 @@ function el(string $tag, array $props = [], array $children = []): Node {
     return new ElNode($tag, $props, $children);
 }
 
+function client(Node $node): Node {
+    if (!($node instanceof ElNode)) {
+        throw new \InvalidArgumentException('client() expects an ElNode container.');
+    }
+    $node->render = ['target' => 'client'];
+    return $node;
+}
+
 function text(Expr|string $value): Node {
     return new TextNode($value);
 }

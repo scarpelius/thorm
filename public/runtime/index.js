@@ -43,6 +43,20 @@ function applyState(store, state) {
 
 export const THORM_MODE_SSR = 'ssr';
 export const THORM_MODE_CSR = 'csr';
+export const THORM_TARGET_SERVER = 'server';
+export const THORM_TARGET_CLIENT = 'client';
+
+const _deprecatedWarned = {
+  mount: false,
+  hydrate: false,
+};
+
+function warnDeprecated(name, replacement) {
+  if (typeof window === 'undefined' || !window.__THORM_DEV__) return;
+  if (_deprecatedWarned[name]) return;
+  _deprecatedWarned[name] = true;
+  console.warn(`[ThormJS] '${name}()' is deprecated. Use ${replacement} instead.`);
+}
 
 function createCore(ir, state) {
   const store = createAtomStore();
@@ -67,24 +81,36 @@ function createCore(ir, state) {
 }
 
 export function mount(ir, container, ctx = {}) {
-  const core = createCore(ir, null);
-  const root = new Scope();
-  container.textContent = '';
-  const inst = core.registry.mount(container, ir.root, root, { evalr: core.evalr, nav: core.nav, http: core.http, ctx });
-  return {
-    dispose: () => { inst.dispose?.(); root.dispose(); },
-    core: core, 
-  };
+  warnDeprecated('mount', "boot(ir, container, { target: 'client', ctx })");
+  return boot(ir, container, { target: THORM_TARGET_CLIENT, ctx });
 }
 
 export function hydrate(ir, container, state = {}, ctx = {}) {
-  window.__THORM_MODE__ = THORM_MODE_SSR;
+  warnDeprecated('hydrate', "boot(ir, container, { target: 'server', state, ctx })");
+  return boot(ir, container, { target: THORM_TARGET_SERVER, state, ctx });
+}
+
+export function boot(ir, container, options = {}) {
+  const target = options?.target ?? ir?.root?.render?.target ?? THORM_TARGET_SERVER;
+  const state = options?.state ?? null;
+  const ctx = options?.ctx ?? {};
+  const useHydration = target !== THORM_TARGET_CLIENT;
+
+  window.__THORM_MODE__ = useHydration ? THORM_MODE_SSR : THORM_MODE_CSR;
   const core = createCore(ir, state);
   const root = new Scope();
-  const hydration = { active: true, cursor: createCursor(container) };
-  const services = { evalr: core.evalr, nav: core.nav, http: core.http, ctx, hydrate: hydration };
+  if (!useHydration) {
+    container.textContent = '';
+  }
+  const hydration = useHydration ? { active: true, cursor: createCursor(container) } : null;
+  const services = { evalr: core.evalr, nav: core.nav, http: core.http, ctx };
+  if (hydration) {
+    services.hydrate = hydration;
+  }
   const inst = core.registry.mount(container, ir.root, root, services);
-  hydration.active = false;
+  if (hydration) {
+    hydration.active = false;
+  }
   return {
     dispose: () => { inst.dispose?.(); root.dispose(); },
     core: core,

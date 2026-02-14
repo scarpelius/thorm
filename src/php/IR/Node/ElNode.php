@@ -16,7 +16,8 @@ final class ElNode extends Node implements \JsonSerializable, AtomCollectable {
     public function __construct(
         public string $tag,
         public array $props = [],
-        public array $children = []
+        public array $children = [],
+        public ?array $render = null
     ) {}
 
     public function collectAtoms(callable $collect): void
@@ -73,12 +74,16 @@ final class ElNode extends Node implements \JsonSerializable, AtomCollectable {
                     $props['on'][] = [$item[1], $item[2]];
             }
         }
-        return [
+        $out = [
             'k' => 'el',
             'tag' => $this->tag,
             'props' => $this->encodeProps($props),
             'children' => $this->children
         ];
+        if ($this->render !== null) {
+            $out['render'] = $this->render;
+        }
+        return $out;
     }
 
     /** @param array<string, mixed> $props */

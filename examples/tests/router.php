@@ -54,7 +54,7 @@ if(!is_dir($path)) { mkdir($path); }
 
 $renderer = new Renderer();
 $res = $renderer->renderPage($app, [
-    'title'         => 'Bid',
+    'title'         => 'Router',
     'containerId'   => 'app',
     'template'      => __DIR__.'/../../assets/index-test.tpl.html',
 ]);

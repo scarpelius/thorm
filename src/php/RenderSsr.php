@@ -107,7 +107,7 @@ final class RenderSsr
         switch ($kind) {
             case 'text': {
                 $v = $this->evalExpr($node['value'] ?? null, $ctx);
-                return $this->escape((string)($v ?? ''));
+                return $this->escape($this->toClientText($v));
             }
             case 'el': {
                 $tag = (string)($node['tag'] ?? 'div');
@@ -170,7 +170,7 @@ final class RenderSsr
             }
             case 'html': {
                 $v = $this->evalExpr($node['value'] ?? null, $ctx);
-                $markup = $v == null ? '' : (string)$v;
+                $markup = $this->toClientText($v);
                 return $this->comment('html:start') . $markup . $this->comment('html:end');
             }
             case 'link': {
@@ -313,7 +313,7 @@ final class RenderSsr
                 $out = '';
                 foreach ($parts as $p) {
                     $v = $this->evalExpr($p, $ctx);
-                    $out .= $v == null ? '' : (string)$v;
+                    $out .= $this->toClientText($v);
                 }
                 return $out;
             }
@@ -547,4 +547,13 @@ final class RenderSsr
         }
         return $cur;
     }
+
+    private function toClientText(mixed $v): string 
+    {
+        if ($v === null) return '';
+        if ($v === true) return 'true';
+        if ($v === false) return 'false';
+        return (string)$v;
+    }
+
 }

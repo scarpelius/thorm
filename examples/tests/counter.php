@@ -51,7 +51,7 @@ if(!is_dir($path)) { mkdir($path); }
 
 $renderer = new Renderer();
 $res = $renderer->renderPage($app, [
-    'title'         => 'Bid',
+    'title'         => 'Counter',
     'containerId'   => 'app',
     'template'      => __DIR__.'/thorm/assets/index.tpl.html',
 ]);

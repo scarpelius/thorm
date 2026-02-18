@@ -8,51 +8,59 @@ use JsonSerializable;
 use Thorm\IR\AtomCollectable;
 
 /**
- * A FragmentNode is an IR (intermediate representation) node that represents
- * a **logical container** for multiple child nodes **without producing
- * an actual DOM element wrapper** in the output. Instead, its children
- * are rendered in sequence in the parent DOM position.
+ * IR node for grouping children without creating a wrapper element.
  *
- * Usage:
- *   fragment([$child1, $child2, …])
+ * Fragment nodes are transparent at the DOM level and only serve as a
+ * structural container in the IR tree.
  *
- * IR shape (jsonSerialize):
- *   {
- *     "k": "fragment",
- *     "children": [ … child IR nodes … ]
- *   }
- *
- * Behaviors:
- * - Fragments are transparent in the DOM: they do not create their own node.
- * - At runtime, they are mounted via comment anchors (start / end markers).
- * - On updates, the runtime diff algorithm patches their children in place.
- * - On unmount, the runtime disposes of all children and cleans up markers.
+ * @group IR/Node
+ * @example
+ * $node = new FragmentNode([
+ *     new TextNode('A'),
+ *     new TextNode('B'),
+ * ]);
  */
 final class FragmentNode extends Node implements JsonSerializable, AtomCollectable
 {
-    /** @param Node[] $children */
-    public function __construct(public array $children) 
+    /**
+     * Build a fragment IR node.
+     *
+     * @param array<int, Node> $children Child nodes rendered in sequence.
+     */
+    public function __construct(public array $children)
     {
-        foreach($children as $child) {
-            if( !($child instanceof Node) ) {
+        foreach ($children as $child) {
+            if (!($child instanceof Node)) {
                 throw new InvalidArgumentException(
-                    "FragmentNode children must be Node instance, got "  . get_debug_type($child)
+                    'FragmentNode children must be Node instance, got ' . get_debug_type($child)
                 );
             }
         }
     }
 
+    /**
+     * Collect atom dependencies from child nodes.
+     *
+     * @param callable $collect Collector callback that receives dependency nodes.
+     * @return void
+     */
     public function collectAtoms(callable $collect): void
     {
-        // children
-        foreach ($this->children as $c) $collect($c);
+        foreach ($this->children as $c) {
+            $collect($c);
+        }
     }
 
-    public function jsonSerialize(): mixed 
+    /**
+     * Encode this fragment node as runtime IR payload.
+     *
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): mixed
     {
         return [
-            'k'         => 'fragment',
-            'children'  => $this->children,
+            'k' => 'fragment',
+            'children' => $this->children,
         ];
     }
 }

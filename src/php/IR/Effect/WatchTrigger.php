@@ -5,7 +5,22 @@ namespace Thorm\IR\Effect;
 use InvalidArgumentException;
 use Thorm\IR\Expr\Expr;
 
+/**
+ * Effect trigger for expression dependency changes.
+ *
+ * @group IR/Effect
+ * @example
+ * $trigger = new WatchTrigger(Expr::read($count), true, 100, null);
+ */
 final class WatchTrigger implements EffectTrigger {
+    /**
+     * Build a watch trigger.
+     *
+     * @param Expr $expr Expression to observe.
+     * @param bool $immediate Run once immediately when mounted.
+     * @param int|Expr|null $debounceMs Optional debounce delay.
+     * @param int|Expr|null $throttleMs Optional throttle delay.
+     */
     public function __construct(
         public readonly Expr $expr,
         public readonly bool $immediate = false,
@@ -14,7 +29,19 @@ final class WatchTrigger implements EffectTrigger {
     ) {
         $this->validate();
     }
+
+    /**
+     * Return trigger discriminator.
+     *
+     * @return string
+     */
     public function type(): string { return 'watch'; }
+
+    /**
+     * Encode this trigger as runtime IR payload.
+     *
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array {
         $out = ['type'=>'watch','expr'=>$this->expr->jsonSerialize(),'immediate'=>$this->immediate];
         if ($this->debounceMs !== null) $out['debounceMs'] = $this->debounceMs;
@@ -22,6 +49,11 @@ final class WatchTrigger implements EffectTrigger {
         return $out;
     }
 
+    /**
+     * Validate timing options.
+     *
+     * @return void
+     */
     private function validate() {
         if ( !$this->debounceMs instanceof Expr
             && $this->debounceMs !== null 

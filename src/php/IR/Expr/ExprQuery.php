@@ -4,18 +4,30 @@ declare(strict_types=1);
 namespace Thorm\IR\Expr;
 
 /**
- * ExprQuery
+ * IR expression for URL query parameters.
  *
- * Expression node that reads a value from the current URL query string.
- * Example: for "/search?q=chair", query('q') → "chair".
+ * Reads values from the current route query map.
  *
- * Evaluated via evaluate(..., ctx) → (ctx.route.query[name] ?? null).
- * Not reactive by itself; route changes remount the subtree so expressions re-evaluate.
+ * @group IR/Expr
+ * @example
+ * $expr = new ExprQuery('q');
  */
-final class ExprQuery extends Expr implements \JsonSerializable {
+final class ExprQuery extends Expr implements \JsonSerializable
+{
+    /**
+     * Build a query-param expression.
+     *
+     * @param string $name Query key.
+     */
     public function __construct(public string $name) {}
-    
-    public function jsonSerialize(): mixed {
+
+    /**
+     * Encode this query-param expression as runtime IR payload.
+     *
+     * @return array<string, string>
+     */
+    public function jsonSerialize(): mixed
+    {
         return ['k' => 'query', 'name' => $this->name];
     }
 }

@@ -4,12 +4,17 @@ declare(strict_types=1);
 namespace Thorm\IR\Node;
 
 /**
- * RouteNode
+ * IR node for route matching and view selection.
  *
- * Top-level switch that mounts exactly one view based on location.pathname.
- * - Compiles authoring table ['/path/:param' => Node] into [{pat,re,keys}] once in PHP.
- * - Provides ctx.route = { path, params, query } to the matched subtree.
- * - Disposes previous view scope on route change to avoid leaks.
+ * Compiles path patterns to regex once on the PHP side and serializes route
+ * table metadata for runtime navigation.
+ *
+ * @group IR/Node
+ * @example
+ * $node = new RouteNode(
+ *     ['/docs' => new TextNode('Docs')],
+ *     new TextNode('Not found')
+ * );
  */
 final class RouteNode extends Node implements \JsonSerializable {
      /** 
@@ -58,7 +63,7 @@ final class RouteNode extends Node implements \JsonSerializable {
         return [$re, $keys];
     }
 
-     /**
+    /**
      * @return array{
      *   k: 'route',
      *   base: string,
@@ -68,7 +73,8 @@ final class RouteNode extends Node implements \JsonSerializable {
      * }
      * IR shape consumed by runtime router (one outlet, popstate listener, pushState updates).
      */
-    public function jsonSerialize(): mixed {
+    public function jsonSerialize(): mixed
+    {
         // Preserve author order between compiled table and views
         $views = array_values($this->table);
 

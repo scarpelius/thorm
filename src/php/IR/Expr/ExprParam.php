@@ -4,18 +4,30 @@ declare(strict_types=1);
 namespace Thorm\IR\Expr;
 
 /**
- * ExprParam
+ * IR expression for route path parameters.
  *
- * Expression node that reads a value from the current route's path params
- * (e.g., for "/auction/:id", param('id') yields the matched "id").
+ * Reads values from the current route parameter map.
  *
- * Evaluated via evaluate(..., ctx) → (ctx.route.params[name] ?? null).
- * Not reactive by itself; route changes remount the subtree so expressions re-evaluate.
+ * @group IR/Expr
+ * @example
+ * $expr = new ExprParam('id');
  */
-final class ExprParam extends Expr implements \JsonSerializable {
+final class ExprParam extends Expr implements \JsonSerializable
+{
+    /**
+     * Build a route-param expression.
+     *
+     * @param string $name Parameter name.
+     */
     public function __construct(public string $name) {}
-    
-    public function jsonSerialize(): mixed {
+
+    /**
+     * Encode this route-param expression as runtime IR payload.
+     *
+     * @return array<string, string>
+     */
+    public function jsonSerialize(): mixed
+    {
         return ['k' => 'param', 'name' => $this->name];
     }
 }

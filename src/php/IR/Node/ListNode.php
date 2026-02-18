@@ -1,25 +1,46 @@
-<?php 
+<?php
+declare(strict_types=1);
+
 namespace Thorm\IR\Node;
 
 use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
 
 /**
- * LinkNode
+ * IR node for list/repeat rendering.
  *
- * Declarative client-side navigation link (renders an <a>).
- * - Computes href from an Expr|string.
- * - Intercepts same-origin clicks (no modifiers) → pushState + reroute.
- * - Passes through props like attrs/cls/on and nests children as content.
+ * Repeats a template node for each item in an items expression with a key
+ * expression used for stable identity.
+ *
+ * @group IR/Node
+ * @example
+ * $node = new ListNode(
+ *     Expr::read($items),
+ *     Expr::val('id'),
+ *     new TextNode('Item')
+ * );
  */
 final class ListNode extends Node implements AtomCollectable
 {
+    /**
+     * Build a list/repeat IR node.
+     *
+     * @param Expr $items Items expression.
+     * @param Expr $key Key expression for each item.
+     * @param Node $template Template node rendered per item.
+     */
     public function __construct(
         public Expr $items,
         public Expr $key,
         public Node $template
     ) {}
 
+    /**
+     * Collect atom dependencies used by items, key, and template.
+     *
+     * @param callable $collect Collector callback that receives dependency nodes.
+     * @return void
+     */
     public function collectAtoms(callable $collect): void
     {
         $collect($this->items);
@@ -27,12 +48,18 @@ final class ListNode extends Node implements AtomCollectable
         $collect($this->template);
     }
 
-    public function jsonSerialize(): mixed {
+    /**
+     * Encode this list node as runtime IR payload.
+     *
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): mixed
+    {
         return [
-            'k'    => 'repeat',
-            'items'=> $this->items,
-            'key'  => $this->key,
-            'tpl'  => $this->template,
+            'k' => 'repeat',
+            'items' => $this->items,
+            'key' => $this->key,
+            'tpl' => $this->template,
         ];
     }
 }

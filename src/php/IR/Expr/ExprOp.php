@@ -5,6 +5,15 @@ namespace Thorm\IR\Expr;
 
 use Thorm\IR\AtomCollectable;
 
+/**
+ * IR expression for generic operations.
+ *
+ * Stores operation name and up to three operands.
+ *
+ * @group IR/Expr
+ * @example
+ * $expr = new ExprOp('add', Expr::val(1), Expr::val(2));
+ */
 final class ExprOp extends Expr implements AtomCollectable
 {
     public string $name;
@@ -15,6 +24,12 @@ final class ExprOp extends Expr implements AtomCollectable
     /** @var Expr[] */
     public array $args = []; // keep if others still use it
 
+    /**
+     * Build an operation expression.
+     *
+     * @param string $name Operation name.
+     * @param Expr ...$args Operation operands.
+     */
     public function __construct(string $name, ...$args)
     {
         $this->name = $name;
@@ -24,6 +39,12 @@ final class ExprOp extends Expr implements AtomCollectable
         if (isset($args[2])) $this->c = $args[2];
     }
 
+    /**
+     * Collect atom dependencies from all operands.
+     *
+     * @param callable $collect Collector callback.
+     * @return void
+     */
     public function collectAtoms(callable $collect): void
     {
         $collect($this->a);
@@ -31,6 +52,11 @@ final class ExprOp extends Expr implements AtomCollectable
         $collect($this->c);
     }
 
+    /**
+     * Encode this operation expression as runtime IR payload.
+     *
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         //if ($this->a === 'get') {

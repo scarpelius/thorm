@@ -8,11 +8,28 @@ use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
 
 /**
- * @param array<string, mixed> $props
- * @param array<int, Node> $children
+ * IR node for a standard HTML element.
+ *
+ * Stores element tag, normalized props helpers, child nodes, and optional
+ * render target metadata.
+ *
+ * @group IR/Node
+ * @example
+ * $node = new ElNode(
+ *     'button',
+ *     [['attrs', ['type' => 'button']], ['cls', 'btn btn-primary']],
+ *     [new TextNode('Save')]
+ * );
  */
 final class ElNode extends Node implements \JsonSerializable, AtomCollectable {
-    /** @param array<int, Node> $children */
+    /**
+     * Build an element IR node.
+     *
+     * @param string $tag Element tag name.
+     * @param array<string, mixed> $props Props helper payload.
+     * @param array<int, Node> $children Child IR nodes.
+     * @param array<string, string>|null $render Optional render metadata.
+     */
     public function __construct(
         public string $tag,
         public array $props = [],
@@ -20,6 +37,12 @@ final class ElNode extends Node implements \JsonSerializable, AtomCollectable {
         public ?array $render = null
     ) {}
 
+    /**
+     * Collect atom-related dependencies referenced by this node.
+     *
+     * @param callable $collect Collector callback that receives dependency nodes.
+     * @return void
+     */
     public function collectAtoms(callable $collect): void
     {
         // children
@@ -40,11 +63,16 @@ final class ElNode extends Node implements \JsonSerializable, AtomCollectable {
                     if (($p[1] ?? null) instanceof Expr) $collect($p[1]);
                 } elseif ($p[0] === 'on') {
                     if (isset($p[2]) && $p[2] instanceof Listener) $collect($p[2]);
-                } 
+                }
             }
         }
     }
 
+    /**
+     * Encode this node as runtime IR payload.
+     *
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): mixed {
         $props = ['attrs'=>[], 'cls'=>null, 'style'=>[], 'on'=>[]];
         foreach ($this->props as $k => $v) {
@@ -56,12 +84,12 @@ final class ElNode extends Node implements \JsonSerializable, AtomCollectable {
                 $props['style'] = $v[1];
             }
         }
-        // Allow props as a list of helper arrays, e.g., [attrs([...]), cls(...), on(...), on(...)]
+        // Allow props as a list of helper arrays, e.g., [attrs([...]), cls(...), on(...), on(...)].
         foreach ($this->props as $item) {
             if (is_array($item) && isset($item[0])) {
                 if ($item[0] === 'attrs')
                     $props['attrs'] = array_replace($props['attrs'] ?? [], (array)$item[1]);
-                elseif ($item[0] === 'cls') 
+                elseif ($item[0] === 'cls')
                     $props['cls'] = $item[1];
                 elseif ($item[0] === 'style'){
                     if($item[1] instanceof Expr) {
@@ -86,7 +114,12 @@ final class ElNode extends Node implements \JsonSerializable, AtomCollectable {
         return $out;
     }
 
-    /** @param array<string, mixed> $props */
+    /**
+     * Normalize props into the runtime wire format.
+     *
+     * @param array<string, mixed> $props
+     * @return array<string, mixed>
+     */
     private function encodeProps(array $props): array {
         $enc = ['attrs'=>[], 'style'=>[], 'on'=>[]];
         foreach ($props['attrs'] ?? [] as $name => $val) {

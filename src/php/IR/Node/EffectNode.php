@@ -10,9 +10,28 @@ use Thorm\IR\Action\Action;
 use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
 
+/**
+ * IR node for declarative effects.
+ *
+ * Binds one or more triggers to one or more runtime actions, optionally
+ * scoped to a specific effect target.
+ *
+ * @group IR/Node
+ * @example
+ * $node = new EffectNode(
+ *     [$trigger],
+ *     [$action]
+ * );
+ */
 final class EffectNode extends Node implements \JsonSerializable, AtomCollectable
 {
-    /** @param EffectTrigger[] $triggers @param Action[] $actions */
+    /**
+     * Build an effect IR node.
+     *
+     * @param array<int, EffectTrigger> $triggers Effect trigger list.
+     * @param array<int, Action> $actions Effect action list.
+     * @param EffectTarget|null $target Optional effect target.
+     */
     public function __construct(
         public readonly array $triggers,
         public readonly array $actions,
@@ -36,6 +55,12 @@ final class EffectNode extends Node implements \JsonSerializable, AtomCollectabl
         }
     }
 
+    /**
+     * Collect atom dependencies referenced by actions and watch triggers.
+     *
+     * @param callable $collect Collector callback that receives dependency nodes.
+     * @return void
+     */
     public function collectAtoms(callable $collect): void
     {
         foreach ($this->actions as $a) $collect($a);
@@ -47,6 +72,11 @@ final class EffectNode extends Node implements \JsonSerializable, AtomCollectabl
         }
     }
 
+    /**
+     * Encode this effect node as runtime IR payload.
+     *
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         $out = [

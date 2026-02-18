@@ -8,24 +8,31 @@ use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
 
 /**
- * ComponentNode represents a reusable IR subtree instantiated with its own
- * set of props and (optionally) slot children.
+ * IR node for mounting a component template with props and slots.
  *
- * JSON shape:
- * {
- *   "k": "component",
- *   "template": { ... Node ... },
- *   "props": { "propName": Expr, ... },
- *   "slots": [ ... Node ... ]
- *   "key": [ ... Expr ... ]
- * }
+ * The template node is reused as the component body, while props and slots
+ * are passed as runtime inputs for each component instance.
+ *
+ * @group IR/Node
+ * @example
+ * $node = new ComponentNode(
+ *     $cardTemplate,
+ *     ['title' => Expr::val('Docs')],
+ *     ['default' => [new TextNode('Body')]]
+ * );
  */
 final class ComponentNode extends Node implements AtomCollectable
 {
-    /** @param Node[] $children */
+    /**
+     * Build a component IR node.
+     *
+     * @param Node $template Component template node.
+     * @param array<string, Expr> $props Component prop expressions.
+     * @param array<string, array<int, Node>> $slots Slot content keyed by slot name.
+     * @param Expr|null $key Optional stable key expression.
+     */
     public function __construct(
         public readonly Node $template,
-        /** @var array<string, Expr> */
         public readonly array $props = [],
         public readonly array $slots = [],
         public readonly ?Expr $key = null,
@@ -55,6 +62,12 @@ final class ComponentNode extends Node implements AtomCollectable
         }
     }
 
+    /**
+     * Collect atom-related dependencies used by template, props, slots, and key.
+     *
+     * @param callable $collect Collector callback that receives dependency nodes.
+     * @return void
+     */
     public function collectAtoms(callable $collect): void
     {
         $collect($this->template);
@@ -63,6 +76,11 @@ final class ComponentNode extends Node implements AtomCollectable
         if ($this->key) $collect($this->key);
     }
 
+    /**
+     * Encode this component node as runtime IR payload.
+     *
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): mixed
     {
         $out = [
@@ -76,12 +94,25 @@ final class ComponentNode extends Node implements AtomCollectable
         return $out;
     }
 
+    /**
+     * Return a cloned component node with one prop updated.
+     *
+     * @param string $name Prop name.
+     * @param Expr $expr Prop expression.
+     * @return self
+     */
     public function withProp(string $name, Expr $expr): self {
         $clone = clone $this;
         $clone->props[$name] = $expr;
         return $clone;
     }
 
+    /**
+     * Return a cloned component node with slot children replaced.
+     *
+     * @param Node ...$slots Slot node list.
+     * @return self
+     */
     public function withSlots(Node ...$slots): self {
         $clone = clone $this;
         $clone->slots = $slots;

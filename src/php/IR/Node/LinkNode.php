@@ -5,15 +5,39 @@ namespace Thorm\IR\Node;
 
 use Thorm\IR\Expr\Expr;
 
+/**
+ * IR node for declarative navigation links.
+ *
+ * Encodes destination expression, link props, and child nodes for runtime
+ * navigation handling.
+ *
+ * @group IR/Node
+ * @example
+ * $node = new LinkNode(
+ *     Expr::val('/docs'),
+ *     [['cls', 'link-light']],
+ *     [new TextNode('Docs')]
+ * );
+ */
 final class LinkNode extends Node implements \JsonSerializable {
-    /** @param array<int, mixed> $props  same shape as ElNode props: ['attrs', map], ['cls', expr], ... */
-    /** @param array<int, Node> $children */
+    /**
+     * Build a link IR node.
+     *
+     * @param Expr $to Destination expression.
+     * @param array<int, mixed> $props Link props helper payload.
+     * @param array<int, Node> $children Child IR nodes.
+     */
     public function __construct(
         public Expr $to,
         public array $props = [],
         public array $children = [],
     ) {}
 
+    /**
+     * Encode this link node as runtime IR payload.
+     *
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): mixed {
         // Normalize props to match ElNode semantics: 'cls' must be an Expr.
         $normProps = [];

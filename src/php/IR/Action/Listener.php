@@ -10,14 +10,34 @@ use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
 use Thorm\IR\Expr\ExprVal;
 
+/**
+ * Legacy listener action wrapper used by props/event helpers.
+ *
+ * @group IR/Action
+ * @example
+ * $listener = Listener::inc($countAtom, 1);
+ */
 final class Listener implements \JsonSerializable, AtomCollectable
 {
+    /**
+     * Build a listener instance.
+     *
+     * @param string $kind Listener kind discriminator.
+     * @param Atom|null $atom Target atom.
+     * @param mixed $payload Listener payload.
+     */
     private function __construct(
         public string $kind,
         public ?Atom $atom = null,
         public mixed $payload = null
     ) {}
 
+    /**
+     * Collect atom dependencies referenced by this listener.
+     *
+     * @param callable $collect Collector callback.
+     * @return void
+     */
     public function collectAtoms(callable $collect): void
     {
         $collect($this->atom);
@@ -27,29 +47,66 @@ final class Listener implements \JsonSerializable, AtomCollectable
         }
     }
     
+    /**
+     * Return listener discriminator.
+     *
+     * @return string
+     */
     public function kind(): string
     {
         return $this->kind;
     }
     
+    /**
+     * Create an increment listener.
+     *
+     * @param Atom $atom Target atom.
+     * @param int|float $by Increment delta.
+     * @return self
+     */
     public static function inc(Atom $atom, int|float $by): self {
         return new self('inc', $atom, $by);
     }
 
-    /** @param Expr|int|float|string|bool $to */
+    /**
+     * Create a set listener.
+     *
+     * @param Atom $atom Target atom.
+     * @param Expr|int|float|string|bool $to Target value.
+     * @return self
+     */
     public static function set(Atom $atom, Expr|int|float|string|bool $to): self {
         $expr = $to instanceof Expr ? $to : new ExprVal($to);
         return new self('set', $atom, $expr);
     }
 
+    /**
+     * Create an add expression based on current atom value.
+     *
+     * @param Atom $atom Target atom.
+     * @param Expr $by Addend expression.
+     * @return Expr
+     */
     public static function add(Atom $atom, Expr $by): Expr {
         return Expr::op('add', Expr::read($atom), $by); // payload is Expr
     }
 
+    /**
+     * Normalize scalar/expr inputs to Expr.
+     *
+     * @param mixed $x Input value.
+     * @return Expr
+     */
     private static function expr(mixed $x): Expr {
         return $x instanceof Expr ? $x : Expr::val($x);
     }
 
+    /**
+     * Create an HTTP listener payload.
+     *
+     * @param array<string, mixed> $opts HTTP options.
+     * @return self
+     */
     public static function http(array $opts): self {
         if (!isset($opts['url'])) {
             throw new \InvalidArgumentException("http(): 'url' is required");
@@ -105,11 +162,21 @@ final class Listener implements \JsonSerializable, AtomCollectable
         return $a;
     }
 
+    /**
+     * Encode this listener as runtime IR payload.
+     *
+     * @return mixed
+     */
     public function jsonSerialize(): mixed {
          $this->validate();
          return $this->toArray();
     }
 
+    /**
+     * Convert listener to normalized array payload.
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return match ($this->kind) {
@@ -122,6 +189,11 @@ final class Listener implements \JsonSerializable, AtomCollectable
         };
     }
 
+    /**
+     * Validate listener state.
+     *
+     * @return void
+     */
     public function validate(): void
     {
         if ($this->kind === '') {

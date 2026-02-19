@@ -6,12 +6,20 @@ namespace Thorm\IR\Action;
 use InvalidArgumentException;
 
 /**
- * Delay an action by a give interval
- * @param int $ms, miliseconds
- * @param Action[] $actions
+ * Action that delays one or more actions by a fixed interval.
+ *
+ * @group IR/Action
+ * @example
+ * $action = new DelayAction(300, [new IncAction(1, 1)]);
  */
 final class DelayAction implements Action
 {
+    /**
+     * Build a delay action.
+     *
+     * @param int $ms Delay in milliseconds.
+     * @param array<int, Action> $actions Actions to execute after delay.
+     */
     public function __construct(
         public readonly int $ms,    
         public readonly mixed $actions
@@ -26,8 +34,18 @@ final class DelayAction implements Action
         }
     }
 
+    /**
+     * Return action discriminator.
+     *
+     * @return string
+     */
     public function kind(): string { return 'delay'; }
 
+    /**
+     * Encode this action as runtime IR payload.
+     *
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return [

@@ -12,9 +12,21 @@ use Thorm\IR\Expr\Expr;
  *
  * JSON (IR):
  *   { k: 'cap', name: 'Date.getFullYear', args?: any, to?: atomId, error?: atomId }
+ *
+ * @group IR/Action
+ * @example
+ * $action = new RuntimeAction('Caps.CopyToClipboard', ['hello']);
  */
 final class RuntimeAction implements Action, AtomCollectable
 {
+    /**
+     * Build a runtime capability action.
+     *
+     * @param string $name Capability name.
+     * @param mixed $args Capability arguments.
+     * @param Atom|int|null $to Target atom for result.
+     * @param Atom|int|null $error Target atom for errors.
+     */
     public function __construct(
         public readonly string $name,
         /** @var mixed|null scalar|array|Expr (arrays may contain Expr) */
@@ -23,8 +35,19 @@ final class RuntimeAction implements Action, AtomCollectable
         public readonly Atom|int|null $error = null,
     ) {}
 
+    /**
+     * Return action discriminator.
+     *
+     * @return string
+     */
     public function kind(): string { return 'cap'; }
 
+    /**
+     * Collect atom dependencies referenced by this action.
+     *
+     * @param callable $collect Collector callback.
+     * @return void
+     */
     public function collectAtoms(callable $collect): void
     {
         if ($this->to instanceof Atom) $collect($this->to);
@@ -43,6 +66,12 @@ final class RuntimeAction implements Action, AtomCollectable
         $walk($this->args);
     }
 
+    /**
+     * Serialize nested arguments recursively.
+     *
+     * @param mixed $v Input value.
+     * @return mixed
+     */
     private static function ser(mixed $v): mixed
     {
         if ($v instanceof \JsonSerializable) return $v->jsonSerialize();
@@ -54,6 +83,11 @@ final class RuntimeAction implements Action, AtomCollectable
         return $v; // scalar|null
     }
 
+    /**
+     * Encode this action as runtime IR payload.
+     *
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         $out = [

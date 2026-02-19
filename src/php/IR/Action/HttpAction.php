@@ -7,8 +7,27 @@ use Thorm\IR\Atom;
 use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
 
+/**
+ * Action that performs an HTTP request.
+ *
+ * @group IR/Action
+ * @example
+ * $action = new HttpAction('/api/ping', 'GET');
+ */
 final class HttpAction implements Action, AtomCollectable
 {
+    /**
+     * Build an HTTP action.
+     *
+     * @param Expr|string $url Request URL.
+     * @param string $method HTTP method.
+     * @param Atom|int|null $to Target atom for response payload.
+     * @param Atom|int|null $status Target atom for HTTP status.
+     * @param array<string, mixed>|null $reqHeaders Request headers.
+     * @param Atom|int|null $resHeaders Target atom for response headers.
+     * @param Expr|int|float|string|bool|array|null $body Request body.
+     * @param string $parse Parse mode.
+     */
     public function __construct(
         public readonly Expr|string $url,
         public readonly string $method = 'GET',
@@ -20,8 +39,19 @@ final class HttpAction implements Action, AtomCollectable
         public readonly string $parse = 'json'
     ) {}
 
+    /**
+     * Return action discriminator.
+     *
+     * @return string
+     */
     public function kind(): string { return 'http'; }
 
+    /**
+     * Collect atom dependencies referenced by this action.
+     *
+     * @param callable $collect Collector callback.
+     * @return void
+     */
     public function collectAtoms(callable $collect): void
     {
         if ($this->to instanceof Atom) $collect($this->to);
@@ -38,6 +68,11 @@ final class HttpAction implements Action, AtomCollectable
         }
     }
 
+    /**
+     * Encode this action as runtime IR payload.
+     *
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         $url = $this->url instanceof \JsonSerializable ? $this->url->jsonSerialize() : $this->url;

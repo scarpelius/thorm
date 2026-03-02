@@ -33,7 +33,7 @@ final class HeaderMenu
                 'navbar'        => 'collapse navbar-collapse',
                 'navbar-list'   => 'navbar-nav me-lg-auto mb-2 mb-lg-0',
             ],
-            'brand-image'   => 'images/thorm-builder_64x64.png',
+            'brand-image'   => 'images/thorm-builder_64x64.webp',
             'navbar-list'   => $props['menu'],
             'right-side-actions' => [
                 [

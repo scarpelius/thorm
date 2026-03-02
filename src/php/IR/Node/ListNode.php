@@ -5,6 +5,7 @@ namespace Thorm\IR\Node;
 
 use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
+use Thorm\IR\Renderable;
 
 /**
  * IR node for list/repeat rendering.
@@ -20,7 +21,7 @@ use Thorm\IR\Expr\Expr;
  *     new TextNode('Item')
  * );
  */
-final class ListNode extends Node implements AtomCollectable
+final class ListNode extends Node implements AtomCollectable, Renderable
 {
     /**
      * Build a list/repeat IR node.
@@ -46,6 +47,40 @@ final class ListNode extends Node implements AtomCollectable
         $collect($this->items);
         $collect($this->key);
         $collect($this->template);
+    }
+
+    public function render(callable $renderer): string
+    {
+        $items = $this->evalExpr($this->node['items'] ?? null, $this->ctx);
+        $arr = is_array($items) ? $items : [];
+        $out = $this->comment('repeat:start');
+
+        $tpl = $this->node['tpl'] ?? ($this->node['child'] ?? null);
+        if ($tpl instanceof \JsonSerializable) {
+            $tpl = $tpl->jsonSerialize();
+        }
+        if (!is_array($tpl)) {
+            $tpl = is_array($this->node['children'] ?? null) ? ($this->node['children'][0] ?? null) : null;
+            if ($tpl instanceof \JsonSerializable) {
+                $tpl = $tpl->jsonSerialize();
+            }
+        }
+
+        foreach ($arr as $index => $item) {
+            $rowCtx = $this->ctx;
+            $rowCtx['item'] = $item;
+            $rowCtx['index'] = $index;
+            $keyRaw = $this->evalExpr($this->node['key'] ?? null, $rowCtx);
+            $key = $this->stringifyKey($keyRaw);
+            $out .= $this->comment('repeat:row:' . $key . ':start');
+            if (is_array($tpl)) {
+                $out .= $this->renderNodes([$tpl], $rowCtx);
+            }
+            $out .= $this->comment('repeat:row:' . $key . ':end');
+        }
+
+        $out .= $this->comment('repeat:end');
+        return $out;
     }
 
     /**

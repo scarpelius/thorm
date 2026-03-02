@@ -5,6 +5,7 @@ namespace Thorm\IR\Node;
 
 use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
+use Thorm\IR\Renderable;
 
 /**
  * IR node for text content.
@@ -15,7 +16,7 @@ use Thorm\IR\Expr\Expr;
  * @example
  * $node = new TextNode('Hello');
  */
-final class TextNode extends Node implements AtomCollectable {
+final class TextNode extends Node implements AtomCollectable, Renderable {
     /**
      * Build a text node.
      *
@@ -34,6 +35,12 @@ final class TextNode extends Node implements AtomCollectable {
         if($this->value instanceof Expr) {
             $collect($this->value);
         }
+    }
+
+    public function render(callable $renderer):string
+    {
+        $v = $this->evalExpr($this->node['value'] ?? null, $this->ctx);
+        return $this->escape((string)($v ?? ''));
     }
 
     /**

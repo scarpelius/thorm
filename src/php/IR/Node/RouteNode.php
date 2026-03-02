@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Thorm\IR\Node;
 
+use Thorm\IR\Renderable;
+
 /**
  * IR node for route matching and view selection.
  *
@@ -16,7 +18,7 @@ namespace Thorm\IR\Node;
  *     new TextNode('Not found')
  * );
  */
-final class RouteNode extends Node implements \JsonSerializable {
+final class RouteNode extends Node implements \JsonSerializable, Renderable {
      /** 
      * Precompiled patterns with their capture keys.
      * @var array<int, array{pat:string, re:string, keys:array<int,string>}>
@@ -37,6 +39,15 @@ final class RouteNode extends Node implements \JsonSerializable {
             [$re, $keys] = self::compilePattern($pat);
             $this->tableCompiled[] = ['pat' => $pat, 're' => $re, 'keys' => $keys];
         }
+    }
+
+    public function render(callable $renderer): string
+    {
+        $child = '';
+        if (isset($this->node['fallback']) && is_array($this->node['fallback'])) {
+            $child = $this->renderNodes([$this->node['fallback']], $this->ctx);
+        }
+        return $this->comment('route:start') . $child . $this->comment('route:end');
     }
 
     /**

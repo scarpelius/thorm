@@ -5,6 +5,7 @@ namespace Thorm\IR\Node;
 
 use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
+use Thorm\IR\Renderable;
 
 /**
  * IR node for conditional rendering.
@@ -18,7 +19,7 @@ use Thorm\IR\Expr\Expr;
  *     new TextNode('Visible')
  * );
  */
-final class ShowNode extends Node implements AtomCollectable{
+final class ShowNode extends Node implements AtomCollectable, Renderable {
     /**
      * Build a conditional IR node.
      *
@@ -37,6 +38,25 @@ final class ShowNode extends Node implements AtomCollectable{
     {
         $collect($this->cond);
         $collect($this->child);
+    }
+
+    public function render(callable $renderer): string
+    {
+        $condExpr = $this->node['when'] ?? ($this->node['cond'] ?? null);
+        $visible = (bool)$this->evalExpr($condExpr, $this->ctx);
+        $child = '';
+
+        if ($visible && isset($this->node['child'])) {
+            $childNode = $this->node['child'];
+            if ($childNode instanceof \JsonSerializable) {
+                $childNode = $childNode->jsonSerialize();
+            }
+            if (is_array($childNode)) {
+                $child = $this->renderNodes([$childNode], $this->ctx);
+            }
+        }
+
+        return $this->comment('show:start') . $child . $this->comment('show:end');
     }
 
     /**

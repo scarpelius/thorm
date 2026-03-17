@@ -4,10 +4,8 @@ declare(strict_types=1);
 require __DIR__ . '/../../vendor/autoload.php';
 
 use function Thorm\{
-  el, text, concat, on, inc, set, read, state, cls,eq,
-  fragment, slot, prop, component, repeat, item, cond, val, show,
-  not, effect,
-    html
+    cls, component, concat, cond, div, el, eq, fragment, html, inc, item, on, prop, read,
+    repeat, set, show, slot, state, text, val
 };
 use Thorm\Renderer;
 
@@ -58,7 +56,7 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 \$footerToggle = el('button', [
     on('click', set(
         \$showFooter,
-        // invert boolean via cond() → Expr
+        // invert boolean via cond() -> Expr
         cond(read(\$showFooter), val(false), val(true))
     )),
   cls('btn btn-secondary'),
@@ -83,8 +81,8 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
   \$itemsB
 );
 
-\$content_list = el('ul', [ 
-    cls('list-group') 
+\$content_list = el('ul', [
+    cls('list-group')
 ], [
     repeat(
         \$itemsExpr,
@@ -97,42 +95,32 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 ]);
 
 \$content_empty = fragment([
-    el('div', [ 
-        cls('text-center p-4') 
+    el('div', [
+        cls('text-center p-4')
     ], [
         el('div', [ cls('display-6 mb-2') ], [ text('No items') ]),
         el('p', [ cls('text-muted') ], [ text('Toggle back to show the list.') ])
     ])
 ]);
 
-\$footer_v0 = el('div', [ 
-    cls('d-flex justify-content-between') 
+\$footer_v0 = el('div', [
+    cls('d-flex justify-content-between')
 ], [
-    el('small', [], [ text('Footer v0 — static info') ]),
+    el('small', [], [ text('Footer v0 - static info') ]),
     el('small', [ cls('text-muted') ], [ text('Tip: Try toggling variants.') ]),
 ]);
 
 \$footer_v1 = el('div', [
-    cls('d-flex justify-content-between') 
+    cls('d-flex justify-content-between')
 ], [
-    el('small', [], [ text('Footer v1 — different layout') ]),
+    el('small', [], [ text('Footer v1 - different layout') ]),
     el('span',  [ cls('badge bg-info') ], [ text('LIVE') ]),
 ]);
 
-/*
-
-\$ticks = state(0);
-\$DebugTicker = effect(onMount(inc(\$ticks, val(1)))); // run once
-\$Probe = fragment([
-  text(concat(val('tick='), read(\$ticks))) // you can also increment this in other effects to watch reactivity
-]);
-
-*/
-
 // ---------- UI ----------
 \$app = el('div', [ cls('container') ], [
-    el('h2', [], [ text('Components: live props & slots') ]),
-
+    el('h1', [], [ text('Components: live props & slots') ]),
+    el('p', [], [text('Advanced slot swapping, conditional content, and reactive props.')]),
     // Controls
     el('div', [ cls('my-2 btn-group') ], [
         el('button', [ cls('btn btn-primary'), on('click', inc(\$i, 1)) ], [ text('Title++') ]),
@@ -225,7 +213,7 @@ $toggle = el('button', [
 $footerToggle = el('button', [
     on('click', set(
         $showFooter,
-        // invert boolean via cond() → Expr
+        // invert boolean via cond() -> Expr
         cond(read($showFooter), val(false), val(true))
     )),
   cls('btn btn-secondary'),
@@ -250,8 +238,8 @@ $itemsExpr = cond(
   $itemsB
 );
 
-$content_list = el('ul', [ 
-    cls('list-group') 
+$content_list = el('ul', [
+    cls('list-group')
 ], [
     repeat(
         $itemsExpr,
@@ -264,88 +252,80 @@ $content_list = el('ul', [
 ]);
 
 $content_empty = fragment([
-    el('div', [ 
-        cls('text-center p-4') 
+    el('div', [
+        cls('text-center p-4')
     ], [
         el('div', [ cls('display-6 mb-2') ], [ text('No items') ]),
         el('p', [ cls('text-muted') ], [ text('Toggle back to show the list.') ])
     ])
 ]);
 
-$footer_v0 = el('div', [ 
-    cls('d-flex justify-content-between') 
+$footer_v0 = el('div', [
+    cls('d-flex justify-content-between')
 ], [
-    el('small', [], [ text('Footer v0 — static info') ]),
+    el('small', [], [ text('Footer v0 - static info') ]),
     el('small', [ cls('text-muted') ], [ text('Tip: Try toggling variants.') ]),
 ]);
 
 $footer_v1 = el('div', [
-    cls('d-flex justify-content-between') 
+    cls('d-flex justify-content-between')
 ], [
-    el('small', [], [ text('Footer v1 — different layout') ]),
+    el('small', [], [ text('Footer v1 - different layout') ]),
     el('span',  [ cls('badge bg-info') ], [ text('LIVE') ]),
 ]);
 
-/*
-
-$ticks = state(0);
-$DebugTicker = effect(onMount(inc($ticks, val(1)))); // run once
-$Probe = fragment([
-  text(concat(val('tick='), read($ticks))) // you can also increment this in other effects to watch reactivity
-]);
-
-*/
-
 // ---------- UI ----------
-$app = el('div', [ cls('container') ], [
-    el('h2', [], [ text('Components: live props & slots') ]),
+$app = el('div', [ cls('container my-5') ], [
+    div([ cls('glass p-3 rounded-2') ], [
+        el('h1', [], [ text('Components: live props & slots') ]),
+        el('p', [], [text('Advanced slot swapping, conditional content, and reactive props.')]),
+        // Controls
+        el('div', [ cls('my-2 btn-group') ], [
+            el('button', [ cls('btn btn-primary'), on('click', inc($i, 1)) ], [ text('Title++') ]),
+            el('button', [ cls('btn btn-secondary'), on('click', set($mode, cond(eq(read($mode), val(0)), val(1), val(0)))) ], [ text('Toggle Items A/B') ]),
+            el('button', [ cls('btn btn-outline-warning'), on('click', set($useEmpty, cond(eq(read($useEmpty), val(true)), val(false), val(true)))) ], [ text('Toggle Default Slot: List/Empty') ]),
+            el('button', [ cls('btn btn-outline-info'), on('click', set($footerVar, cond(eq(read($footerVar), val(0)), val(1), val(0)))) ], [ text('Toggle Footer Variant') ]),
+            $toggle,
+            $footerToggle
+        ]),
 
-    // Controls
-    el('div', [ cls('my-2 btn-group') ], [
-        el('button', [ cls('btn btn-primary'), on('click', inc($i, 1)) ], [ text('Title++') ]),
-        el('button', [ cls('btn btn-secondary'), on('click', set($mode, cond(eq(read($mode), val(0)), val(1), val(0)))) ], [ text('Toggle Items A/B') ]),
-        el('button', [ cls('btn btn-outline-warning'), on('click', set($useEmpty, cond(eq(read($useEmpty), val(true)), val(false), val(true)))) ], [ text('Toggle Default Slot: List/Empty') ]),
-        el('button', [ cls('btn btn-outline-info'), on('click', set($footerVar, cond(eq(read($footerVar), val(0)), val(1), val(0)))) ], [ text('Toggle Footer Variant') ]),
-        $toggle,
-        $footerToggle
+        // Live debug line
+        el('p', [ cls('text-muted') ], [
+            text(concat(
+                'i=', read($i),
+                ' | mode=', read($mode),
+                ' | default=', cond(eq(read($useEmpty), val(true)), 'empty', 'list'),
+                ' | footerVar=', read($footerVar)
+            ))
+        ]),
+
+        // Component instance
+        component(
+            $Card,
+            [ 'title' => cond(read($useAlt), $titleExprB, $titleExprA) ],
+            [
+                // -------- Default Slot --------
+                // We *structurally* switch between two different content shapes:
+                // - A <ul> with a repeat() list
+                // - An "empty state" fragment
+                //
+                // Note: show(...) nodes are literal children of the default slot.
+                // They add/remove DOM under the slot when toggled.
+                'default' => [
+                    show(eq(read($useEmpty), val(false)), $content_list),
+                    show(eq(read($useEmpty), val(true)), $content_empty)
+                ],
+
+                // -------- Named Slot: 'footer' --------
+                // Swap content variant 0/1; this demonstrates child changes under a named slot.
+                'footer' => [
+                    show(eq(read($footerVar), val(0)), $footer_v0),
+                    show(eq(read($footerVar), val(1)), $footer_v1),
+                ],
+                'footer2' => [$footerProjected],
+            ]
+        ),
     ]),
-
-    // Live debug line
-    el('p', [ cls('text-muted') ], [
-        text(concat(
-            'i=', read($i),
-            ' | mode=', read($mode),
-            ' | default=', cond(eq(read($useEmpty), val(true)), 'empty', 'list'),
-            ' | footerVar=', read($footerVar)
-        ))
-    ]),
-
-    // Component instance
-    component(
-        $Card,
-        [ 'title' => cond(read($useAlt), $titleExprB, $titleExprA) ],
-        [
-            // -------- Default Slot --------
-            // We *structurally* switch between two different content shapes:
-            // - A <ul> with a repeat() list
-            // - An "empty state" fragment
-            //
-            // Note: show(...) nodes are literal children of the default slot.
-            // They add/remove DOM under the slot when toggled.
-            'default' => [
-                show(eq(read($useEmpty), val(false)), $content_list),
-                show(eq(read($useEmpty), val(true)), $content_empty)
-            ],
-
-            // -------- Named Slot: 'footer' --------
-            // Swap content variant 0/1; this demonstrates child changes under a named slot.
-            'footer' => [
-                show(eq(read($footerVar), val(0)), $footer_v0),
-                show(eq(read($footerVar), val(1)), $footer_v1),
-            ],
-            'footer2' => [$footerProjected],
-        ]
-    ),
     $code
 ]);
 

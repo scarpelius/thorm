@@ -4,9 +4,8 @@ declare(strict_types=1);
 require __DIR__ . '/../../vendor/autoload.php';
 
 use function Thorm\{
-  el, text, concat, on, inc, set, read, state, cls,eq,
-  fragment, slot, prop, component, cond, val, style, attrs,
-  html
+  attrs, cls, component, concat, cond, div, el, eq, fragment, html, inc, on, prop, read,
+  set, slot, state, style, text, val
 };
 use Thorm\Renderer;
 
@@ -23,11 +22,11 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
  * Component template (Card)
  * - Applies class from prop('class') as string
  * - Applies style from prop('style') as map (shallow diff expected in runtime)
- * - Shows label text to verify prop→text flow
+ * - Shows label text to verify prop->text flow
  */
 \$CardTpl = fragment([
-    el('div', [ 
-        cls(prop('class')), 
+    el('div', [
+        cls(prop('class')),
         style(prop('style')),
         attrs(['id' => 'card']),
     ], [
@@ -55,7 +54,7 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 ], [
     // default slot content
     'default' => [
-        el('div', [ cls('row') ], [ 
+        el('div', [ cls('row') ], [
             el('p',[cls('my-1')], [text('From the forest the fairies were heard, stepping on leaves of moonlight.')]),
             el('p',[cls('my-1')], [text('The water grew afraid and turned into many mirrors, so it could look back.')]),
             el('p',[cls('my-1')], [text('An old shepherd, with a wire staff and a heavy heart, said he had seen them -- not with his eyes, but with fear.')]),
@@ -67,8 +66,8 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 
 // ---------- UI ----------
 \$app = el('div', [ cls('container py-3') ], [
-    el('h2', [], [ text('Components: class (string) + style (map) — live updates') ]),
-
+    el('h1', [], [ text('Components: class (string) + style (map) - live updates') ]),
+    el('p', [], [text('Reactively update class strings and style maps on components.')]),
     // Controls
     el('div', [ cls('my-3 btn-group') ], [
         el('button', [ cls('btn btn-primary'), on('click', inc(\$i, 1)) ], [ text('Label++') ]),
@@ -90,11 +89,11 @@ $isPrimary= state(false);       // drives class string: adds/removes "card-prima
  * Component template (Card)
  * - Applies class from prop('class') as string
  * - Applies style from prop('style') as map (shallow diff expected in runtime)
- * - Shows label text to verify prop→text flow
+ * - Shows label text to verify prop->text flow
  */
 $CardTpl = fragment([
-    el('div', [ 
-        cls(prop('class')), 
+    el('div', [
+        cls(prop('class')),
         style(prop('style')),
         attrs(['id' => 'card']),
     ], [
@@ -107,22 +106,19 @@ $CardTpl = fragment([
 
 $card = component($CardTpl, [
     'label' => concat('Card #', read($i)),
-    'class' => cond(         // STRING usage
+    'class' => cond(
         eq(read($isPrimary), val(true)),
         'card bg-warning',
         'card'
     ),
-    'style' => cond(           // MAP usage
+    'style' => cond(
         eq(read($isHeavy), val(true)),
-        // heavy
         val(['color' => 'tomato', 'fontWeight' => 700]),
-        // light
         val(['color' => 'black', 'fontWeight' => 400])
     ),
 ], [
-    // default slot content
     'default' => [
-        el('div', [ cls('row') ], [ 
+        el('div', [ cls('row') ], [
             el('p',[cls('my-1')], [text('From the forest the fairies were heard, stepping on leaves of moonlight.')]),
             el('p',[cls('my-1')], [text('The water grew afraid and turned into many mirrors, so it could look back.')]),
             el('p',[cls('my-1')], [text('An old shepherd, with a wire staff and a heavy heart, said he had seen them -- not with his eyes, but with fear.')]),
@@ -131,20 +127,21 @@ $card = component($CardTpl, [
     ],
 ]);
 
-
 // ---------- UI ----------
-$app = el('div', [ cls('container py-3') ], [
-    el('h2', [], [ text('Components: class (string) + style (map) — live updates') ]),
+$app = el('div', [ cls('container my-5') ], [
+    div([ cls('glass p-3 rounded-2') ], [
+        el('h1', [], [ text('Components: class (string) + style (map) - live updates') ]),
+        el('p', [], [text('Reactively update class strings and style maps on components.')]),
+        // Controls
+        el('div', [ cls('my-3 btn-group') ], [
+            el('button', [ cls('btn btn-primary'), on('click', inc($i, 1)) ], [ text('Label++') ]),
+            el('button', [ cls('btn btn-warning'), on('click', set($isPrimary, cond(read($isPrimary), val(false), val(true)))) ], [ text('Toggle Warning Class') ]),
+            el('button', [ cls('btn btn-outline-danger'), on('click', set($isHeavy, cond(read($isHeavy), val(false), val(true)))) ], [ text('Toggle Heavy Style') ]),
+        ]),
 
-    // Controls
-    el('div', [ cls('my-3 btn-group') ], [
-        el('button', [ cls('btn btn-primary'), on('click', inc($i, 1)) ], [ text('Label++') ]),
-        el('button', [ cls('btn btn-warning'), on('click', set($isPrimary, cond(read($isPrimary), val(false), val(true)))) ], [ text('Toggle Warning Class') ]),
-        el('button', [ cls('btn btn-outline-danger'), on('click', set($isHeavy, cond(read($isHeavy), val(false), val(true)))) ], [ text('Toggle Heavy Style') ]),
+        // Demo card
+        $card,
     ]),
-
-    // Demo card
-    $card,
     $code,
 ]);
 
@@ -167,5 +164,3 @@ $json_data = file_put_contents($path . 'index.html', $res['tpl']);
 if($html !== false ) { echo green("Wrote html file\n"); } else { echo red("Bad luck, could not write html file.\n"); }
 if($json_data !== false ) { echo green("Wrote JSON data file\n"); } else { echo red("Bad luck, could not write JSON file.\n"); }
 echo "\n";
-
-

@@ -39,7 +39,7 @@ final class HeaderMenu
                 [
                     'style1' => 'btn btn-warning',
                     'style2' => 'btn btn-warning',
-                    'attrs' => ['href' => '/docs/getting-started',],
+                    'attrs' => ['href' => '/get-started',],
                     'text'  => 'Get Started',
                 ],
                 [

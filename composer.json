@@ -9,7 +9,8 @@
       "Hronic\\": "examples/tests/hronic/"
     },
     "files": [
-      "src/php/functions.php"
+      "src/php/functions.php",
+      "src/php/tags.php"
     ]
   },
   "require": {

@@ -19,7 +19,7 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 
 \$item = el('li', [ cls('nav-link') ], [ text(item('name')) ]);
 
-\$app = el('div', [ cls('container') ], [
+\$app = el('div', [ cls('container my-5') ], [
     el('h1', [], [ text('Repeat aka List')]),
     el('ul', [ cls('nav') ], [
         repeat(
@@ -40,14 +40,17 @@ $items = state([
 
 $item = el('li', [ cls('nav-link') ], [ text(item('name')) ]);
 
-$app = el('div', [ cls('container') ], [
-    el('h1', [], [ text('Repeat aka List')]),
-    el('ul', [ cls('nav') ], [
-        repeat(
-            read($items),
-            item('id'),
-            $item
-        ),
+$app = el('div', [ cls('container my-5') ], [
+    el('div', [ cls('glass p-3 rounded-2') ], [
+        el('h1', [], [ text('Repeat aka List')]),
+        el('p', [], [text('Render reactive lists with keyed repeat templates.')]),
+        el('ul', [ cls('nav') ], [
+            repeat(
+                read($items),
+                item('id'),
+                $item
+            ),
+        ]),
     ]),
     $code
 ]);
@@ -75,4 +78,3 @@ $json_data = file_put_contents(
 if($html !== false ) { echo green("Wrote html file\n"); } else { echo red("Bad luck, could not write html file.\n"); }
 if($json_data !== false ) { echo green("Wrote JSON data file\n"); } else { echo red("Bad luck, could not write JSON file.\n"); }
 echo "\n";
-

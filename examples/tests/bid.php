@@ -3,19 +3,22 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use function Thorm\{el, text, concat, val, on, cls, attrs, read, state, http, cond, get, bind, html};
+use function Thorm\{el, text, concat, val, on, cls, attrs, read, state, http, cond, get, bind, button, div, form, h1, html, input, p};
 use Thorm\Renderer;
 use Thorm\RenderSsr;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
 
-$code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(highlight_string("<?php
-\$app = el('div', [
+$code = div([cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(highlight_string("<?php
+\$amount = state(10);
+\$status = state(0);
+\$out = state('');
+
+\$app = div([
     cls('container'),
 ], [
-    el('h1',[], [ text('Bid example') ]),
-    el('form', [
+    form([
         cls('my-5'),
         on('submit', 
             http(
@@ -29,18 +32,18 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
             )
         )
     ], [
-        el('div', [ cls('col col-lg-2')], [
-            el('input', 
+        div([ cls('col col-lg-2')], [
+            input( 
                 [ 
                     cls('form-control shadow col-3'), 
                     attrs(['type'=>'number']), ...bind(\$amount, ['type'=>'number']) 
                 ]
             ),
         ] ),
-        el('button', [ cls('btn btn-primary mt-3') ], [ text('Place bid') ]),
-        el('p', [], [ text(get(read(\$out), 'message')) ]),
+        button([ cls('btn btn-primary mt-3') ], [ text('Place bid') ]),
+        p([], [ text(get(read(\$out), 'message')) ]),
 
-        el('p', [], [
+        p([], [
             text(
                 cond(
                     get(read(\$out), 'ok'),
@@ -57,43 +60,52 @@ $amount = state(10);
 $status = state(0);
 $out = state('');
 
-$app = el('div', [
-    cls('container'),
+$app = div([
+    cls('container my-5'),
 ], [
-    el('h1',[], [ text('Bid example') ]),
-    el('form', [
-        cls('my-5'),
-        on('submit', 
-            http(
-                val('/api/bid/'),
-                'POST',
-                $out,
-                $status,
-                ['Content-Type' => 'application/x-www-form-urlencoded'],
-                concat('amount=', read($amount)),
-                'json'
-            )
-        )
-    ], [
-        el('div', [ cls('col col-lg-2')], [
-            el('input', 
-                [ 
-                    cls('form-control shadow col-3'), 
-                    attrs(['type'=>'number']), ...bind($amount, ['type'=>'number']) 
-                ]
-            ),
-        ] ),
-        el('button', [ cls('btn btn-primary mt-3') ], [ text('Place bid') ]),
-        el('p', [], [ text(get(read($out), 'message')) ]),
-
-        el('p', [], [
-            text(
-                cond(
-                    get(read($out), 'ok'),
-                    'Thanks!',
-                    get(get(read($out), 'error'), 'message')
+    div([], [
+        h1([cls('h1 mb-1')], [
+            text('Bid'),
+        ]),
+        p([cls('text-dark mb-0')], [
+            text('Submit bid amounts over HTTP and render response feedback reactively.'),
+        ]),
+    ]),
+    div([ cls('glass p-3 rounded-2') ], [
+        form([
+            cls('my-5'),
+            on('submit', 
+                http(
+                    val('/api/bid'),
+                    'POST',
+                    $out,
+                    $status,
+                    ['Content-Type' => 'application/x-www-form-urlencoded'],
+                    concat('amount=', read($amount)),
+                    'json'
                 )
             )
+        ], [
+            div([ cls('col col-lg-2')], [
+                input( 
+                    [ 
+                        cls('form-control shadow col-3'), 
+                        attrs(['type'=>'number']), ...bind($amount, ['type'=>'number']) 
+                    ]
+                ),
+            ] ),
+            button([ cls('btn btn-primary mt-3') ], [ text('Place bid') ]),
+            p([], [ text(get(read($out), 'message')) ]),
+
+            p([], [
+                text(
+                    cond(
+                        get(read($out), 'ok'),
+                        'Thanks!',
+                        get(get(read($out), 'error'), 'message')
+                    )
+                )
+            ])
         ])
     ]),
     $code

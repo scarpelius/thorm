@@ -3,37 +3,41 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use function Thorm\{el, text, concat, read, on, cls, state, inc, html};
+use function Thorm\{button, cls, concat, div, h1, html, inc, on, p, read, state, text};
 use Thorm\Renderer;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
 
-$code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(highlight_string("<?php
+$code = div([cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(highlight_string("<?php
 \$count = state(1);
 
-\$app = el('div', [ cls('container') ], [
-    el('h1', [], [ text('Reactive text')]),
-    el('p', [], [ text(concat('Count: ', read(\$count))) ]),
-    el('button',[
+\$app = div([ cls('container') ], [
+    h1([], [ text('Reactive text')]),
+    p([], [ text('A minimal counter demo that updates text live when state changes.') ]),
+    p([], [ text(concat('Count: ', read(\$count))) ]),
+    button([
         on('click', inc(\$count, 1)),
         cls('btn btn-primary')
     ],[ 
         text('Inc') 
-    ])
+    ]),
 ]);
 ", true))]);
 
 $count = state(1);
 
-$app = el('div', [ cls('container') ], [
-    el('h1', [], [ text('Reactive text')]),
-    el('p', [], [ text(concat('Count: ', read($count))) ]),
-    el('button',[
-        on('click', inc($count, 1)),
-        cls('btn btn-primary')
-    ],[ 
-        text('Inc') 
+$app = div([ cls('container my-5') ], [
+    div([cls('glass rounded-2 p-3')], [
+        h1([], [ text('Reactive text')]),
+        p([], [ text('A minimal counter demo that updates text live when state changes.') ]),
+        p([], [ text(concat('Count: ', read($count))) ]),
+        button([
+            on('click', inc($count, 1)),
+            cls('btn btn-primary')
+        ],[
+            text('Inc')
+        ]),
     ]),
     $code
 ]);

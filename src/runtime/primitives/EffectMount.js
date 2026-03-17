@@ -195,7 +195,6 @@ export default class EffectMount {
     }
     // otherwise fall back to nearest element ancestor
     return this._nearestElementAncestor();
-    return selfEl;
   }
 
   _nearestElementAncestor() {

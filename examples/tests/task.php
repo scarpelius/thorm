@@ -19,7 +19,8 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 \$log = state([]);
 
 \$app = el('div', [attrs(['class' => 'container p-3'])], [
-    el('h1', [], [ text('Task action (CSR)') ]),
+    el('h1', [], [ text('Task action') ]),
+    el('p', [], [ text('Queue actions with task, delay, and log updates.') ]),
     el('p', [], [ text(concat('Status: ', read(\$status))) ]),
     el('p', [], [ text(concat('Count: ', read(\$count))) ]),
     el('button', [
@@ -51,31 +52,34 @@ $count = state(0);
 $status = state('idle');
 $log = state([]);
 
-$app = el('div', [attrs(['class' => 'container p-3'])], [
-    el('h1', [], [ text('Task action (CSR)') ]),
-    el('p', [], [ text(concat('Status: ', read($status))) ]),
-    el('p', [], [ text(concat('Count: ', read($count))) ]),
-    el('button', [
-        cls('btn btn-primary me-2'),
-        on('click', task([
-            set($status, val('starting...'), true),
-            push($log, concat('click #', read($count)), true),
-            delay(300, [
-                set($status, val('incremented'), true),
-            ]),
-            inc($count, 1, true),
-            set($status, val('idle'), true),
-        ]))
-    ], [ text('Run task') ]),
-    el('ul', [cls('mt-3')], [
-        repeat(read($log), item(''), el('li', [], [ text(item('')) ]))
-    ]),
-    onMount([
-        task([
-            set($status, val('mounted'), true),
-            push($log, val('mounted'), true),
-            delay(200, [ set($status, val('idle'), true) ]),
-        ])
+$app = el('div', [attrs(['class' => 'container my-5'])], [
+    el('div', [ cls('glass p-3 rounded-2') ], [
+        el('h1', [], [ text('Task action') ]),
+        el('p', [], [ text('Queue actions with task, delay, and log updates.') ]),
+        el('p', [], [ text(concat('Status: ', read($status))) ]),
+        el('p', [], [ text(concat('Count: ', read($count))) ]),
+        el('button', [
+            cls('btn btn-primary me-2'),
+            on('click', task([
+                set($status, val('starting...'), true),
+                push($log, concat('click #', read($count)), true),
+                delay(300, [
+                    set($status, val('incremented'), true),
+                ]),
+                inc($count, 1, true),
+                set($status, val('idle'), true),
+            ]))
+        ], [ text('Run task') ]),
+        el('ul', [cls('mt-3')], [
+            repeat(read($log), item(''), el('li', [], [ text(item('')) ]))
+        ]),
+        onMount([
+            task([
+                set($status, val('mounted'), true),
+                push($log, val('mounted'), true),
+                delay(200, [ set($status, val('idle'), true) ]),
+            ])
+        ]),
     ]),
     $code
 ]);
@@ -86,7 +90,7 @@ if (!is_dir($path)) { mkdir($path, 0777, true); }
 
 $renderer = new Renderer();
 $res = $renderer->renderPage($app, [
-    'title'       => 'Task action (CSR)',
+    'title'       => 'Task action',
     'containerId' => 'app',
     'template'    => __DIR__ . '/../../assets/index-test.tpl.html',
 ]);

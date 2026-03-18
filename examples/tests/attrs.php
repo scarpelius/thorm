@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use function Thorm\{el, text, concat, style, on, cls, attrs, html, read, state, inc};
-use Thorm\Renderer;
+use function Thorm\{el, text, concat, style, on, cls, attrs, client, html, read, state, inc};
+
+use Thorm\BuildExample;
+use Thorm\Render;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
@@ -25,7 +27,7 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 ", true))]);
 
 $cnt = state(0);
-$app = el('div', [ cls('container') ], [
+$app = client( el('div', [ cls('container') ], [
     el('h2', [], [ text('Reactive attribute demo') ]),
     el('button', [ 
             attrs(['title' => concat('Clicked ', read($cnt), ' times')]), 
@@ -36,27 +38,25 @@ $app = el('div', [ cls('container') ], [
     ),
     el('div', [], [ text(concat('Count: ', read($cnt))) ]),
     $code
-]);
+]));
 
-$test = strtolower(pathinfo(__FILE__, PATHINFO_FILENAME));
-$path = __DIR__.'/../../public/tests/'.$test.'/';
-if(!is_dir($path)) { mkdir($path); }
+$renderer = new Render();
+$res = $renderer->render($app);
 
-$renderer = new Renderer();
-$res = $renderer->renderPage($app, [
-    'title'         => 'Bid',
-    'containerId'   => 'app',
+$build = BuildExample::build([
+    'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
+    'path'          => __DIR__.'/../../public/tests/',
+    'renderer'      => $res,
     'template'      => __DIR__.'/../../assets/index-test.tpl.html',
+    'opts'          => [
+        'title'         => 'Bid',
+        'containerId'   => 'app',
+    ],
 ]);
-// save the bootstrap data
-$html = file_put_contents($path . $res['iruri'], $res['irJson']);
-// save the page
-$json_data = file_put_contents(
-    $path . 'index.html', 
-    $res['tpl']
-);
 
-if($html !== false ) { echo green("Wrote html file\n"); } else { echo red("Bad luck, could not write html file.\n"); }
-if($json_data !== false ) { echo green("Wrote JSON data file\n"); } else { echo red("Bad luck, could not write JSON file.\n"); }
+if($build !== false ) { 
+    echo green("File wrote to disk.\n"); 
+} else { 
+    echo red("Could not write files to disk.\n");
+}
 echo "\n";
-

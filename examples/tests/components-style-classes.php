@@ -6,8 +6,10 @@ require __DIR__ . '/../../vendor/autoload.php';
 use function Thorm\{
   attrs, cls, component, concat, cond, div, el, eq, fragment, html, inc, on, prop, read,
   set, slot, state, style, text, val
+    client,
 };
-use Thorm\Renderer;
+use Thorm\BuildExample;
+use Thorm\Render;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
@@ -145,22 +147,26 @@ $app = el('div', [ cls('container my-5') ], [
     $code,
 ]);
 
-$test = strtolower(pathinfo(__FILE__, PATHINFO_FILENAME));
-$path = __DIR__.'/../../public/tests/'.$test.'/';
-if(!is_dir($path)) { mkdir($path); }
 
-$renderer = new Renderer();
-$res = $renderer->renderPage($app, [
-    'title'         => 'Components: class + style live updates',
-    'containerId'   => 'app',
+$app = client($app);
+
+$renderer = new Render();
+$res = $renderer->render($app);
+
+$build = BuildExample::build([
+    'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
+    'path'          => __DIR__.'/../../public/tests/',
+    'renderer'      => $res,
     'template'      => __DIR__.'/../../assets/index-test.tpl.html',
+    'opts'          => [
+        'title'         => 'Components: class + style live updates',
+        'containerId'   => 'app',
+    ],
 ]);
 
-// save the bootstrap data
-$html = file_put_contents($path . $res['iruri'], $res['irJson']);
-// save the page
-$json_data = file_put_contents($path . 'index.html', $res['tpl']);
-
-if($html !== false ) { echo green("Wrote html file\n"); } else { echo red("Bad luck, could not write html file.\n"); }
-if($json_data !== false ) { echo green("Wrote JSON data file\n"); } else { echo red("Bad luck, could not write JSON file.\n"); }
+if($build !== false ) {
+    echo green("File wrote to disk.\n");
+} else {
+    echo red("Could not write files to disk.\n");
+}
 echo "\n";

@@ -8,8 +8,7 @@ use function Thorm\{
     on, onMount, repeat, item,
     inc, set, delay, task, push, val
 };
-use Thorm\Renderer;
-use Thorm\RenderSsr;
+use Thorm\Render;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
@@ -50,10 +49,8 @@ $test = strtolower(pathinfo(__FILE__, PATHINFO_FILENAME));
 $path = __DIR__ . '/../../public/tests/' . $test . '/';
 if (!is_dir($path)) { mkdir($path, 0777, true); }
 
-$renderer = new Renderer();
-$ssr = new RenderSsr($renderer);
-$ir = $renderer->toIR($app);
-$ssrRes = $ssr->renderIr($ir);
+$renderer = new Render();
+$res = $renderer->render($app);
 
 $title = 'Task action (SSR)';
 $containerId = 'app';
@@ -61,7 +58,7 @@ $templatePath = __DIR__ . '/../../assets/index-test-ssr.tpl.html';
 
 $callerId = md5(__FILE__);
 $iruri = $callerId . '.ir.json';
-$irJson = json_encode($ir, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+$irJson = json_encode($res['ir'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
 $tpl = file_get_contents($templatePath);
 $scope = [
@@ -69,8 +66,8 @@ $scope = [
     'containerId' => htmlspecialchars($containerId, ENT_QUOTES),
     'iruri'       => $iruri,
     'iruri_dir'   => '',
-    'html'        => $ssrRes['html'] ?? '',
-    'stateJson'   => json_encode($ssrRes['state'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+    'html'        => $res['html'] ?? '',
+    'stateJson'   => json_encode($res['state'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
 ];
 $tpl = preg_replace_callback('/{\$(\w+)}/', function($matches) use ($scope) {
     return $scope[$matches[1]] ?? '';

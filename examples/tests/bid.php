@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use function Thorm\{el, text, concat, val, on, cls, attrs, read, state, http, cond, get, bind, button, div, form, h1, html, input, p};
-use Thorm\Renderer;
-use Thorm\RenderSsr;
+use function Thorm\{el, text, concat, val, on, cls, attrs, read, state, http, cond, get, bind, button, div, form, h1, html, input, p, client};
+use Thorm\BuildExample;
+use Thorm\Render;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
@@ -76,7 +76,7 @@ $app = div([
             cls('my-5'),
             on('submit', 
                 http(
-                    val('/api/bid'),
+                    val('/api/bid/'),
                     'POST',
                     $out,
                     $status,
@@ -111,45 +111,25 @@ $app = div([
     $code
 ]);
 
-$test = strtolower(pathinfo(__FILE__, PATHINFO_FILENAME));
-$path = __DIR__.'/../../public/tests/'.$test.'/';
-if(!is_dir($path)) { mkdir($path); }
+$app = client($app);
 
-$renderer = new Renderer();
-$ssr = new RenderSsr($renderer);
-$ir = $renderer->toIR($app);
-$ssrRes = $ssr->renderIr($ir);
+$renderer = new Render();
+$res = $renderer->render($app);
 
-$title = 'Bid';
-$containerId = 'app';
-$templatePath = __DIR__.'/../../assets/index-test-ssr.tpl.html';
+$build = BuildExample::build([
+    'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
+    'path'          => __DIR__.'/../../public/tests/',
+    'renderer'      => $res,
+    'template'      => __DIR__.'/../../assets/index-test.tpl.html',
+    'opts'          => [
+        'title'         => 'Bid',
+        'containerId'   => 'app',
+    ],
+]);
 
-// ensure the unicity of the iruri
-$callerId = md5(__FILE__);
-$iruri = $callerId . '.ir.json';
-$irJson = json_encode($ir, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-
-$tpl = file_get_contents($templatePath);
-$scope = [
-    'title'         => htmlspecialchars($title, ENT_QUOTES),
-    'containerId'   => htmlspecialchars($containerId, ENT_QUOTES),
-    'iruri'         => $iruri,
-    'iruri_dir'     => '',
-    'html'          => $ssrRes['html']??'',
-    'stateJson'     => json_encode($ssrRes['state'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-];
-$tpl = preg_replace_callback('/{\$(\w+)}/', function($matches) use($scope)  {
-    return $scope[$matches[1]] ?? '';
-}, $tpl);
-
-// save the bootstrap data
-$html = file_put_contents($path . $iruri, $irJson);
-// save the page
-$json_data = file_put_contents(
-    $path . 'index.html',
-    $tpl
-);
-
-if($html !== false ) { echo green("Wrote html file\n"); } else { echo red("Bad luck, could not write html file.\n"); }
-if($json_data !== false ) { echo green("Wrote JSON data file\n"); } else { echo red("Bad luck, could not write JSON file.\n"); }
+if($build !== false ) {
+    echo green("File wrote to disk.\n");
+} else {
+    echo red("Could not write files to disk.\n");
+}
 echo "\n";

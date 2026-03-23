@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>boot-basic</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('boot-basic', 'Client boot mounts a simple text node.', async ({ app, step, assertEqual }) => {
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'text',
+          value: { k: 'val', v: 'Hello runtime' },
+        },
+      };
+
+      await step('boot() mounts the text node into the container', async () => {
+        boot(ir, app, { target: THORM_TARGET_CLIENT });
+        assertEqual(app.textContent, 'Hello runtime', 'text node should mount');
+      });
+    });
+  </script>
+</body>
+</html>

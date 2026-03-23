@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thorm Runtime Tests</title>
+  <script type="module">
+    import { createPage } from './assert.js';
+
+    const { app } = createPage('Thorm Runtime Tests', 'Browser-native runtime checks without Node.js.');
+    app.innerHTML = `
+      <ul>
+        <li><a href="./tests/boot-basic.html">boot-basic.html</a></li>
+        <li><a href="./tests/events-inc.html">events-inc.html</a></li>
+        <li><a href="./tests/show-toggle.html">show-toggle.html</a></li>
+        <li><a href="./tests/repeat-reconcile.html">repeat-reconcile.html</a></li>
+        <li><a href="./tests/hydrate-basic.html">hydrate-basic.html</a></li>
+        <li><a href="./tests/route-basic.html">route-basic.html</a></li>
+        <li><a href="./tests/component-props.html">component-props.html</a></li>
+        <li><a href="./tests/component-slots.html">component-slots.html</a></li>
+        <li><a href="./tests/effect-on-mount.html">effect-on-mount.html</a></li>
+        <li><a href="./tests/effect-watch.html">effect-watch.html</a></li>
+        <li><a href="./tests/effect-after.html">effect-after.html</a></li>
+        <li><a href="./tests/effect-every.html">effect-every.html</a></li>
+
+      </ul>
+      <p>Serve <code>public/</code> and open these pages in a browser. Each page renders its own pass/fail summary.</p>
+    `;
+  </script>
+</head>
+<body></body>
+</html>

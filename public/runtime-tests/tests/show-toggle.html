@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>show-toggle</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('show-toggle', 'Conditional nodes should mount and unmount as atom values change.', async ({ app, step, waitMicrotasks, assert, assertEqual }) => {
+      const ir = {
+        atoms: [{ id: 1, initial: true }],
+        root: {
+          k: 'show',
+          when: { k: 'read', atom: 1 },
+          child: {
+            k: 'el',
+            tag: 'strong',
+            props: { attrs: {}, style: {}, on: [] },
+            children: [{ k: 'text', value: { k: 'val', v: 'Visible now' } }],
+          },
+        },
+      };
+
+      const runtime = boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('child starts visible when condition atom is true', async () => {
+        assertEqual(app.querySelector('strong').textContent, 'Visible now', 'strong should be present');
+      });
+
+      await step('setting atom false removes the child subtree', async () => {
+        runtime.core.store.atoms.get(1).v = false;
+        runtime.core.store.notify(1);
+        await waitMicrotasks();
+        assert(!app.querySelector('strong'), 'strong should be removed');
+      });
+
+      await step('setting atom true mounts the child subtree again', async () => {
+        runtime.core.store.atoms.get(1).v = true;
+        runtime.core.store.notify(1);
+        await waitMicrotasks();
+        assertEqual(app.querySelector('strong').textContent, 'Visible now', 'strong should return');
+      });
+    });
+  </script>
+</body>
+</html>

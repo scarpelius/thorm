@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>component-props</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('component-props', 'Component runtime should evaluate prop expressions and update when atom-backed props change.', async ({ app, step, waitMicrotasks, assertEqual }) => {
+      const ir = {
+        atoms: [{ id: 1, initial: 'Welcome' }],
+        root: {
+          k: 'component',
+          props: {
+            title: { k: 'read', atom: 1 },
+            body: { k: 'val', v: 'Rendered from runtime props' },
+          },
+          tpl: {
+            k: 'el',
+            tag: 'section',
+            props: { attrs: {}, style: {}, on: [] },
+            children: [
+              {
+                k: 'el',
+                tag: 'h2',
+                props: { attrs: {}, style: {}, on: [] },
+                children: [{ k: 'text', value: { k: 'prop', name: 'title' } }],
+              },
+              {
+                k: 'el',
+                tag: 'p',
+                props: { attrs: {}, style: {}, on: [] },
+                children: [{ k: 'text', value: { k: 'prop', name: 'body' } }],
+              },
+            ],
+          },
+        },
+      };
+
+      const runtime = boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('component renders its initial prop values', async () => {
+        assertEqual(app.querySelector('h2').textContent, 'Welcome', 'title prop should render');
+        assertEqual(app.querySelector('p').textContent, 'Rendered from runtime props', 'body prop should render');
+      });
+
+      await step('changing the backing atom updates the rendered prop value', async () => {
+        runtime.core.store.atoms.get(1).v = 'Updated title';
+        runtime.core.store.notify(1);
+        await waitMicrotasks();
+        assertEqual(app.querySelector('h2').textContent, 'Updated title', 'title prop should react to atom changes');
+      });
+    });
+  </script>
+</body>
+</html>

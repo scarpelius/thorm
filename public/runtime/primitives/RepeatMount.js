@@ -190,9 +190,8 @@ export default class RepeatMount {
 
         row = { key, start: rowStart, end: rowEnd, scope: childScope, inst };
       } else {
-        // Existing row: ensure child context is updated when evaluated next time
-        // (Expressions always re-evaluate with current ctx; we only need to move DOM.)
         this._moveRangeBefore(row.start, row.end, insertBefore);
+        this._remountRow(row, rowCtx);
       }
 
       // Advance cursor to just after the row range we’ve placed
@@ -244,5 +243,41 @@ export default class RepeatMount {
       if (n === endNode) break;
       n = next;
     }
+  }
+
+  _clearBetween(startNode, endNode) {
+    let n = startNode.nextSibling;
+    while (n && n !== endNode) {
+      const next = n.nextSibling;
+      n.remove();
+      n = next;
+    }
+  }
+
+  _remountRow(row, rowCtx) {
+    row.inst?.dispose?.();
+    row.scope?.dispose?.();
+    this._clearBetween(row.start, row.end);
+
+    const childIR =
+      this.ir.tpl ??
+      this.ir.child ??
+      (Array.isArray(this.ir.children) ? this.ir.children[0] : undefined);
+    if (!childIR) {
+      row.inst = null;
+      row.scope = null;
+      return;
+    }
+
+    const frag = document.createDocumentFragment();
+    const scope = this.scope.fork();
+    const inst = this.registry.mount(frag, childIR, scope, {
+      ...this.services,
+      ctx: rowCtx
+    });
+
+    this.parent.insertBefore(frag, row.end);
+    row.scope = scope;
+    row.inst = inst;
   }
 }

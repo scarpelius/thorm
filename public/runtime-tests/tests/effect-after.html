@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>effect-after</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('effect-after', 'Timeout effects should run after the configured delay.', async ({ app, step, assertEqual }) => {
+      const ir = {
+        atoms: [{ id: 1, initial: 'waiting' }],
+        root: {
+          k: 'fragment',
+          children: [
+            {
+              k: 'effect',
+              triggers: [{ type: 'timeout', ms: 30 }],
+              actions: [{ k: 'set', atom: 1, to: { k: 'val', v: 'done' } }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: {}, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 1 } }],
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('before the timeout fires the initial value is visible', async () => {
+        assertEqual(app.querySelector('span').textContent, 'waiting', 'timeout effect should not fire immediately');
+      });
+
+      await step('after the timeout the atom is updated', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 60));
+        assertEqual(app.querySelector('span').textContent, 'done', 'timeout effect should update the atom');
+      });
+    });
+  </script>
+</body>
+</html>

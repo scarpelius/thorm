@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>events-inc</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('events-inc', 'Click events should update atom-backed text.', async ({ app, step, click, waitMicrotasks, assertEqual }) => {
+      const ir = {
+        atoms: [{ id: 1, initial: 1 }],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: {},
+                style: {},
+                on: [{ event: 'click', action: { k: 'inc', atom: 1, by: 1 } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Inc' } }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: {}, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 1 } }],
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('initial text reflects the initial atom value', async () => {
+        assertEqual(app.querySelector('span').textContent, '1', 'span should render initial atom');
+      });
+
+      await step('clicking the button increments the atom and updates text', async () => {
+        click(app.querySelector('button'));
+        await waitMicrotasks();
+        assertEqual(app.querySelector('span').textContent, '2', 'span should update after click');
+      });
+    });
+  </script>
+</body>
+</html>

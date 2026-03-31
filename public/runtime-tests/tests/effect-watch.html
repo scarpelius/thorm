@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -10,7 +10,7 @@
     import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
     import { runPage } from '../assert.js';
 
-    await runPage('effect-watch', 'Watch effects should react when the watched expression changes.', async ({ app, step, waitMicrotasks, assertEqual }) => {
+    await runPage('effect-watch', 'Watch effects should react when the watched expression changes.', async ({ app, step, click, waitFor, assertEqual }) => {
       const ir = {
         atoms: [
           { id: 1, initial: 1 },
@@ -41,7 +41,7 @@
                   k: 'el',
                   tag: 'button',
                   props: {
-                    attrs: {},
+                    attrs: { id: 'watch-source' },
                     style: {},
                     on: [{ event: 'click', action: { k: 'inc', atom: 1, by: 1 } }],
                   },
@@ -50,7 +50,7 @@
                 {
                   k: 'el',
                   tag: 'span',
-                  props: { attrs: {}, style: {}, on: [] },
+                  props: { attrs: { id: 'watch-target' }, style: {}, on: [] },
                   children: [{ k: 'text', value: { k: 'read', atom: 2 } }],
                 },
               ],
@@ -60,15 +60,18 @@
       };
 
       boot(ir, app, { target: THORM_TARGET_CLIENT });
+      const button = app.querySelector('#watch-source');
+      const target = app.querySelector('#watch-target');
 
       await step('watch target starts unchanged before the source mutates', async () => {
-        assertEqual(app.querySelector('span').textContent, 'idle', 'watch action should not run before source changes');
+        assertEqual(target.textContent, 'idle', 'watch action should not run before source changes');
       });
 
       await step('mutating the watched atom triggers the watch action', async () => {
-        app.querySelector('button').click();
-        await waitMicrotasks(3);
-        assertEqual(app.querySelector('span').textContent, 'changed', 'watch effect should run after source changes');
+        click(button);
+        await waitFor(() => {
+          assertEqual(target.textContent, 'changed', 'watch effect should run after source changes');
+        }, { label: 'watch effect result' });
       });
     });
   </script>

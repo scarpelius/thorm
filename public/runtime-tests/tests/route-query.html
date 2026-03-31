@@ -1,0 +1,53 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>route-query</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('route-query', 'Route query expressions should expose parsed query string values to the mounted view.', async ({ app, step, assertEqual, assertContains }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/search?term=dune&sort=asc');
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/search', re: '/^\\/search$/', keys: [] },
+          ],
+          views: [{
+            k: 'el',
+            tag: 'div',
+            props: { attrs: { id: 'query-view' }, style: {}, on: [] },
+            children: [
+              { k: 'text', value: { k: 'query', name: 'term' } },
+              { k: 'text', value: { k: 'val', v: ':' } },
+              { k: 'text', value: { k: 'query', name: 'sort' } },
+            ],
+          }],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+        await step('query string values are available through query expressions', async () => {
+          const view = app.querySelector('#query-view');
+          assertEqual(!!view, true, 'query route view should render');
+          assertContains(view.textContent, 'dune:asc', 'query expressions should read multiple query string values');
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

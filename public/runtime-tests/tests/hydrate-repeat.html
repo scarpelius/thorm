@@ -1,0 +1,88 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-repeat</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-repeat', 'Hydration should preserve repeat rows and keep keyed reconciliation interactive.', async ({ app, step, click, waitFor, assertEqual }) => {
+      app.innerHTML = '<div><button id="reverse-list">Reverse</button><ul><!--repeat:start--><!--repeat:row:a:start--><li>Ada</li><!--repeat:row:a:end--><!--repeat:row:b:start--><li>Grace</li><!--repeat:row:b:end--><!--repeat:end--></ul></div>';
+
+      const reversed = [
+        { id: 'b', label: 'Grace' },
+        { id: 'a', label: 'Ada' },
+      ];
+
+      const ir = {
+        atoms: [{ id: 1, initial: [
+          { id: 'a', label: 'Ada' },
+          { id: 'b', label: 'Grace' },
+        ] }],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'reverse-list' },
+                style: {},
+                on: [{ event: 'click', action: { k: 'set', atom: 1, to: { k: 'val', v: reversed } } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Reverse' } }],
+            },
+            {
+              k: 'el',
+              tag: 'ul',
+              props: { attrs: {}, style: {}, on: [] },
+              children: [{
+                k: 'repeat',
+                items: { k: 'read', atom: 1 },
+                key: { k: 'item', path: 'id' },
+                tpl: {
+                  k: 'el',
+                  tag: 'li',
+                  props: { attrs: {}, style: {}, on: [] },
+                  children: [{ k: 'text', value: { k: 'item', path: 'label' } }],
+                },
+              }],
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, {
+        target: THORM_TARGET_SERVER,
+        state: {
+          atoms: {
+            1: [
+              { id: 'a', label: 'Ada' },
+              { id: 'b', label: 'Grace' },
+            ],
+          },
+        },
+      });
+
+      const labels = () => Array.from(app.querySelectorAll('li')).map((el) => el.textContent).join('|');
+
+      await step('hydration keeps the existing repeat rows in place', async () => {
+        assertEqual(labels(), 'Ada|Grace', 'repeat hydration should preserve the SSR row order');
+      });
+
+      await step('hydrated repeat rows reconcile after the backing atom changes', async () => {
+        click(app.querySelector('#reverse-list'));
+        await waitFor(() => {
+          assertEqual(labels(), 'Grace|Ada', 'repeat hydration should reconcile the keyed rows after events');
+        }, { label: 'repeat reconciliation after hydration' });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>component-slot-replace</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('component-slot-replace', 'Projected slot content should replace slot fallback content.', async ({ app, step, assert, assertEqual }) => {
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'component',
+          slots: {
+            default: [{
+              k: 'el',
+              tag: 'strong',
+              props: { attrs: { id: 'projected-slot' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'val', v: 'Projected default' } }],
+            }],
+          },
+          tpl: {
+            k: 'el',
+            tag: 'section',
+            props: { attrs: {}, style: {}, on: [] },
+            children: [{
+              k: 'slot',
+              children: [{
+                k: 'el',
+                tag: 'p',
+                props: { attrs: { id: 'fallback-slot' }, style: {}, on: [] },
+                children: [{ k: 'text', value: { k: 'val', v: 'Fallback default' } }],
+              }],
+            }],
+          },
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('projected default slot content wins over fallback content', async () => {
+        assertEqual(app.querySelector('#projected-slot').textContent, 'Projected default', 'projected default slot should render');
+        assert(!app.querySelector('#fallback-slot'), 'fallback slot content should not remain once projection is available');
+      });
+    });
+  </script>
+</body>
+</html>

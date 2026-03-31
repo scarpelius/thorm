@@ -1,0 +1,85 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>http-error-json</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('http-error-json', 'HTTP action should fall back to null when JSON parsing fails while still recording the status code.', async ({ app, step, click, waitFor, assertEqual }) => {
+      const ir = {
+        atoms: [
+          { id: 1, initial: 'pending' },
+          { id: 2, initial: null },
+        ],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'fetch-bad-json' },
+                style: {},
+                on: [{
+                  event: 'click',
+                  action: {
+                    k: 'http',
+                    url: { k: 'val', v: '/api/bad-json/' },
+                    method: 'GET',
+                    parse: 'json',
+                    to: 1,
+                    status: 2,
+                  },
+                }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Fetch bad JSON' } }],
+            },
+            {
+              k: 'el',
+              tag: 'pre',
+              props: { attrs: { id: 'bad-json-payload' }, style: {}, on: [] },
+              children: [{
+                k: 'text',
+                value: {
+                  k: 'stringify',
+                  value: { k: 'read', atom: 1 },
+                },
+              }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'bad-json-status' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 2 } }],
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+      const button = app.querySelector('#fetch-bad-json');
+      const payload = app.querySelector('#bad-json-payload');
+      const status = app.querySelector('#bad-json-status');
+
+      await step('before the request the JSON atom shows its initial marker', async () => {
+        assertEqual(payload.textContent.trim(), '"pending"', 'JSON atom should start with its marker value');
+      });
+
+      await step('invalid JSON resolves to null while the response status stays visible', async () => {
+        click(button);
+        await waitFor(() => {
+          assertEqual(payload.textContent.trim(), 'null', 'parse failures should store null in the target atom');
+          assertEqual(status.textContent, '200', 'status atom should still contain the HTTP status');
+        }, { label: 'invalid JSON result' });
+      });
+    });
+  </script>
+</body>
+</html>

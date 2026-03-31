@@ -1,4 +1,4 @@
-const styles = `
+﻿const styles = `
   :root {
     color-scheme: light;
     --bg: #f6f3ea;
@@ -129,6 +129,29 @@ export async function waitFrames(count = 1) {
   }
 }
 
+export async function waitFor(check, options = {}) {
+  const timeoutMs = Number(options.timeoutMs ?? 1500);
+  const intervalMs = Number(options.intervalMs ?? 20);
+  const label = options.label ?? 'condition';
+  const start = Date.now();
+  let lastError = null;
+
+  while ((Date.now() - start) < timeoutMs) {
+    try {
+      return await check();
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+  }
+
+  if (lastError) {
+    throw new Error(`Timed out waiting for ${label}\n${lastError.message ?? String(lastError)}`);
+  }
+
+  throw new Error(`Timed out waiting for ${label}`);
+}
+
 export function createPage(title, subtitle = '') {
   ensureStyles();
   document.body.innerHTML = `
@@ -178,6 +201,7 @@ export async function runPage(title, subtitle, run) {
     click,
     waitMicrotasks,
     waitFrames,
+    waitFor,
     step(label, fn) {
       return Promise.resolve()
         .then(fn)

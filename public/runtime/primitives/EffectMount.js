@@ -224,22 +224,30 @@ export default class EffectMount {
   }
 
   _setupWatch(trig) {
+    let previous = this.evalr.evaluate(trig.expr, null, this.ctx);
     const apply = () => runActions(this.evalr, this.services, this.ctx, this.ir.actions, null);
     const wrapped = this._wrapDebounceThrottle(apply, trig.debounceMs ?? null, trig.throttleMs ?? null);
+    const onDependencyChange = () => {
+      const next = this.evalr.evaluate(trig.expr, null, this.ctx);
+      if (Object.is(previous, next)) return;
+      previous = next;
+      wrapped();
+    };
 
-    if (typeof this.evalr?.bindReactive === 'function') {
-      const unbind = this.evalr.bindReactive(trig.expr, wrapped, this);
-      this.disposers.push(() => { try { unbind(); } catch {} });
+    if (typeof this.evalr?.deps === 'function' && typeof this.evalr?.subscribeMany === 'function') {
+      const depSet = this.evalr.deps(trig.expr);
+      const unbind = this.evalr.subscribeMany(depSet, onDependencyChange, this);
+      this.disposers.push(() => { try { unbind?.(); } catch {} });
       if (trig.immediate) wrapped();
       return;
     }
     if (typeof this.scope.atoms?.subscribe === 'function') {
-      const unsub = this.scope.atoms.subscribe(() => wrapped());
+      const unsub = this.scope.atoms.subscribe(onDependencyChange);
       this.disposers.push(() => { try { unsub(); } catch {} });
       if (trig.immediate) wrapped();
       return;
     }
-    if (this.scope.dev) console.warn('[effect] watch: no reactive binding API (bindReactive/atoms.subscribe)');
+    if (this.scope.dev) console.warn('[effect] watch: no reactive subscription API (subscribeMany/atoms.subscribe)');
     if (trig.immediate) wrapped();
   }
 

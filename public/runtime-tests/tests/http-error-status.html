@@ -1,0 +1,79 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>http-error-status</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('http-error-status', 'HTTP action should preserve non-2xx response bodies and expose the response status.', async ({ app, step, click, waitFor, assertEqual }) => {
+      const ir = {
+        atoms: [
+          { id: 1, initial: 'idle' },
+          { id: 2, initial: null },
+        ],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'fetch-error-status' },
+                style: {},
+                on: [{
+                  event: 'click',
+                  action: {
+                    k: 'http',
+                    url: { k: 'val', v: '/api/not-found/' },
+                    method: 'GET',
+                    parse: 'text',
+                    to: 1,
+                    status: 2,
+                  },
+                }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Fetch missing' } }],
+            },
+            {
+              k: 'el',
+              tag: 'pre',
+              props: { attrs: { id: 'error-status-payload' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 1 } }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'error-status-code' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 2 } }],
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+      const button = app.querySelector('#fetch-error-status');
+      const payload = app.querySelector('#error-status-payload');
+      const status = app.querySelector('#error-status-code');
+
+      await step('before the request the payload remains idle', async () => {
+        assertEqual(payload.textContent, 'idle', 'payload atom should start unchanged');
+      });
+
+      await step('a non-2xx response still updates the payload and status atom', async () => {
+        click(button);
+        await waitFor(() => {
+          assertEqual(payload.textContent.trim(), 'missing', 'non-2xx response body should still be stored');
+          assertEqual(status.textContent, '404', 'status atom should contain 404');
+        }, { label: '404 response state' });
+      });
+    });
+  </script>
+</body>
+</html>

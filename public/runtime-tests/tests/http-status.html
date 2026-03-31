@@ -1,0 +1,80 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>http-status</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('http-status', 'HTTP action should store a deterministic response and record the HTTP status code.', async ({ app, step, click, waitFor, assertContains, assertEqual }) => {
+      const ir = {
+        atoms: [
+          { id: 1, initial: 'idle' },
+          { id: 2, initial: null },
+        ],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'fetch-status' },
+                style: {},
+                on: [{
+                  event: 'click',
+                  action: {
+                    k: 'http',
+                    url: { k: 'val', v: '/api/ping/' },
+                    method: 'GET',
+                    parse: 'text',
+                    to: 1,
+                    status: 2,
+                  },
+                }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Fetch status' } }],
+            },
+            {
+              k: 'el',
+              tag: 'pre',
+              props: { attrs: { id: 'status-payload' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 1 } }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'status-code' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 2 } }],
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+      const button = app.querySelector('#fetch-status');
+      const payloadNode = app.querySelector('#status-payload');
+      const statusNode = app.querySelector('#status-code');
+
+      await step('before the request the response atom keeps its initial value', async () => {
+        assertEqual(payloadNode.textContent, 'idle', 'response atom should start unchanged');
+      });
+
+      await step('clicking the button stores the response body and status code', async () => {
+        click(button);
+        await waitFor(() => {
+          const payload = payloadNode.textContent.trim();
+          assertContains(payload, 'pong', 'response body should be stored in the target atom');
+          assertEqual(statusNode.textContent, '200', 'status atom should contain 200');
+        }, { label: 'HTTP status result' });
+      });
+    });
+  </script>
+</body>
+</html>

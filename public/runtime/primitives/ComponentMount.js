@@ -1,4 +1,4 @@
-import { normalizeSlotsMap } from "../utils/props.js";
+import { normalizeSlotsMap, resolveProps } from "../utils/props.js";
 import PrimitiveMount from "./PrimitiveMount.js";
 
 export default class ComponentMount extends PrimitiveMount {
@@ -19,6 +19,7 @@ export default class ComponentMount extends PrimitiveMount {
     this.propStops  = [];
     this.propExprs  = [];
     this.childScope = null;
+    this.childCtx   = null;
     this.childInst  = null;
     this.slotsVal   = normalizeSlotsMap(ir.slots || []);
   }
@@ -26,12 +27,17 @@ export default class ComponentMount extends PrimitiveMount {
   mount() {
     this.childScope = this.scope.fork?.() ?? this.scope;
 
+    // Seed initial prop values before mounting the child tree so first render
+    // sees the same prop shape as SSR.
+    this.bindProps(this.ir.props || {});
+
     const childCtx = Object.assign({}, this.ctx, {
       props: this.propsVal,
       slots: this.slots,   // slot placeholders will register here
       component: this,     // allow SlotMount to register with this component
-      __propsExpr: this.ir.props || {},
+      __propsExpr: this.resolvePropsMap(this.ir.props || {}),
     });
+    this.childCtx = childCtx;
     
     const hydration = this.services.hydrate;
     const cursor = hydration?.cursor;
@@ -45,8 +51,6 @@ export default class ComponentMount extends PrimitiveMount {
     );
     if (!useHydrate) this.parent.insertBefore(mountParent, this.end);
     if (useHydrate) this.finishHydrate();
-
-    this.bindProps(this.ir.props || {});
     //this.seedSlots();
     return this;
   }
@@ -65,7 +69,9 @@ export default class ComponentMount extends PrimitiveMount {
     this.bindProps(nextNode.props) || [];
     this.reconcileSlots(nextNode.props || []);
     this.ir = nextNode;
-    this.ctx.__propsExpr = nextNode.props || [];
+    if (this.childCtx) {
+      this.childCtx.__propsExpr = this.resolvePropsMap(nextNode.props || {});
+    }
   }
 
   // Called by SlotMount to attach an instance for a given name
@@ -95,28 +101,35 @@ export default class ComponentMount extends PrimitiveMount {
       const prevExpr = this.propExprs[name];
       const needsRebind = !prevExpr || prevExpr !== expr;
       if(needsRebind) {
+        const resolvedExpr = resolveProps(expr, this.ctx);
         // dispose old
         if(this.propStops[name]) {
           try { this.propStops[name](); } catch {}
         }
         // bind new
         const apply = () => {
-          const scopeCtx = this.childScope ? this.childScope.ctx : this.ctx;
-          const v = this.services.evalr.evaluate(expr, null, scopeCtx);
+          const v = this.services.evalr.evaluate(resolvedExpr, null, this.ctx);
           this.propsVal[name] = v;
           this.queuePropsChanged();
         };
-        this.propStops[name] = this.services.evalr.bindReactive(expr, apply, this.childScope);
+        this.propStops[name] = this.services.evalr.bindReactive(resolvedExpr, apply, this.childScope);
         this.propExprs[name] = expr;
 
         // Run once asynchronously so child sees initial props immediately
         try {
-          const scopeCtx = this.childScope ? this.childScope.ctx : this.ctx;
-          this.propsVal[name] = this.services.evalr.evaluate(expr, null, scopeCtx);
+          this.propsVal[name] = this.services.evalr.evaluate(resolvedExpr, null, this.ctx);
           this.queuePropsChanged();
         } catch {}
       }
     }
+  }
+
+  resolvePropsMap(props) {
+    const out = {};
+    for (const [name, expr] of Object.entries(props || {})) {
+      out[name] = resolveProps(expr, this.ctx);
+    }
+    return out;
   }
 
   queuePropsChanged() {

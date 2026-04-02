@@ -6,7 +6,7 @@ require __DIR__ . '/../../vendor/autoload.php';
 use function Thorm\{
     el, text, attrs, cls, concat, read, val, state, fragment,
     onVisible, onLeftViewport, selectorTarget,      // effect + target
-    set                              // unified helper (use asAction = true)
+    set,                              // unified helper (use asAction = true)
     client,
 };
 use Thorm\BuildExample;
@@ -67,7 +67,7 @@ $build = BuildExample::build([
     'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
     'path'          => __DIR__.'/../../public/tests/',
     'renderer'      => $res,
-    'template'      => __DIR__.'/../../assets/index-test.tpl.html',
+    'template'      => __DIR__.'/../../assets/index.tpl.html',
     'opts'          => [
         'title'         => 'Effect visible + set',
         'containerId'   => 'app',

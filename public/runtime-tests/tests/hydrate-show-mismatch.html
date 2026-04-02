@@ -1,0 +1,47 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-show-mismatch</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-show-mismatch', 'Hydration should fail clearly when show SSR markup does not match the conditional subtree shape.', async ({ app, step, assertContains }) => {
+      app.innerHTML = '<div><!--show:start--><!--show:end--></div>';
+
+      const ir = {
+        atoms: [{ id: 1, initial: true }],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [{
+            k: 'show',
+            when: { k: 'read', atom: 1 },
+            child: {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'hydrated-show' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'val', v: 'Visible' } }],
+            },
+          }],
+        },
+      };
+
+      await step('missing show child markup raises a hydration error with a useful message', async () => {
+        let message = '';
+        try {
+          boot(ir, app, { target: THORM_TARGET_SERVER, state: { atoms: { 1: true } } });
+        } catch (error) {
+          message = error?.message ?? String(error);
+        }
+        assertContains(message, '[hydrate] expected <span> but got nodeType 8', 'show hydration mismatch should fail on the missing visible child node');
+      });
+    });
+  </script>
+</body>
+</html>

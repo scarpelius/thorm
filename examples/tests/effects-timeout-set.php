@@ -6,7 +6,7 @@ require __DIR__ . '/../../vendor/autoload.php';
 use function Thorm\{
     el, text, attrs, cls, concat, read, val, state, fragment,
     after,        // effect helper (timeout)
-    set, inc      // unified helpers; pass asAction=true when used in Effects
+    set, inc,     // unified helpers; pass asAction=true when used in Effects
     client,
 };
 use Thorm\BuildExample;
@@ -52,7 +52,7 @@ $build = BuildExample::build([
     'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
     'path'          => __DIR__.'/../../public/tests/',
     'renderer'      => $res,
-    'template'      => __DIR__.'/../../assets/index-test.tpl.html',
+    'template'      => __DIR__.'/../../assets/index.tpl.html',
     'opts'          => [
         'title'         => 'Effect timeout + set/inc',
         'containerId'   => 'app',

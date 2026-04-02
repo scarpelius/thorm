@@ -7,7 +7,7 @@ use function Thorm\{
     el, text, attrs, cls, concat, read, val, state, fragment,
     stringify,
     onMount,        // effect
-    http            // unified helper; we'll pass asAction = true
+    http,           // unified helper; we'll pass asAction = true
     client,
 };
 use Thorm\BuildExample;
@@ -69,7 +69,7 @@ $build = BuildExample::build([
     'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
     'path'          => __DIR__.'/../../public/tests/',
     'renderer'      => $res,
-    'template'      => __DIR__.'/../../assets/index-test.tpl.html',
+    'template'      => __DIR__.'/../../assets/index.tpl.html',
     'opts'          => [
         'title'         => 'Effect HTTP on mount',
         'containerId'   => 'app',

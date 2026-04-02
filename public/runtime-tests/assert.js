@@ -65,6 +65,7 @@
     border-radius: 12px;
     border: 1px solid var(--line);
     background: #fff;
+    white-space: pre-wrap;
   }
   .rt-list li.pass { border-color: rgba(33, 110, 57, 0.18); }
   .rt-list li.fail { border-color: rgba(166, 27, 27, 0.18); }
@@ -216,6 +217,7 @@ export async function runPage(title, subtitle, run) {
   try {
     await run(api);
   } catch (error) {
+    record('page execution', false, error?.message ?? String(error));
     console.error(error);
   } finally {
     page.status.textContent = failures === 0 ? 'PASS' : 'FAIL';

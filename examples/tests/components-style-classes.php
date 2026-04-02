@@ -5,8 +5,7 @@ require __DIR__ . '/../../vendor/autoload.php';
 
 use function Thorm\{
   attrs, cls, component, concat, cond, div, el, eq, fragment, html, inc, on, prop, read,
-  set, slot, state, style, text, val
-    client,
+  set, slot, state, style, text, val, client,
 };
 use Thorm\BuildExample;
 use Thorm\Render;
@@ -157,7 +156,7 @@ $build = BuildExample::build([
     'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
     'path'          => __DIR__.'/../../public/tests/',
     'renderer'      => $res,
-    'template'      => __DIR__.'/../../assets/index-test.tpl.html',
+    'template'      => __DIR__.'/../../assets/index.tpl.html',
     'opts'          => [
         'title'         => 'Components: class + style live updates',
         'containerId'   => 'app',

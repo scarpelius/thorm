@@ -1,0 +1,108 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>route-view-cleanup-events</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('route-view-cleanup-events', 'Route rerenders should dispose old view event handlers so detached nodes stop mutating state.', async ({ app, step, click, waitFor, waitMicrotasks, assertEqual, assert }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app');
+
+      const ir = {
+        atoms: [{ id: 1, initial: 0 }],
+        root: {
+          k: 'fragment',
+          children: [
+            {
+              k: 'route',
+              base: '/app',
+              table: [
+                { pat: '/', re: '/^\\/$/', keys: [] },
+                { pat: '/details/:id', re: '/^\\/details\\/([^/]+)$/', keys: ['id'] },
+              ],
+              views: [
+                {
+                  k: 'el',
+                  tag: 'div',
+                  props: { attrs: { id: 'home-view' }, style: {}, on: [] },
+                  children: [
+                    {
+                      k: 'el',
+                      tag: 'button',
+                      props: {
+                        attrs: { id: 'stale-inc' },
+                        style: {},
+                        on: [{ event: 'click', action: { k: 'inc', atom: 1, by: 1 } }],
+                      },
+                      children: [{ k: 'text', value: { k: 'val', v: 'Increment from home' } }],
+                    },
+                    {
+                      k: 'el',
+                      tag: 'button',
+                      props: {
+                        attrs: { id: 'go-details' },
+                        style: {},
+                        on: [{ event: 'click', action: { k: 'navigate', to: { k: 'val', v: '/app/details/42' } } }],
+                      },
+                      children: [{ k: 'text', value: { k: 'val', v: 'Open details' } }],
+                    },
+                  ],
+                },
+                {
+                  k: 'el',
+                  tag: 'div',
+                  props: { attrs: { id: 'details-view' }, style: {}, on: [] },
+                  children: [
+                    { k: 'text', value: { k: 'val', v: 'Details:' } },
+                    { k: 'text', value: { k: 'param', name: 'id' } },
+                  ],
+                },
+              ],
+              fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'event-count' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 1 } }],
+            },
+          ],
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_CLIENT });
+        const staleButton = app.querySelector('#stale-inc');
+
+        await step('home route mounts the original interactive view', async () => {
+          assertEqual(app.querySelector('#home-view') !== null, true, 'home view should render first');
+          assertEqual(app.querySelector('#event-count').textContent, '0', 'counter should start at zero');
+        });
+
+        await step('navigating away removes the old route view from the DOM', async () => {
+          click(app.querySelector('#go-details'));
+          await waitFor(() => {
+            assertEqual(app.querySelector('#details-view') !== null, true, 'details view should render after navigation');
+            assertEqual(app.querySelector('#stale-inc'), null, 'old home view button should be removed from the DOM');
+          }, { label: 'route view swap' });
+        });
+
+        await step('dispatching events on the detached old node no longer mutates state', async () => {
+          assert(staleButton instanceof HTMLElement, 'test should keep a reference to the detached button');
+          click(staleButton);
+          await waitMicrotasks(3);
+          assertEqual(app.querySelector('#event-count').textContent, '0', 'detached route nodes should no longer have active listeners');
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

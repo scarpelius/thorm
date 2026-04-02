@@ -28,8 +28,8 @@ export default class SlotMount extends PrimitiveMount {
     ) {
       this.services.ctx.component.registerSlot(this.name, this);
     };
-    // If parent hasn't provided content yet, render fallback (if any)
-    if(this.fallbackIR.length > 0) {
+    // If parent hasn't provided content during registration, render fallback.
+    if(this.fallbackIR.length > 0 && this.children.length === 0) {
       this.renderFallback();
     }
 
@@ -64,7 +64,7 @@ export default class SlotMount extends PrimitiveMount {
 
   renderFallback() {
     this.clearChildren();
-    for (const childIr of this.fallbackIR) {
+    for (const childIr of this._resolveForwardedNodes(this.fallbackIR)) {
       const inst = this.registry.mount(this.parent, childIr, this.scope, this.services);
       this.children.push(inst);
     }
@@ -81,10 +81,38 @@ export default class SlotMount extends PrimitiveMount {
   replaceWith(nodes) {
     // replace current children (fallback or previous nodes) with new nodes
     this.clearChildren();
-    for (const chidlIr of nodes) {
+    for (const chidlIr of this._resolveForwardedNodes(nodes)) {
       const inst = this.registry.mount(this.parent, chidlIr, this.scope, this.services);
       this.children.push(inst);
     }
+  }
+
+  _resolveForwardedNodes(nodes) {
+    const resolved = [];
+    const slotSource = this.services?.ctx?.__slotForwardSource || {};
+
+    for (const node of nodes || []) {
+      if (node && typeof node === 'object' && node.k === 'slot') {
+        const name = node.name ?? 'default';
+        const forwarded = Array.isArray(slotSource[name]) ? slotSource[name] : [];
+
+        if (forwarded.length > 0) {
+          resolved.push(...forwarded);
+          continue;
+        }
+
+        if (Array.isArray(node.children) && node.children.length > 0) {
+          resolved.push(...this._resolveForwardedNodes(node.children));
+          continue;
+        }
+
+        continue;
+      }
+
+      resolved.push(node);
+    }
+
+    return resolved;
   }
 
   dispose() {

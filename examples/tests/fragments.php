@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use function Thorm\{el, text, concat, param, query, route, Link, navigate, on, cls, attrs, fragment, repeat, read, item, state, cond, eq, val, client};
+use function Thorm\{el, text, concat, cls, attrs, fragment, repeat, read, item, state, cond, eq, val, client};
 use Thorm\BuildExample;
 use Thorm\Render;
 
@@ -84,7 +84,7 @@ $build = BuildExample::build([
     'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
     'path'          => __DIR__.'/../../public/tests/',
     'renderer'      => $res,
-    'template'      => __DIR__.'/../../assets/index-test.tpl.html',
+    'template'      => __DIR__.'/../../assets/index.tpl.html',
     'opts'          => [
         'title'         => 'Bid',
         'containerId'   => 'app',

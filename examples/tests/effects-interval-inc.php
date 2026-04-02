@@ -7,7 +7,7 @@ use function Thorm\{
     el, text, attrs, cls, concat, read, state, fragment,
     every,         // effect helper
     inc,           // unified helper (Listener|Action). We'll pass asAction=true
-    html
+    html,
     client,
 };
 use Thorm\BuildExample;
@@ -64,7 +64,7 @@ $build = BuildExample::build([
     'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
     'path'          => __DIR__.'/../../public/tests/',
     'renderer'      => $res,
-    'template'      => __DIR__.'/../../assets/index-test.tpl.html',
+    'template'      => __DIR__.'/../../assets/index.tpl.html',
     'opts'          => [
         'title'         => 'Effect interval + inc',
         'containerId'   => 'app',

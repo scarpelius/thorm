@@ -1,0 +1,59 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>effect-watch-dispose</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('effect-watch-dispose', 'Disposed watch effects should stop reacting to later atom changes.', async ({ app, step, assertEqual }) => {
+      const ir = {
+        atoms: [
+          { id: 1, initial: 1 },
+          { id: 2, initial: 'idle' },
+        ],
+        root: {
+          k: 'fragment',
+          children: [
+            {
+              k: 'effect',
+              triggers: [{
+                type: 'watch',
+                expr: { k: 'read', atom: 1 },
+                immediate: false,
+              }],
+              actions: [{
+                k: 'set',
+                atom: 2,
+                to: { k: 'val', v: 'changed' },
+              }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'watch-dispose-value' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 2 } }],
+            },
+          ],
+        },
+      };
+
+      const runtime = boot(ir, app, { target: THORM_TARGET_CLIENT });
+      const value = app.querySelector('#watch-dispose-value');
+      runtime.dispose();
+      runtime.core.store.atoms.get(1).v = 2;
+      runtime.core.store.notify(1);
+
+      await step('disposing the tree stops later watch-triggered mutations', async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+        assertEqual(value.textContent, 'idle', 'disposed watch effect should not react after teardown');
+      });
+    });
+  </script>
+</body>
+</html>

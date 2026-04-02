@@ -35,6 +35,8 @@ export default class ComponentMount extends PrimitiveMount {
       props: this.propsVal,
       slots: this.slots,   // slot placeholders will register here
       component: this,     // allow SlotMount to register with this component
+      __slotSource: this.slotsVal,
+      __slotForwardSource: this.ctx?.__slotSource ?? this.ctx?.__slotForwardSource ?? this.slotsVal,
       __propsExpr: this.resolvePropsMap(this.ir.props || {}),
     });
     this.childCtx = childCtx;
@@ -160,7 +162,12 @@ export default class ComponentMount extends PrimitiveMount {
         if (slot) slot.setNodes([]);
       }
     }
+    this.slotsVal = next;
     this.slotVal = next;
+    if (this.childCtx) {
+      this.childCtx.__slotSource = next;
+      this.childCtx.__slotForwardSource = this.ctx?.__slotSource ?? this.ctx?.__slotForwardSource ?? next;
+    }
   }
 
   dispose(){

@@ -1,0 +1,48 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>effect-interval-dispose</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('effect-interval-dispose', 'Disposed interval effects should stop ticking after the tree is torn down.', async ({ app, step, assertEqual, assert }) => {
+      const ir = {
+        atoms: [{ id: 1, initial: 0 }],
+        root: {
+          k: 'fragment',
+          children: [
+            {
+              k: 'effect',
+              triggers: [{ type: 'interval', ms: 20 }],
+              actions: [{ k: 'inc', atom: 1, by: 1 }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'interval-dispose-value' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 1 } }],
+            },
+          ],
+        },
+      };
+
+      const runtime = boot(ir, app, { target: THORM_TARGET_CLIENT });
+      const value = app.querySelector('#interval-dispose-value');
+
+      await step('interval ticks while mounted before disposal', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 70));
+        const beforeDispose = Number(value.textContent || '0');
+        assert(beforeDispose >= 1, `expected at least one interval tick before dispose, got ${beforeDispose}`);
+        runtime.dispose();
+        await new Promise((resolve) => setTimeout(resolve, 70));
+        assertEqual(value.textContent, String(beforeDispose), 'disposed interval should stop ticking after teardown');
+      });
+    });
+  </script>
+</body>
+</html>

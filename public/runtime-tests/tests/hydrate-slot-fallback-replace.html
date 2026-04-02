@@ -1,0 +1,59 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-slot-fallback-replace</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-slot-fallback-replace', 'Hydrated projected slot content should replace slot fallback content when both are involved.', async ({ app, step, assert, assertEqual }) => {
+      app.innerHTML = '<!--component:start--><section><div><!--slot:start--><strong id="projected-slot">Projected</strong><!--slot:end--></div></section><!--component:end-->';
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'component',
+          slots: {
+            default: [{
+              k: 'el',
+              tag: 'strong',
+              props: { attrs: { id: 'projected-slot' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'val', v: 'Projected' } }],
+            }],
+          },
+          tpl: {
+            k: 'el',
+            tag: 'section',
+            props: { attrs: {}, style: {}, on: [] },
+            children: [{
+              k: 'el',
+              tag: 'div',
+              props: { attrs: {}, style: {}, on: [] },
+              children: [{
+                k: 'slot',
+                children: [{
+                  k: 'el',
+                  tag: 'p',
+                  props: { attrs: { id: 'fallback-slot' }, style: {}, on: [] },
+                  children: [{ k: 'text', value: { k: 'val', v: 'Fallback' } }],
+                }],
+              }],
+            }],
+          },
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_SERVER, state: { atoms: {} } });
+
+      await step('projected slot content survives hydration without fallback duplication', async () => {
+        assertEqual(app.querySelector('#projected-slot').textContent, 'Projected', 'projected slot content should remain after hydration');
+        assert(!app.querySelector('#fallback-slot'), 'fallback slot content should not appear when projection is provided');
+      });
+    });
+  </script>
+</body>
+</html>

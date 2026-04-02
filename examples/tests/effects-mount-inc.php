@@ -7,7 +7,7 @@ use function Thorm\{
     el, text, attrs, cls, concat, read, state,
     inc,
     onMount,
-    fragment
+    fragment,
     client,
 };
 use Thorm\BuildExample;
@@ -50,7 +50,7 @@ $build = BuildExample::build([
     'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
     'path'          => __DIR__.'/../../public/tests/',
     'renderer'      => $res,
-    'template'      => __DIR__.'/../../assets/index-test.tpl.html',
+    'template'      => __DIR__.'/../../assets/index.tpl.html',
     'opts'          => [
         'title'         => 'Effect mount + inc',
         'containerId'   => 'app',

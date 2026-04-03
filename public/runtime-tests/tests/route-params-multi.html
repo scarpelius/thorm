@@ -1,0 +1,53 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>route-params-multi</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('route-params-multi', 'Route params should extract values across multiple dynamic path segments.', async ({ app, step, assertEqual, assertContains }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/users/alice/posts/42');
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/users/:userId/posts/:postId', re: '/^\\/users\\/([^/]+)\\/posts\\/([^/]+)$/', keys: ['userId', 'postId'] },
+          ],
+          views: [{
+            k: 'el',
+            tag: 'div',
+            props: { attrs: { id: 'params-view' }, style: {}, on: [] },
+            children: [
+              { k: 'text', value: { k: 'param', name: 'userId' } },
+              { k: 'text', value: { k: 'val', v: '/' } },
+              { k: 'text', value: { k: 'param', name: 'postId' } },
+            ],
+          }],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+        await step('multiple params are decoded into the route context', async () => {
+          const view = app.querySelector('#params-view');
+          assertEqual(!!view, true, 'multi-param route should render');
+          assertContains(view.textContent, 'alice/42', 'route params should expose both captured segments');
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

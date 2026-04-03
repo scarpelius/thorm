@@ -1,0 +1,71 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>component-nested</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('component-nested', 'Nested components should render through multiple component boundaries.', async ({ app, step, assertEqual }) => {
+      const innerCard = {
+        k: 'component',
+        props: {
+          summary: { k: 'prop', name: 'summary' },
+        },
+        tpl: {
+          k: 'el',
+          tag: 'article',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [{
+            k: 'el',
+            tag: 'p',
+            props: { attrs: { id: 'nested-summary' }, style: {}, on: [] },
+            children: [{ k: 'text', value: { k: 'prop', name: 'summary' } }],
+          }],
+        },
+      };
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'component',
+          props: {
+            title: { k: 'val', v: 'Outer title' },
+            summary: { k: 'val', v: 'Inner body' },
+          },
+          tpl: {
+            k: 'el',
+            tag: 'section',
+            props: { attrs: {}, style: {}, on: [] },
+            children: [
+              {
+                k: 'el',
+                tag: 'h2',
+                props: { attrs: { id: 'nested-title' }, style: {}, on: [] },
+                children: [{ k: 'text', value: { k: 'prop', name: 'title' } }],
+              },
+              {
+                ...innerCard,
+                props: {
+                  summary: { k: 'prop', name: 'summary' },
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('outer and inner components both render their content', async () => {
+        assertEqual(app.querySelector('#nested-title').textContent, 'Outer title', 'outer component should render its prop');
+        assertEqual(app.querySelector('#nested-summary').textContent, 'Inner body', 'inner component should render the prop passed through the outer component');
+      });
+    });
+  </script>
+</body>
+</html>

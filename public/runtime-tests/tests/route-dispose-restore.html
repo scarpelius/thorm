@@ -1,0 +1,66 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>route-dispose-restore</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('route-dispose-restore', 'Disposing a route should restore the previous reroute hook and stop rerouting the old container.', async ({ app, step, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      const previousReroute = window.__THORM_REROUTE__;
+      let restoredCalls = 0;
+      window.__THORM_REROUTE__ = () => {
+        restoredCalls += 1;
+      };
+      history.replaceState(null, '', '/app');
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/', re: '/^\\/$/', keys: [] },
+            { pat: '/details/:id', re: '/^\\/details\\/([^/]+)$/', keys: ['id'] },
+          ],
+          views: [
+            { k: 'el', tag: 'div', props: { attrs: { id: 'home-view' }, style: {}, on: [] }, children: [{ k: 'text', value: { k: 'val', v: 'Home' } }] },
+            { k: 'el', tag: 'div', props: { attrs: { id: 'details-view' }, style: {}, on: [] }, children: [{ k: 'text', value: { k: 'param', name: 'id' } }] },
+          ],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        const runtime = boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+        await step('route mounts the initial matching view before disposal', async () => {
+          assertEqual(app.querySelector('#home-view').textContent, 'Home', 'initial route view should render before teardown');
+        });
+
+        await step('hold the initial route view for inspection', async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          assertEqual(app.querySelector('#home-view').textContent, 'Home', 'initial route view should remain visible during the inspection delay');
+        });
+
+        runtime.dispose();
+        history.replaceState(null, '', '/app/details/99');
+        window.__THORM_REROUTE__?.();
+
+        await step('disposing restores the previous reroute hook instead of updating the old route tree', async () => {
+          assertEqual(restoredCalls, 1, 'previous reroute hook should be restored and called after dispose');
+          assertEqual(app.textContent.includes('99'), false, 'disposed route tree should not rerender after dispose');
+        });
+      } finally {
+        window.__THORM_REROUTE__ = previousReroute;
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

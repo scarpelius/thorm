@@ -11,9 +11,11 @@ use function Thorm\{
     watch,
     // actions (via unified helpers with $asAction = true)
     set,
-    html
+    html,
+    client,
 };
-use Thorm\Renderer;
+use Thorm\BuildExample;
+use Thorm\Render;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
@@ -184,20 +186,26 @@ $app = fragment([
 // ─────────────────────────────────────────────────────────────────────────────
 // render → public/tests/<name>/
 
-$test = strtolower(pathinfo(__FILE__, PATHINFO_FILENAME));
-$path = __DIR__ . '/../../public/tests/' . $test . '/';
-if (!is_dir($path)) { mkdir($path, 0777, true); }
 
-$renderer = new Renderer();
-$res = $renderer->renderPage($app, [
-    'title'       => 'Effect watch + set',
-    'containerId' => 'app',
-    'template'    => __DIR__ . '/../../assets/index-test.tpl.html',
+$app = client(el('div', [], [$app]));
+
+$renderer = new Render();
+$res = $renderer->render($app);
+
+$build = BuildExample::build([
+    'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
+    'path'          => __DIR__.'/../../public/tests/',
+    'renderer'      => $res,
+    'template'      => __DIR__.'/../../assets/index.tpl.html',
+    'opts'          => [
+        'title'         => 'Effect watch + set',
+        'containerId'   => 'app',
+    ],
 ]);
 
-$html_ok = file_put_contents($path . $res['iruri'], $res['irJson']) !== false;
-$page_ok = file_put_contents($path . 'index.html', $res['tpl']) !== false;
-
-echo $html_ok ? green("Wrote JSON data file\n") : red("Could not write JSON file\n");
-echo $page_ok ? green("Wrote HTML page\n") : red("Could not write HTML page\n");
+if($build !== false ) {
+    echo green("File wrote to disk.\n");
+} else {
+    echo red("Could not write files to disk.\n");
+}
 echo "\n";

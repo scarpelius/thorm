@@ -6,6 +6,7 @@ namespace Thorm\IR\Node;
 use InvalidArgumentException;
 use JsonSerializable;
 use Thorm\IR\AtomCollectable;
+use Thorm\IR\Renderable;
 
 /**
  * IR node for grouping children without creating a wrapper element.
@@ -20,7 +21,7 @@ use Thorm\IR\AtomCollectable;
  *     new TextNode('B'),
  * ]);
  */
-final class FragmentNode extends Node implements JsonSerializable, AtomCollectable
+final class FragmentNode extends Node implements JsonSerializable, AtomCollectable, Renderable
 {
     /**
      * Build a fragment IR node.
@@ -49,6 +50,12 @@ final class FragmentNode extends Node implements JsonSerializable, AtomCollectab
         foreach ($this->children as $c) {
             $collect($c);
         }
+    }
+
+    public function render(callable $renderer): string
+    {
+        $children = $this->renderNodes($this->node['children'] ?? [], $this->ctx);
+        return $this->comment('fragment:start') . $children . $this->comment('fragment:end');
     }
 
     /**

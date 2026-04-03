@@ -90,7 +90,9 @@ export default class ElMount {
   mount() {
     const hydration = this.services.hydrate;
     const cursor = hydration?.cursor;
-    if (hydration?.active && cursor) {
+    const isClientTarget = this.ir?.render?.target === 'client';
+    const isHydrating = !!(hydration?.active && cursor);
+    if (isHydrating) {
       this.el = cursor.nextElement(this.parent, this.ir.tag);
     } else {
       this.el = document.createElement(this.ir.tag);
@@ -178,15 +180,22 @@ export default class ElMount {
       this.listeners.push([event, handler]);
     }
 
+    // Hybrid island boundary:
+    // hydrate the container element itself, then switch descendants to CSR.
+    if (isHydrating && isClientTarget) {
+      this.el.textContent = '';
+    }
+
+    const childServices = (isHydrating && isClientTarget)
+      ? { ...this.services, ctx: this.ctx, hydrate: { ...hydration, active: false } }
+      : { ...this.services, ctx: this.ctx };
+
     // -----------------------
     // CHILDREN
     // Pass the same ctx to subtree (El does not augment context)
     // -----------------------
     for (const child of (this.ir.children || [])) {
-      const inst = this.registry.mount(el, child, this.scope, {
-        ...this.services,
-        ctx: this.ctx
-      });
+      const inst = this.registry.mount(el, child, this.scope, childServices);
       this.childInstances.push(inst);
     }
   }

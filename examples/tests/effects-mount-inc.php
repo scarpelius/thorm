@@ -7,9 +7,11 @@ use function Thorm\{
     el, text, attrs, cls, concat, read, state,
     inc,
     onMount,
-    fragment
+    fragment,
+    client,
 };
-use Thorm\Renderer;
+use Thorm\BuildExample;
+use Thorm\Render;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
@@ -38,22 +40,26 @@ $app = fragment([
 // ─────────────────────────────────────────────────────────────────────────────
 // render → public/tests/<filename>/
 
-$test = strtolower(pathinfo(__FILE__, PATHINFO_FILENAME));
-$path = __DIR__ . '/../../public/tests/' . $test . '/';
-if (!is_dir($path)) { mkdir($path, 0777, true); }
 
-$renderer = new Renderer();
-$res = $renderer->renderPage($app, [
-    'title'       => 'Effect mount + inc',
-    'containerId' => 'app',
-    'template'    => __DIR__ . '/../../assets/index-test.tpl.html',
+$app = client(el('div', [], [$app]));
+
+$renderer = new Render();
+$res = $renderer->render($app);
+
+$build = BuildExample::build([
+    'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
+    'path'          => __DIR__.'/../../public/tests/',
+    'renderer'      => $res,
+    'template'      => __DIR__.'/../../assets/index.tpl.html',
+    'opts'          => [
+        'title'         => 'Effect mount + inc',
+        'containerId'   => 'app',
+    ],
 ]);
 
-// save the bootstrap data (IR JSON)
-$html_ok = file_put_contents($path . $res['iruri'], $res['irJson']) !== false;
-// save the page
-$page_ok = file_put_contents($path . 'index.html', $res['tpl']) !== false;
-
-echo $html_ok ? green("Wrote html file\n") : red("Could not write html file\n");
-echo $page_ok ? green("Wrote JSON data file\n") : red("Could not write JSON file\n");
+if($build !== false ) {
+    echo green("File wrote to disk.\n");
+} else {
+    echo red("Could not write files to disk.\n");
+}
 echo "\n";

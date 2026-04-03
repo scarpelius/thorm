@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>component-slots</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('component-slots', 'Component runtime should project named slots and fall back when no content is provided.', async ({ app, step, assert, assertEqual }) => {
+      const makeTemplate = () => ({
+        k: 'el',
+        tag: 'article',
+        props: { attrs: {}, style: {}, on: [] },
+        children: [
+          {
+            k: 'el',
+            tag: 'header',
+            props: { attrs: {}, style: {}, on: [] },
+            children: [{ k: 'slot', name: 'title' }],
+          },
+          {
+            k: 'el',
+            tag: 'section',
+            props: { attrs: {}, style: {}, on: [] },
+            children: [{
+              k: 'slot',
+              name: 'content',
+              children: [{
+                k: 'el',
+                tag: 'p',
+                props: { attrs: {}, style: {}, on: [] },
+                children: [{ k: 'text', value: { k: 'val', v: 'Fallback content' } }],
+              }],
+            }],
+          },
+        ],
+      });
+
+      await step('named slots are projected into the right outlets', async () => {
+        const projected = {
+          atoms: [],
+          root: {
+            k: 'component',
+            slots: {
+              title: [{
+                k: 'el',
+                tag: 'h1',
+                props: { attrs: {}, style: {}, on: [] },
+                children: [{ k: 'text', value: { k: 'val', v: 'Projected title' } }],
+              }],
+              content: [{
+                k: 'el',
+                tag: 'p',
+                props: { attrs: {}, style: {}, on: [] },
+                children: [{ k: 'text', value: { k: 'val', v: 'Projected body' } }],
+              }],
+            },
+            tpl: makeTemplate(),
+          },
+        };
+
+        const mountPoint = document.createElement('div');
+        app.appendChild(mountPoint);
+        boot(projected, mountPoint, { target: THORM_TARGET_CLIENT });
+
+        assertEqual(mountPoint.querySelector('header h1').textContent, 'Projected title', 'title slot should render projected content');
+        assertEqual(mountPoint.querySelector('section p').textContent, 'Projected body', 'content slot should render projected content');
+      });
+
+      await step('slot fallback renders when no projected content exists', async () => {
+        const fallbackOnly = {
+          atoms: [],
+          root: {
+            k: 'component',
+            tpl: makeTemplate(),
+          },
+        };
+
+        const mountPoint = document.createElement('div');
+        app.appendChild(mountPoint);
+        boot(fallbackOnly, mountPoint, { target: THORM_TARGET_CLIENT });
+
+        assert(!mountPoint.querySelector('header h1'), 'title slot should stay empty without projection');
+        assertEqual(mountPoint.querySelector('section p').textContent, 'Fallback content', 'content slot should render fallback');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -6,6 +6,7 @@ namespace Thorm\IR\Node;
 use Thorm\IR\Action\Listener;
 use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
+use Thorm\IR\Renderable;
 
 /**
  * IR node for a standard HTML element.
@@ -21,7 +22,7 @@ use Thorm\IR\Expr\Expr;
  *     [new TextNode('Save')]
  * );
  */
-final class ElNode extends Node implements \JsonSerializable, AtomCollectable {
+final class ElNode extends Node implements \JsonSerializable, AtomCollectable, Renderable {
     /**
      * Build an element IR node.
      *
@@ -66,6 +67,27 @@ final class ElNode extends Node implements \JsonSerializable, AtomCollectable {
                 }
             }
         }
+    }
+
+    public function render(callable $renderer): string
+    {
+        $tag = (string)($this->node['tag'] ?? 'div');
+        $props = $this->node['props'] ?? [];
+        $attrs = $this->renderProps($props, $this->ctx);
+        $isClientTarget = (($this->node['render']['target'] ?? null) === 'client');
+        if ($isClientTarget) {
+            $lower = strtolower($tag);
+            if (isset(self::VOID_TAGS[$lower])) {
+                return '<' . $tag . $attrs . '>';
+            }
+            return '<' . $tag . $attrs . '></' . $tag . '>';
+        }
+        $children = $this->renderNodes($this->node['children'] ?? [], $this->ctx);
+        $lower = strtolower($tag);
+        if (isset(self::VOID_TAGS[$lower])) {
+            return '<' . $tag . $attrs . '>';
+        }
+        return '<' . $tag . $attrs . '>' . $children . '</' . $tag . '>';
     }
 
     /**

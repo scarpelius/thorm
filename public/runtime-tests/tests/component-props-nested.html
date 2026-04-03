@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>component-props-nested</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('component-props-nested', 'Reactive prop updates should flow through nested component trees.', async ({ app, step, waitFor, assertEqual }) => {
+      const ir = {
+        atoms: [{ id: 1, initial: 'Welcome' }],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [{
+            k: 'component',
+            props: {
+              title: { k: 'read', atom: 1 },
+            },
+            tpl: {
+              k: 'component',
+              props: {
+                nestedTitle: { k: 'prop', name: 'title' },
+              },
+              tpl: {
+                k: 'el',
+                tag: 'div',
+                props: { attrs: {}, style: {}, on: [] },
+                children: [{
+                  k: 'el',
+                  tag: 'h3',
+                  props: { attrs: { id: 'deep-title' }, style: {}, on: [] },
+                  children: [{ k: 'text', value: { k: 'prop', name: 'nestedTitle' } }],
+                }],
+              },
+            },
+          }],
+        },
+      };
+
+      const runtime = boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('nested tree renders the initial reactive prop value', async () => {
+        assertEqual(app.querySelector('#deep-title').textContent, 'Welcome', 'initial nested prop value should render');
+      });
+
+      await step('updating the source atom refreshes the deepest nested prop consumer', async () => {
+        runtime.core.store.atoms.get(1).v = 'Updated title';
+        runtime.core.store.notify(1);
+        await waitFor(() => {
+          assertEqual(app.querySelector('#deep-title').textContent, 'Updated title', 'nested prop consumer should update after the source atom changes');
+        }, { label: 'nested prop update' });
+      });
+    });
+  </script>
+</body>
+</html>
+

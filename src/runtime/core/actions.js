@@ -1,5 +1,8 @@
 function evalMaybe(evalr, evt, ctx, v) {
-  return (v && typeof v === 'object' && v.k) ? evalr.evaluate(v, evt, ctx) : v;
+  return (v && typeof v === 'object' && v.k)
+    ? evalr.evaluate(v, evt, ctx) 
+    : v
+  ;
 }
 
 function parseSource(source) {
@@ -157,7 +160,11 @@ export async function runAction(evalr, services, ctx, action, evt = null) {
     }
     case 'cap': {
       try {
-        const args = evalMaybe(evalr, evt, ctx, action.args);
+        const rawArgs = action.args;
+        const args = Array.isArray(rawArgs)
+          ? rawArgs.map((v) => evalMaybe(evalr, evt, ctx, v))
+          : evalMaybe(evalr, evt, ctx, rawArgs);
+        
         const { invokeCapability } = await import('../capabilities/invoke.js');
 
         const value = await invokeCapability(action.name, args);

@@ -1,0 +1,79 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-show</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-show', 'Hydration should preserve show regions and keep them reactive.', async ({ app, step, click, waitFor, assert, assertEqual }) => {
+      app.innerHTML = '<div><button id="hide-show">Hide</button><button id="show-show">Show</button><!--show:start--><span id="hydrated-show">Visible</span><!--show:end--></div>';
+
+      const ir = {
+        atoms: [{ id: 1, initial: true }],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'hide-show' },
+                style: {},
+                on: [{ event: 'click', action: { k: 'set', atom: 1, to: { k: 'val', v: false } } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Hide' } }],
+            },
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'show-show' },
+                style: {},
+                on: [{ event: 'click', action: { k: 'set', atom: 1, to: { k: 'val', v: true } } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Show' } }],
+            },
+            {
+              k: 'show',
+              when: { k: 'read', atom: 1 },
+              child: {
+                k: 'el',
+                tag: 'span',
+                props: { attrs: { id: 'hydrated-show' }, style: {}, on: [] },
+                children: [{ k: 'text', value: { k: 'val', v: 'Visible' } }],
+              },
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_SERVER, state: { atoms: { 1: true } } });
+
+      await step('hydration preserves the initial show subtree', async () => {
+        assertEqual(app.querySelector('#hydrated-show').textContent, 'Visible', 'show subtree should bind to the existing SSR markup');
+      });
+
+      await step('hydrated show subtree can be hidden by events', async () => {
+        click(app.querySelector('#hide-show'));
+        await waitFor(() => {
+          assert(!app.querySelector('#hydrated-show'), 'show subtree should unmount after the hydrated click handler runs');
+        }, { label: 'show subtree hidden' });
+      });
+
+      await step('hydrated show subtree can mount again after becoming visible', async () => {
+        click(app.querySelector('#show-show'));
+        await waitFor(() => {
+          assertEqual(app.querySelector('#hydrated-show').textContent, 'Visible', 'show subtree should remount after the condition becomes true again');
+        }, { label: 'show subtree remounted' });
+      });
+    });
+  </script>
+</body>
+</html>

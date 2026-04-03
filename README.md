@@ -2,22 +2,31 @@
 
 PHP-first DSL for describing reactive UIs that compile to a small JavaScript runtime. Build views with simple PHP functions, emit an intermediate representation (IR), and let the runtime handle reactivity, events, routing, and effects in the browser.
 
+## Current release status
+Thorm is not yet published as a public Composer package.
+
+- In this repository, `composer install` is only used to generate local autoload files under `vendor/`.
+- A public GitHub repository is not required for that local install flow.
+- A public repository matters later for `composer require bitforge/thorm` from another project or for Packagist publication.
+- Until the repository is public, consume Thorm from this checkout or through a Composer `path` repository in a separate local test project.
+
 ## Project layout
-- `src/functions.php`: Public DSL surface (state, el, attrs, on, repeat, route, component, effects, http, etc.).
-- `src/Renderer.php`: Walks the IR tree, collects atoms, and emits `{atoms, root}` plus an HTML page using a template.
-- `src/IR/*`: IR node definitions for atoms, expressions, actions, effects, and DOM nodes.
-- `assets/index*.tpl.html`: HTML templates consumed by `Renderer` (`{$title}`, `{$containerId}`, `{$runtimeSrc}`, `{$iruri}` placeholders).
+- `src/php/functions.php`: Public DSL surface (state, el, attrs, on, repeat, route, component, effects, http, etc.).
+- `src/php/Render.php`: Builds the shared IR and can render server-side HTML from that IR.
+- `src/php/BuildExample.php`: Writes generated example output to `public/tests/<example>/`.
+- `src/php/IR/*`: IR node definitions for atoms, expressions, actions, effects, and DOM nodes.
+- `assets/index*.tpl.html`: HTML templates used during example generation (`{$title}`, `{$containerId}`, `{$runtimeSrc}`, `{$iruri}` placeholders).
 - `assets/runtime/**`: Browser runtime (core, primitives, utils, devtools). Synced to `public/runtime/` when shipping.
 - `examples/tests/*.php`: End-to-end samples that generate pages under `public/tests/` (ignore `examples/tests/hronic/`, it is outdated).
 - `cli/watch.sh`: Dev helper that watches the tree, reruns touched example PHP files, and syncs runtime assets.
 
 ## Requirements
 - PHP 8.1+
-- Composer (for autoloading via `vendor/autoload.php`)
+- Composer (or an existing `vendor/` directory) for autoloading via `vendor/autoload.php`
 - A static file server to view the generated pages (e.g., `php -S localhost:8000 -t public`)
 
 ## Quick start
-1) Install dependencies:
+1) Install autoload files in this repository:
 ```bash
 composer install
 ```
@@ -33,12 +42,32 @@ bash cli/watch.sh
 ```
 (Use `WATCH_MODE=poll` on filesystems without inotify.)
 
+## Testing from another local project before publication
+If you want to exercise the package as a dependency before the repository is public, use a Composer `path` repository:
+
+```json
+{
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../Thorm"
+    }
+  ],
+  "require": {
+    "bitforge/thorm": "*"
+  }
+}
+```
+
+That lets you validate package metadata, autoloading, and install behavior locally before making the GitHub repository public.
+
 ## Authoring UIs in PHP
 Build views with the DSL from `Thorm\` (autoloaded via composer files):
 ```php
 <?php
-use Thorm\Renderer;
-use function Thorm\{state, el, text, attrs, cls, on, inc, read};
+use Thorm\BuildExample;
+use Thorm\Render;
+use function Thorm\{state, el, text, attrs, cls, on, inc, read, client};
 
 $cnt = state(0);
 $app = el('div', [cls('p-3')], [
@@ -47,18 +76,25 @@ $app = el('div', [cls('p-3')], [
     el('button', [attrs(['class' => 'btn btn-primary']), on('click', inc($cnt, 1))], [text('Increment')]),
 ]);
 
-$renderer = new Renderer();
-$res = $renderer->renderPage($app, [
-    'title' => 'Counter',
-    'containerId' => 'app',
-    'template' => __DIR__ . '/assets/index.tpl.html',
-]);
-file_put_contents(__DIR__ . '/public/tests/counter/' . $res['iruri'], $res['irJson']);
-file_put_contents(__DIR__ . '/public/tests/counter/index.html', $res['tpl']);
-```
-`renderPage()` returns the IR JSON (atoms + root) and an HTML page with the runtime bootstrap embedded. Serve the output and the runtime under `public/runtime`.
+$app = client($app);
 
-## DSL highlights (see `src/functions.php`)
+$render = new Render();
+$res = $render->render($app);
+
+BuildExample::build([
+    'name' => 'counter',
+    'path' => __DIR__ . '/public/tests/',
+    'renderer' => $res,
+    'template' => __DIR__ . '/assets/index-test.tpl.html',
+    'opts' => [
+        'title' => 'Counter',
+        'containerId' => 'app',
+    ],
+]);
+```
+`Render::render()` returns the IR plus server-rendered HTML. `BuildExample::build()` writes the IR JSON and `index.html` for the example. Serve the output and the runtime under `public/runtime`.
+
+## DSL highlights (see `src/php/functions.php`)
 - State & expressions: `state`, `read`, `val/num/str/not/concat/cond`, `item` inside `repeat` (`item('')` returns the full item).
 - DOM nodes: `el`, `text`, `fragment`, `show`, `repeat` (lists), `attrs`, `cls`, `style`, `on` (events).
 - Routing & links: `route` with path table + fallback, `link`, `navigate`, `redirect`, `param`, `query`.
@@ -77,7 +113,7 @@ file_put_contents(__DIR__ . '/public/tests/counter/index.html', $res['tpl']);
 
 ## Runtime & templates
 - Runtime entry: `assets/runtime/index.js` (bundles core/primitives/utils/devtools) and is expected to be available at `/assets/Thorm-runtime.js` or copied to `public/runtime/`.
-- Templates: `assets/index.tpl.html` (default), `assets/index-test.tpl.html`, `assets/index-old.tpl.html`, `assets/index-hronic.tpl.html` (legacy). Tokens are replaced by `Renderer::renderPage()`.
+- Templates: `assets/index.tpl.html` (default), `assets/index-test.tpl.html`, `assets/index-old.tpl.html`, `assets/index-hronic.tpl.html` (legacy). Tokens are replaced during example generation.
 
 ## Serving and packaging
 - For quick demos, serve `public/` with PHP's built-in server: `php -S localhost:8000 -t public`.

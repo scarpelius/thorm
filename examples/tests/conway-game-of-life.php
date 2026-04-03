@@ -4,15 +4,17 @@ declare(strict_types=1);
 require __DIR__ . '/../../vendor/autoload.php';
 
 use function Thorm\{
-    el, text, attrs, cls, concat, read, state, fragment, repeat, item, val, cond, eq, style,
-    on, inc, set, every, thorm, html
+    attrs, client, cls, concat, cond, div, el, eq, every, fragment, html, item, on, p,
+    read, repeat, set, state, style, text, thorm, val
 };
-use Thorm\Renderer;
+use Thorm\BuildExample;
+use Thorm\Render;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
 
-function makeGrid(int $rows, int $cols): array {
+function makeGrid(int $rows, int $cols): array
+{
     $grid = [];
     for ($r = 0; $r < $rows; $r++) {
         $row = [];
@@ -24,7 +26,8 @@ function makeGrid(int $rows, int $cols): array {
     return $grid;
 }
 
-function seedGlider(array $grid, int $r, int $c): array {
+function seedGlider(array $grid, int $r, int $c): array
+{
     $grid[$r + 0][$c + 1] = 1;
     $grid[$r + 1][$c + 2] = 1;
     $grid[$r + 2][$c + 0] = 1;
@@ -33,7 +36,8 @@ function seedGlider(array $grid, int $r, int $c): array {
     return $grid;
 }
 
-function nextGen(array $grid): array {
+function nextGen(array $grid): array
+{
     $rows = count($grid);
     $cols = count($grid[0] ?? []);
     $out = $grid;
@@ -42,7 +46,9 @@ function nextGen(array $grid): array {
         $n = 0;
         for ($dr = -1; $dr <= 1; $dr++) {
             for ($dc = -1; $dc <= 1; $dc++) {
-                if ($dr === 0 && $dc === 0) continue;
+                if ($dr === 0 && $dc === 0) {
+                    continue;
+                }
                 $rr = ($r + $dr + $rows) % $rows;
                 $cc = ($c + $dc + $cols) % $cols;
                 $n += $grid[$rr][$cc] ? 1 : 0;
@@ -55,14 +61,19 @@ function nextGen(array $grid): array {
         for ($c = 0; $c < $cols; $c++) {
             $alive = $grid[$r][$c] === 1;
             $nbrs = $count($r, $c);
-            if ($alive && ($nbrs < 2 || $nbrs > 3)) $out[$r][$c] = 0;
-            if (!$alive && $nbrs === 3) $out[$r][$c] = 1;
+            if ($alive && ($nbrs < 2 || $nbrs > 3)) {
+                $out[$r][$c] = 0;
+            }
+            if (!$alive && $nbrs === 3) {
+                $out[$r][$c] = 1;
+            }
         }
     }
     return $out;
 }
 
-function frameFromGrid(array $grid): array {
+function frameFromGrid(array $grid): array
+{
     $frame = [];
     foreach ($grid as $r => $row) {
         $cells = [];
@@ -94,13 +105,58 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-4')], [html(hi
 \$currentFrame = state([]);
 
 // Tick every 200ms, advance by speed (1..10), wrap by frame count.
-\$nextIndex = thorm(['mod', ['add', read(\$frameIndex), read(\$speed)], {\$framesCount}]);
+\$nextIndex = thorm(['mod', ['add', read(\$frameIndex), read(\$speed)], {$framesCount}]);
 \$tickIndex = thorm(['cond', read(\$running), \$nextIndex, read(\$frameIndex)]);
 \$nextFrame = thorm(['get', read(\$framesAtom), \$tickIndex]);
 
-every(200, [
-    set(\$frameIndex, \$tickIndex, true),
-    set(\$currentFrame, \$nextFrame, true)
+\$rowTpl = el('div', [style(['display' => 'flex'])], [
+    repeat(item('cells'), concat(read(\$frameIndex), '-', item('id')),
+        el('div', [
+            style([
+                'width' => '12px',
+                'height' => '12px',
+                'border' => '1px solid #222',
+                'background' => cond(eq(item('alive'), val(1)), '#00d27a', '#111')
+            ])
+        ], [])
+    ),
+]);
+
+\$app = fragment([
+    el('div', [attrs(['class' => 'container my-5 p-3'])], [
+        client(
+            div([ cls('glass p-3 rounded-2') ], [
+                el('h1', [], [ text('Conway Game of Life') ]),
+                el('p', [cls('text-muted')], [
+                    text('A precomputed demo using thorm() for tick math and simple controls.')
+                ]),
+                el('div', [cls('d-flex gap-2 align-items-center my-3')], [
+                    el('button', [
+                        cls('btn btn-primary'),
+                        on('click', set(\$running, cond(read(\$running), val(false), val(true))))
+                    ], [ text(cond(read(\$running), 'Pause', 'Run')) ]),
+                    el('button', [
+                        cls('btn btn-outline-dark'),
+                        on('click', set(\$speed, thorm(['max', ['sub', read(\$speed), 1], 1])))
+                    ], [ text('Speed -') ]),
+                    el('button', [
+                        cls('btn btn-outline-dark'),
+                        on('click', set(\$speed, thorm(['min', ['add', read(\$speed), 1], 10])))
+                    ], [ text('Speed +') ]),
+                    el('span', [cls('text-dark ms-2')], [
+                        text(concat('Speed: ', read(\$speed), ' | Frame: ', read(\$frameIndex)))
+                    ]),
+                ]),
+                el('div', [style(['display' => 'inline-block', 'padding' => '8px', 'background' => '#0d0d0d'])], [
+                    repeat(read(\$currentFrame), concat(read(\$frameIndex), '-', item('id')), \$rowTpl)
+                ]),
+            ])
+        ),
+    ]),
+    every(200, [
+        set(\$frameIndex, \$tickIndex, true),
+        set(\$currentFrame, \$nextFrame, true)
+    ]),
 ]);
 ", true))]);
 
@@ -128,7 +184,8 @@ function seedGlider(array \$grid, int \$r, int \$c): array {
     return \$grid;
 }
 
-function nextGen(array \$grid): array {
+function nextGen(array \$grid): array
+{
     \$rows = count(\$grid);
     \$cols = count(\$grid[0] ?? []);
     \$out = \$grid;
@@ -137,7 +194,9 @@ function nextGen(array \$grid): array {
         \$n = 0;
         for (\$dr = -1; \$dr <= 1; \$dr++) {
             for (\$dc = -1; \$dc <= 1; \$dc++) {
-                if (\$dr === 0 && \$dc === 0) continue;
+                if (\$dr === 0 && \$dc === 0) {
+                    continue;
+                }
                 \$rr = (\$r + \$dr + \$rows) % \$rows;
                 \$cc = (\$c + \$dc + \$cols) % \$cols;
                 \$n += \$grid[\$rr][\$cc] ? 1 : 0;
@@ -150,14 +209,19 @@ function nextGen(array \$grid): array {
         for (\$c = 0; \$c < \$cols; \$c++) {
             \$alive = \$grid[\$r][\$c] === 1;
             \$nbrs = \$count(\$r, \$c);
-            if (\$alive && (\$nbrs < 2 || \$nbrs > 3)) \$out[\$r][\$c] = 0;
-            if (!\$alive && \$nbrs === 3) \$out[\$r][\$c] = 1;
+            if (\$alive && (\$nbrs < 2 || \$nbrs > 3)) {
+                \$out[\$r][\$c] = 0;
+            }
+            if (!\$alive && \$nbrs === 3) {
+                \$out[\$r][\$c] = 1;
+            }
         }
     }
     return \$out;
 }
 
-function frameFromGrid(array \$grid): array {
+function frameFromGrid(array \$grid): array
+{
     \$frame = [];
     foreach (\$grid as \$r => \$row) {
         \$cells = [];
@@ -207,55 +271,64 @@ $rowTpl = el('div', [style(['display' => 'flex'])], [
 ]);
 
 $app = fragment([
-    el('div', [attrs(['class' => 'container p-3'])], [
-        el('h1', [], [ text('Conway Game of Life') ]),
-        el('p', [cls('text-muted')], [
-            text('A precomputed demo using thorm() for tick math and simple controls.')
-        ]),
-        el('div', [cls('d-flex gap-2 align-items-center my-3')], [
-            el('button', [
-                cls('btn btn-primary'),
-                on('click', set($running, cond(read($running), val(false), val(true))))
-            ], [ text(cond(read($running), 'Pause', 'Run')) ]),
-            el('button', [
-                cls('btn btn-outline-dark'),
-                on('click', set($speed, thorm(['max', ['sub', read($speed), 1], 1])))
-            ], [ text('Speed -') ]),
-            el('button', [
-                cls('btn btn-outline-dark'),
-                on('click', set($speed, thorm(['min', ['add', read($speed), 1], 10])))
-            ], [ text('Speed +') ]),
-            el('span', [cls('text-darkit do ms-2')], [
-                text(concat('Speed: ', read($speed), ' | Frame: ', read($frameIndex)))
-            ]),
-        ]),
-        el('div', [style(['display' => 'inline-block', 'padding' => '8px', 'background' => '#0d0d0d'])], [
-            repeat(read($currentFrame), concat(read($frameIndex), '-', item('id')), $rowTpl)
-        ]),
-        $code,
+    el('div', [attrs(['class' => 'container my-5 p-3'])], [
+        client(
+            div([ cls('glass p-3 rounded-2') ], [
+                el('h1', [], [ text('Conway Game of Life') ]),
+                p([cls('text-muted')], [
+                    text('A precomputed demo using thorm() for tick math and simple controls.')
+                ]),
+                el('div', [cls('d-flex gap-2 align-items-center my-3')], [
+                    el('button', [
+                        cls('btn btn-primary'),
+                        on('click', set($running, cond(read($running), val(false), val(true))))
+                    ], [ text(cond(read($running), 'Pause', 'Run')) ]),
+                    el('button', [
+                        cls('btn btn-outline-dark'),
+                        on('click', set($speed, thorm(['max', ['sub', read($speed), 1], 1])))
+                    ], [ text('Speed -') ]),
+                    el('button', [
+                        cls('btn btn-outline-dark'),
+                        on('click', set($speed, thorm(['min', ['add', read($speed), 1], 10])))
+                    ], [ text('Speed +') ]),
+                    el('span', [cls('text-dark ms-2')], [
+                        text(concat('Speed: ', read($speed), ' | Frame: ', read($frameIndex)))
+                    ]),
+                ]),
+                el('div', [style(['display' => 'inline-block', 'padding' => '8px', 'background' => '#0d0d0d'])], [
+                    repeat(read($currentFrame), concat(read($frameIndex), '-', item('id')), $rowTpl)
+                ]),
+            ])
+        ),
         $precomputeCode,
+        $code,
     ]),
-
     every(200, [
         set($frameIndex, $tickIndex, true),
         set($currentFrame, $nextFrame, true)
     ]),
 ]);
 
-$test = strtolower(pathinfo(__FILE__, PATHINFO_FILENAME));
-$path = __DIR__ . '/../../public/tests/' . $test . '/';
-if (!is_dir($path)) { mkdir($path, 0777, true); }
 
-$renderer = new Renderer();
-$res = $renderer->renderPage($app, [
-    'title'       => 'Conway Game of Life',
-    'containerId' => 'app',
-    'template'    => __DIR__ . '/../../assets/index-test.tpl.html',
+$app = client(el('div', [], [$app]));
+
+$renderer = new Render();
+$res = $renderer->render($app);
+
+$build = BuildExample::build([
+    'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
+    'path'          => __DIR__.'/../../public/tests/',
+    'renderer'      => $res,
+    'template'      => __DIR__.'/../../assets/index.tpl.html',
+    'opts'          => [
+        'title'         => 'Conway Game of Life',
+        'containerId'   => 'app',
+    ],
 ]);
 
-$html_ok = file_put_contents($path . $res['iruri'], $res['irJson']) !== false;
-$page_ok = file_put_contents($path . 'index.html', $res['tpl']) !== false;
-
-echo $html_ok ? green("Wrote JSON data file\n") : red("Could not write JSON file\n");
-echo $page_ok ? green("Wrote HTML page\n") : red("Could not write HTML page\n");
+if($build !== false ) {
+    echo green("File wrote to disk.\n");
+} else {
+    echo red("Could not write files to disk.\n");
+}
 echo "\n";

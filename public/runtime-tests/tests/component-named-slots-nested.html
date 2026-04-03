@@ -1,0 +1,78 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>component-named-slots-nested</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('component-named-slots-nested', 'Named slots should project correctly through nested component composition.', async ({ app, step, assert, assertEqual }) => {
+      const layoutTemplate = {
+        k: 'el',
+        tag: 'article',
+        props: { attrs: { id: 'outer-layout' }, style: {}, on: [] },
+        children: [
+          {
+            k: 'el',
+            tag: 'header',
+            props: { attrs: {}, style: {}, on: [] },
+            children: [{ k: 'slot', name: 'title' }],
+          },
+          {
+            k: 'component',
+            slots: {
+              default: [{ k: 'slot', name: 'content' }],
+            },
+            tpl: {
+              k: 'el',
+              tag: 'section',
+              props: { attrs: { id: 'inner-shell' }, style: {}, on: [] },
+              children: [{ k: 'slot' }],
+            },
+          },
+        ],
+      };
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'component',
+          slots: {
+            title: [{
+              k: 'el',
+              tag: 'h1',
+              props: { attrs: { id: 'nested-slot-title' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'val', v: 'Projected title' } }],
+            }],
+            content: [{
+              k: 'el',
+              tag: 'p',
+              props: { attrs: { id: 'nested-slot-content' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'val', v: 'Projected body' } }],
+            }],
+          },
+          tpl: layoutTemplate,
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('nested named slot content reaches the final projected outlets', async () => {
+        const title = app.querySelector('#nested-slot-title');
+        const content = app.querySelector('#nested-slot-content');
+        const shell = app.querySelector('#inner-shell');
+
+        assert(shell !== null, 'inner component shell should render as part of nested slot composition');
+        assert(title !== null, 'title slot should project through the outer component');
+        assert(content !== null, 'content slot should project through the nested inner component');
+        assertEqual(title.textContent, 'Projected title', 'title slot should project through the outer component');
+        assertEqual(content.textContent, 'Projected body', 'content slot should project through the nested inner component');
+      });
+    });
+  </script>
+</body>
+</html>

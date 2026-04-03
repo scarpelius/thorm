@@ -1,0 +1,45 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>effect-timeout-dispose</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('effect-timeout-dispose', 'Disposed timeout effects should not mutate state after the tree is torn down.', async ({ app, step, assertEqual }) => {
+      const ir = {
+        atoms: [{ id: 1, initial: 'waiting' }],
+        root: {
+          k: 'fragment',
+          children: [
+            {
+              k: 'effect',
+              triggers: [{ type: 'timeout', ms: 40 }],
+              actions: [{ k: 'set', atom: 1, to: { k: 'val', v: 'done' } }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'timeout-dispose-value' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 1 } }],
+            },
+          ],
+        },
+      };
+
+      const runtime = boot(ir, app, { target: THORM_TARGET_CLIENT });
+      const value = app.querySelector('#timeout-dispose-value');
+      runtime.dispose();
+
+      await step('disposing before the timeout fires prevents the later mutation', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 90));
+        assertEqual(value.textContent, 'waiting', 'disposed timeout should not update the atom after teardown');
+      });
+    });
+  </script>
+</body>
+</html>

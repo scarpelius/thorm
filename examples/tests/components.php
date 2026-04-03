@@ -3,17 +3,18 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use function Thorm\{el, text, fragment, slot, val, prop, component, cls, html};
-use Thorm\Renderer;
+use function Thorm\{component, cls, div, el, fragment, h1, html, prop, slot, text, val, client};
+use Thorm\BuildExample;
+use Thorm\Render;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
 
 $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(highlight_string("<?php
 \$Layout = fragment([
-    el('header', [], [ slot('header') ]),
-    el('main',   [], [ slot() ]),
-    el('footer', [], [ slot('footer') ]),
+    el('header', [cls('bg-info-subtle mt-3')], [ slot('header') ]),
+    el('main',   [cls('bg-info-subtle')], [ slot() ]),
+    el('footer', [cls('bg-info-subtle mb-3')], [ slot('footer') ]),
 ]);
 
 // Optional: a template that also reads a prop, e.g. title
@@ -26,9 +27,9 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 
 // Use the component with NAMED slots (including 'default')
 \$NamedSlotsInstance = component(\$Layout, [], [
-    'header'  => [ el('h1', [], [ text(val('Top')) ]) ],
-    'default' => [ el('p',  [], [ text(val('Body')) ]) ],
-    'footer'  => [ el('p',  [], [ text(val('Bottom')) ]) ],
+    'header'  => [ el('p', [cls('p-3 m-0')], [ text(val('Top')) ]) ],
+    'default' => [ el('p', [cls('p-3 m-0')], [ text(val('Body')) ]) ],
+    'footer'  => [ el('p', [cls('p-3 m-0')], [ text(val('Bottom')) ]) ],
 ]);
 
 // Use the component with ONLY DEFAULT slot (unnamed children form)
@@ -47,6 +48,14 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 // Compose a page IR that uses the three component instances
 \$app = fragment([
     el('div', [ cls('container') ], [
+        el('div', [], [
+            el('h1', [cls('h1 mb-1')], [
+                text('Components'),
+            ]),
+            el('p', [cls('text-dark mb-0')], [
+                text('Reusable templates with named slots and props.'),
+            ]),
+        ]),
         \$NamedSlotsInstance,
         \$DefaultOnlyInstance,
         \$CardInstance,
@@ -55,9 +64,9 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 ", true))]);
 
 $Layout = fragment([
-    el('header', [], [ slot('header') ]),
-    el('main',   [], [ slot() ]),
-    el('footer', [], [ slot('footer') ]),
+    el('header', [cls('bg-info-subtle mt-3')], [ slot('header') ]),
+    el('main',   [cls('bg-info-subtle')], [ slot() ]),
+    el('footer', [cls('bg-info-subtle mb-3')], [ slot('footer') ]),
 ]);
 
 // Optional: a template that also reads a prop, e.g. title
@@ -70,9 +79,9 @@ $CardTpl = fragment([
 
 // Use the component with NAMED slots (including 'default')
 $NamedSlotsInstance = component($Layout, [], [
-    'header'  => [ el('h1', [], [ text(val('Top')) ]) ],
-    'default' => [ el('p',  [], [ text(val('Body')) ]) ],
-    'footer'  => [ el('p',  [], [ text(val('Bottom')) ]) ],
+    'header'  => [ el('p', [cls('p-3 m-0')], [ text(val('Top section')) ]) ],
+    'default' => [ el('p', [cls('p-3 m-0')], [ text(val('Body section')) ]) ],
+    'footer'  => [ el('p', [cls('p-3 m-0')], [ text(val('Bottom section')) ]) ],
 ]);
 
 // Use the component with ONLY DEFAULT slot (unnamed children form)
@@ -90,32 +99,44 @@ $CardInstance = component($CardTpl, /* props */ [
 
 // Compose a page IR that uses the three component instances
 $app = fragment([
-    el('div', [ cls('container') ], [
-        $NamedSlotsInstance,
-        $DefaultOnlyInstance,
-        $CardInstance,
+    el('div', [ cls('container my-5') ], [
+        div([ cls('glass p-3 rounded-2') ], [
+            el('div', [], [
+                el('h1', [cls('h1 mb-1')], [
+                    text('Components'),
+                ]),
+                el('p', [cls('text-dark mb-0')], [
+                    text('Reusable templates with named slots and props.'),
+                ]),
+            ]),
+            $NamedSlotsInstance,
+            $DefaultOnlyInstance,
+            $CardInstance,
+        ]),
         $code
     ]),
 ]);
 
-$test = strtolower(pathinfo(__FILE__, PATHINFO_FILENAME));
-$path = __DIR__.'/../../public/tests/'.$test.'/';
-if(!is_dir($path)) { mkdir($path); }
 
-$renderer = new Renderer();
-$res = $renderer->renderPage($app, [
-    'title'         => 'Components',
-    'containerId'   => 'app',
-    'template'      => __DIR__.'/../../assets/index-test.tpl.html',
+$app = client(el('div', [], [$app]));
+
+$renderer = new Render();
+$res = $renderer->render($app);
+
+$build = BuildExample::build([
+    'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
+    'path'          => __DIR__.'/../../public/tests/',
+    'renderer'      => $res,
+    'template'      => __DIR__.'/../../assets/index.tpl.html',
+    'opts'          => [
+        'title'         => 'Components',
+        'containerId'   => 'app',
+    ],
 ]);
-// save the bootstrap data
-$html = file_put_contents($path . $res['iruri'], $res['irJson']);
-// save the page
-$json_data = file_put_contents(
-    $path . 'index.html', 
-    $res['tpl']
-);
 
-if($html !== false ) { echo green("Wrote html file\n"); } else { echo red("Bad luck, could not write html file.\n"); }
-if($json_data !== false ) { echo green("Wrote JSON data file\n"); } else { echo red("Bad luck, could not write JSON file.\n"); }
+if($build !== false ) {
+    echo green("File wrote to disk.\n");
+} else {
+    echo red("Could not write files to disk.\n");
+}
 echo "\n";

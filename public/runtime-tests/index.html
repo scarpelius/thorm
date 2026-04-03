@@ -1,0 +1,179 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thorm Runtime Tests</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f3ea;
+      --panel: #fffdf8;
+      --ink: #1f1a14;
+      --muted: #6b6257;
+      --line: #d9cfbf;
+      --accent: #9b6b1f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px;
+      font: 16px/1.5 Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(155, 107, 31, 0.12), transparent 24rem),
+        linear-gradient(180deg, #f8f5ee 0%, var(--bg) 100%);
+    }
+    .rt-shell {
+      max-width: 980px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+    .rt-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px 22px;
+      box-shadow: 0 10px 30px rgba(31, 26, 20, 0.06);
+    }
+    .rt-title {
+      margin: 0 0 4px;
+      font-size: 2rem;
+      line-height: 1.1;
+    }
+    .rt-subtle {
+      margin: 0;
+      color: var(--muted);
+    }
+    .rt-groups {
+      display: grid;
+      gap: 18px;
+    }
+    .rt-group {
+      padding: 16px 18px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+    .rt-group h2 {
+      margin: 0 0 6px;
+      font-size: 1.15rem;
+    }
+    .rt-group p {
+      margin: 0 0 10px;
+      color: var(--muted);
+    }
+    .rt-group ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+    .rt-group li + li {
+      margin-top: 8px;
+    }
+    .rt-desc {
+      color: var(--muted);
+    }
+    code {
+      font: 13px/1.4 Consolas, "Courier New", monospace;
+    }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="rt-shell">
+    <section class="rt-card">
+      <h1 class="rt-title">Thorm Runtime Tests</h1>
+      <p class="rt-subtle">Browser-native runtime checks without Node.js. Open a page to run its assertions in the browser.</p>
+    </section>
+
+    <section class="rt-card">
+      <div class="rt-groups">
+        <section class="rt-group">
+          <h2>Core Rendering</h2>
+          <p>Basic client boot, events, conditional rendering, and keyed list reconciliation.</p>
+          <ul>
+            <li><a href="./tests/boot-basic.html">boot-basic.html</a> <span class="rt-desc">Boots a minimal client tree and confirms initial DOM rendering.</span></li>
+            <li><a href="./tests/events-inc.html">events-inc.html</a> <span class="rt-desc">Checks click listeners and atom increment updates.</span></li>
+            <li><a href="./tests/show-toggle.html">show-toggle.html</a> <span class="rt-desc">Verifies <code>show</code> mounts, unmounts, and remounts with atom changes.</span></li>
+            <li><a href="./tests/repeat-reconcile.html">repeat-reconcile.html</a> <span class="rt-desc">Confirms keyed repeat rows reconcile content and order after updates.</span></li>
+          </ul>
+        </section>
+
+        <section class="rt-group">
+          <h2>Effects</h2>
+          <p>Mount, watch, timeout, interval, and cleanup trigger behavior.</p>
+          <ul>
+            <li><a href="./tests/effect-on-mount.html">effect-on-mount.html</a> <span class="rt-desc">Checks that mount effects run once after boot.</span></li>
+            <li><a href="./tests/effect-watch.html">effect-watch.html</a> <span class="rt-desc">Checks that watch effects react only after the watched value changes.</span></li>
+            <li><a href="./tests/effect-after.html">effect-after.html</a> <span class="rt-desc">Checks timeout-triggered actions after the configured delay.</span></li>
+            <li><a href="./tests/effect-every.html">effect-every.html</a> <span class="rt-desc">Checks repeated interval ticks while the tree remains mounted.</span></li>
+            <li><a href="./tests/effect-timeout-dispose.html">effect-timeout-dispose.html</a> <span class="rt-desc">Checks disposed timeout effects do not fire after teardown.</span></li>
+            <li><a href="./tests/effect-interval-dispose.html">effect-interval-dispose.html</a> <span class="rt-desc">Checks disposed interval effects stop ticking after teardown.</span></li>
+            <li><a href="./tests/effect-watch-dispose.html">effect-watch-dispose.html</a> <span class="rt-desc">Checks disposed watch effects stop reacting to later changes.</span></li>
+          </ul>
+        </section>
+
+        <section class="rt-group">
+          <h2>HTTP</h2>
+          <p>Successful requests plus failure-path handling for HTTP actions.</p>
+          <ul>
+            <li><a href="./tests/http-text.html">http-text.html</a> <span class="rt-desc">Fetches text and stores both payload and status.</span></li>
+            <li><a href="./tests/http-json.html">http-json.html</a> <span class="rt-desc">Fetches JSON and renders the stored response body.</span></li>
+            <li><a href="./tests/http-status.html">http-status.html</a> <span class="rt-desc">Confirms deterministic response storage with status capture.</span></li>
+            <li><a href="./tests/http-error-status.html">http-error-status.html</a> <span class="rt-desc">Checks non-2xx responses still expose body and HTTP status.</span></li>
+            <li><a href="./tests/http-error-json.html">http-error-json.html</a> <span class="rt-desc">Checks invalid JSON falls back to <code>null</code> while preserving status.</span></li>
+            <li><a href="./tests/http-error-network.html">http-error-network.html</a> <span class="rt-desc">Checks failed fetches surface status <code>-1</code> without mutating payload.</span></li>
+          </ul>
+        </section>
+
+        <section class="rt-group">
+          <h2>Routing</h2>
+          <p>Matched routes, fallback behavior, params, query values, reroute flow, and route cleanup.</p>
+          <ul>
+            <li><a href="./tests/route-basic.html">route-basic.html</a> <span class="rt-desc">Confirms a matched route exposes param and query expressions.</span></li>
+            <li><a href="./tests/route-fallback.html">route-fallback.html</a> <span class="rt-desc">Checks fallback rendering when no route pattern matches.</span></li>
+            <li><a href="./tests/route-query.html">route-query.html</a> <span class="rt-desc">Checks query-string parsing through route query expressions.</span></li>
+            <li><a href="./tests/route-params-multi.html">route-params-multi.html</a> <span class="rt-desc">Checks extraction across multiple dynamic path segments.</span></li>
+            <li><a href="./tests/route-reroute.html">route-reroute.html</a> <span class="rt-desc">Checks <code>navigate</code> triggers rerendering into the new route view.</span></li>
+            <li><a href="./tests/route-dispose-restore.html">route-dispose-restore.html</a> <span class="rt-desc">Checks dispose restores the previous reroute hook and stops old rerenders.</span></li>
+            <li><a href="./tests/route-view-cleanup-events.html">route-view-cleanup-events.html</a> <span class="rt-desc">Checks rerouted-away view handlers are disposed with the old route subtree.</span></li>
+          </ul>
+        </section>
+
+        <section class="rt-group">
+          <h2>Hydration</h2>
+          <p>Hydration against SSR-like DOM for plain elements, conditionals, repeats, components, slots, and mismatch handling.</p>
+          <ul>
+            <li><a href="./tests/hydrate-basic.html">hydrate-basic.html</a> <span class="rt-desc">Binds client events onto existing SSR-like markup.</span></li>
+            <li><a href="./tests/hydrate-show.html">hydrate-show.html</a> <span class="rt-desc">Checks <code>show</code> hydration and later visibility toggles.</span></li>
+            <li><a href="./tests/hydrate-show-mismatch.html">hydrate-show-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when visible <code>show</code> markup is missing.</span></li>
+            <li><a href="./tests/hydrate-repeat.html">hydrate-repeat.html</a> <span class="rt-desc">Checks hydrated repeat rows stay interactive and reconcile correctly.</span></li>
+            <li><a href="./tests/hydrate-repeat-mismatch.html">hydrate-repeat-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when keyed repeat rows are missing.</span></li>
+            <li><a href="./tests/hydrate-component-slot.html">hydrate-component-slot.html</a> <span class="rt-desc">Checks hydrated component props and projected slot content.</span></li>
+            <li><a href="./tests/hydrate-slot-fallback-replace.html">hydrate-slot-fallback-replace.html</a> <span class="rt-desc">Checks hydrated projected slot content replaces fallback slot content.</span></li>
+            <li><a href="./tests/hydrate-slot-fallback-empty.html">hydrate-slot-fallback-empty.html</a> <span class="rt-desc">Checks fallback slot content hydrates correctly when no projection exists.</span></li>
+          </ul>
+        </section>
+
+        <section class="rt-group">
+          <h2>Components</h2>
+          <p>Prop evaluation, slot projection, nesting, and reactive prop flow through component trees.</p>
+          <ul>
+            <li><a href="./tests/component-props.html">component-props.html</a> <span class="rt-desc">Checks component prop expressions and reactive prop updates.</span></li>
+            <li><a href="./tests/component-slots.html">component-slots.html</a> <span class="rt-desc">Checks named slot projection and fallback rendering.</span></li>
+            <li><a href="./tests/component-slot-replace.html">component-slot-replace.html</a> <span class="rt-desc">Checks projected slot content replaces default fallback content.</span></li>
+            <li><a href="./tests/component-nested.html">component-nested.html</a> <span class="rt-desc">Checks rendering across nested component boundaries.</span></li>
+            <li><a href="./tests/component-props-nested.html">component-props-nested.html</a> <span class="rt-desc">Checks reactive prop updates reach deeply nested consumers.</span></li>
+            <li><a href="./tests/component-named-slots-nested.html">component-named-slots-nested.html</a> <span class="rt-desc">Checks named slots project through nested component composition.</span></li>
+          </ul>
+        </section>
+      </div>
+    </section>
+
+    <section class="rt-card">
+      <p>Serve <code>public/</code> and open any page above. Each test page renders its own pass/fail summary.</p>
+    </section>
+  </div>
+</body>
+</html>

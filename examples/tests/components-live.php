@@ -4,12 +4,11 @@ declare(strict_types=1);
 require __DIR__ . '/../../vendor/autoload.php';
 
 use function Thorm\{
-    el, text, concat, on, inc, set, read, state, cls,
-    fragment, slot, prop, component, repeat, item, cond, val, eq,
-    html,
-    show
+    cls, component, concat, cond, div, el, eq, fragment, html, inc, item, on, prop, read,
+    repeat, set, show, slot, state, text, val, client,
 };
-use Thorm\Renderer;
+use Thorm\BuildExample;
+use Thorm\Render;
 
 function green($s){ return "\033[32m{$s}\033[0m"; }
 function red($s){ return "\033[31m{$s}\033[0m"; }
@@ -18,7 +17,7 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 /**
 * Demo: Component live reactivity for props & slots.
 *
-* - Props: title reads from \$i (counter). Buttons mutate \$i → header updates without remounting.
+* - Props: title reads from \$i (counter). Buttons mutate \$i -> header updates without remounting.
 * - Slots: default slot renders a list via repeat() driven by \$mode (0/1). Toggle switches arrays.
 *          footer slot visibility toggled by \$showFooter.
 */
@@ -63,8 +62,8 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
             el('div', [ cls('d-flex justify-content-between') ], [
                 el('small', [], [ text('Footer (static area)') ]),
                 // show/hide via \$showFooter
-                el('small', [], [ 
-                    text(concat('Visible: ', cond(eq(read(\$showFooter), val(true)), 'yes', 'no'))) 
+                el('small', [], [
+                    text(concat('Visible: ', cond(eq(read(\$showFooter), val(true)), 'yes', 'no')))
                 ]),
             ]),
             // Also demonstrate conditional child
@@ -79,8 +78,8 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 
 // The App
 \$app = el('div', [ cls('container') ], [
-    el('h2', [], [ text('Components: live props & slots') ]),
-
+    el('h1', [], [ text('Components: live props & slots') ]),
+    el('p', [], [text('Live props and slots update without remounting the component.')]),
     // Controls
     el('div', [ cls('my-2 btn-group') ], [
         el('button', [ cls('btn btn-primary'), on('click', inc(\$i, 1)) ], [ text('Title++') ]),
@@ -101,7 +100,7 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
 /**
 * Demo: Component live reactivity for props & slots.
 *
-* - Props: title reads from $i (counter). Buttons mutate $i → header updates without remounting.
+* - Props: title reads from $i (counter). Buttons mutate $i -> header updates without remounting.
 * - Slots: default slot renders a list via repeat() driven by $mode (0/1). Toggle switches arrays.
 *          footer slot visibility toggled by $showFooter.
 */
@@ -146,8 +145,8 @@ $comp = component(
             el('div', [ cls('d-flex justify-content-between') ], [
                 el('small', [], [ text('Footer (static area)') ]),
                 // show/hide via $showFooter
-                el('small', [], [ 
-                    text(concat('Visible: ', cond(eq(read($showFooter), val(true)), 'yes', 'no'))) 
+                el('small', [], [
+                    text(concat('Visible: ', cond(eq(read($showFooter), val(true)), 'yes', 'no')))
                 ]),
             ]),
             // Also demonstrate conditional child
@@ -161,43 +160,48 @@ $comp = component(
 );
 
 // The App
-$app = el('div', [ cls('container') ], [
-    el('h2', [], [ text('Components: live props & slots') ]),
+$app = el('div', [ cls('container my-5') ], [
+    div([ cls('glass p-3 rounded-2') ], [
+        el('h1', [], [ text('Components: live props & slots') ]),
+        el('p', [], [text('Live props and slots update without remounting the component.')]),
+        // Controls
+        el('div', [ cls('my-2 btn-group') ], [
+            el('button', [ cls('btn btn-primary'), on('click', inc($i, 1)) ], [ text('Title++') ]),
+            el('button', [ cls('btn btn-secondary'), on('click', set($mode, cond(eq(read($mode), val(0)), val(1), val(0)))) ], [ text('Toggle Items A/B') ]),
+            el('button', [ cls('btn btn-outline-dark'), on('click', set($showFooter, cond(eq(read($showFooter), val(true)), val(false), val(true)))) ], [ text('Toggle Footer') ]),
+        ]),
 
-    // Controls
-    el('div', [ cls('my-2 btn-group') ], [
-        el('button', [ cls('btn btn-primary'), on('click', inc($i, 1)) ], [ text('Title++') ]),
-        el('button', [ cls('btn btn-secondary'), on('click', set($mode, cond(eq(read($mode), val(0)), val(1), val(0)))) ], [ text('Toggle Items A/B') ]),
-        el('button', [ cls('btn btn-outline-dark'), on('click', set($showFooter, cond(eq(read($showFooter), val(true)), val(false), val(true)))) ], [ text('Toggle Footer') ]),
+        // Live debug line
+        el('p', [ cls('text-muted') ], [
+            text(concat('i=', read($i), ' | mode=', read($mode), ' | footer=', cond(eq(read($showFooter), val(true)), 'on', 'off')))
+        ]),
+
+        // Component instance
+        $comp,
     ]),
-
-    // Live debug line
-    el('p', [ cls('text-muted') ], [
-        text(concat('i=', read($i), ' | mode=', read($mode), ' | footer=', cond(eq(read($showFooter), val(true)), 'on', 'off')))
-    ]),
-
-    // Component instance
-    $comp,
     $code
 ]);
 
-$test = strtolower(pathinfo(__FILE__, PATHINFO_FILENAME));
-$path = __DIR__.'/../../public/tests/'.$test.'/';
 
-if(!is_dir($path)) { mkdir($path, recursive: true); }
+$app = client($app);
 
-$renderer = new Renderer();
-$res = $renderer->renderPage($app, [
-    'title'         => 'Components: live props & slots',
-    'containerId'   => 'app',
-    'template'      => __DIR__.'/../../assets/index-test.tpl.html',
+$renderer = new Render();
+$res = $renderer->render($app);
+
+$build = BuildExample::build([
+    'name'          => strtolower(pathinfo(__FILE__, PATHINFO_FILENAME)),
+    'path'          => __DIR__.'/../../public/tests/',
+    'renderer'      => $res,
+    'template'      => __DIR__.'/../../assets/index.tpl.html',
+    'opts'          => [
+        'title'         => 'Components: live props & slots',
+        'containerId'   => 'app',
+    ],
 ]);
 
-// save the bootstrap data
-$html = file_put_contents($path . $res['iruri'], $res['irJson']);
-// save the page
-$json_data = file_put_contents($path . 'index.html', $res['tpl']);
-
-if($html !== false ) { echo green("Wrote html file\n"); } else { echo red("Bad luck, could not write html file.\n"); }
-if($json_data !== false ) { echo green("Wrote JSON data file\n"); } else { echo red("Bad luck, could not write JSON file.\n"); }
+if($build !== false ) {
+    echo green("File wrote to disk.\n");
+} else {
+    echo red("Could not write files to disk.\n");
+}
 echo "\n";

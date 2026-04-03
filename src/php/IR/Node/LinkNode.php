@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Thorm\IR\Node;
 
 use Thorm\IR\Expr\Expr;
+use Thorm\IR\Renderable;
 
 /**
  * IR node for declarative navigation links.
@@ -19,7 +20,7 @@ use Thorm\IR\Expr\Expr;
  *     [new TextNode('Docs')]
  * );
  */
-final class LinkNode extends Node implements \JsonSerializable {
+final class LinkNode extends Node implements \JsonSerializable, Renderable {
     /**
      * Build a link IR node.
      *
@@ -32,6 +33,17 @@ final class LinkNode extends Node implements \JsonSerializable {
         public array $props = [],
         public array $children = [],
     ) {}
+
+    public function render(callable $renderer): string
+    {
+        $props = $this->node['props'] ?? [];
+        $attrs = $this->renderProps($props, $this->ctx);
+        $href = $this->evalExpr($this->node['to'] ?? null, $this->ctx);
+        $hrefVal = $this->escape((string)($href ?? ''));
+        $attrs .= ' href="' . $hrefVal . '"';
+        $children = $this->renderNodes($this->node['children'] ?? [], $this->ctx);
+        return '<a' . $attrs . '>' . $children . '</a>';
+    }
 
     /**
      * Encode this link node as runtime IR payload.

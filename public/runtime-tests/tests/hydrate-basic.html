@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-basic</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-basic', 'Hydration should bind to existing SSR-like DOM and keep it interactive.', async ({ app, step, click, waitMicrotasks, assertEqual }) => {
+      app.innerHTML = '<div><button>Inc</button><span>1</span></div>';
+
+      const ir = {
+        atoms: [{ id: 1, initial: 1 }],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: {},
+                style: {},
+                on: [{ event: 'click', action: { k: 'inc', atom: 1, by: 1 } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Inc' } }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: {}, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 1 } }],
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_SERVER, state: { atoms: { 1: 1 } } });
+
+      await step('hydration preserves the existing SSR-like markup', async () => {
+        assertEqual(app.querySelector('span').textContent, '1', 'span should still show SSR value');
+      });
+
+      await step('hydrated event handlers still update the DOM', async () => {
+        click(app.querySelector('button'));
+        await waitMicrotasks();
+        assertEqual(app.querySelector('span').textContent, '2', 'hydrated click should update the value');
+      });
+    });
+  </script>
+</body>
+</html>

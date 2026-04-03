@@ -52,7 +52,7 @@ export function resolveProps(expr, ctx) {
   if (expr.k === 'prop') {
     const ex = ctx && ctx.__propsExpr ? ctx.__propsExpr[expr.name] : undefined;
     // Fallback to a stable "val(undefined)" if prop missing
-    return ex || { k: 'val', v: undefined };
+    return ex ? resolveProps(ex, ctx) : { k: 'val', v: undefined };
   }
   // Recurse through common shapes
   switch (expr.k) {

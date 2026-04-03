@@ -1,0 +1,86 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-component-slot</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-component-slot', 'Component and slot hydration should preserve projected content and reactive props when supported.', async ({ app, step, click, waitFor, assertEqual }) => {
+      app.innerHTML = '<div><button id="update-title">Update</button><!--component:start--><section><h2 id="hydrated-title">Welcome</h2><div><!--slot:start--><strong id="hydrated-slot">Projected</strong><!--slot:end--></div></section><!--component:end--></div>';
+
+      const ir = {
+        atoms: [{ id: 1, initial: 'Welcome' }],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'update-title' },
+                style: {},
+                on: [{ event: 'click', action: { k: 'set', atom: 1, to: { k: 'val', v: 'Updated' } } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Update' } }],
+            },
+            {
+              k: 'component',
+              props: {
+                title: { k: 'read', atom: 1 },
+              },
+              slots: {
+                default: [{
+                  k: 'el',
+                  tag: 'strong',
+                  props: { attrs: { id: 'hydrated-slot' }, style: {}, on: [] },
+                  children: [{ k: 'text', value: { k: 'val', v: 'Projected' } }],
+                }],
+              },
+              tpl: {
+                k: 'el',
+                tag: 'section',
+                props: { attrs: {}, style: {}, on: [] },
+                children: [
+                  {
+                    k: 'el',
+                    tag: 'h2',
+                    props: { attrs: { id: 'hydrated-title' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'prop', name: 'title' } }],
+                  },
+                  {
+                    k: 'el',
+                    tag: 'div',
+                    props: { attrs: {}, style: {}, on: [] },
+                    children: [{ k: 'slot' }],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_SERVER, state: { atoms: { 1: 'Welcome' } } });
+
+      await step('hydration preserves projected slot content and initial props', async () => {
+        assertEqual(app.querySelector('#hydrated-title').textContent, 'Welcome', 'component prop should hydrate against the existing DOM');
+        assertEqual(app.querySelector('#hydrated-slot').textContent, 'Projected', 'projected slot content should hydrate in place when supported');
+      });
+
+      await step('hydrated component props remain reactive after boot', async () => {
+        click(app.querySelector('#update-title'));
+        await waitFor(() => {
+          assertEqual(app.querySelector('#hydrated-title').textContent, 'Updated', 'component prop should still react after hydration');
+        }, { label: 'component prop hydration update' });
+      });
+    });
+  </script>
+</body>
+</html>

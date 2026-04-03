@@ -1,0 +1,48 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>effect-every</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('effect-every', 'Interval effects should tick repeatedly while mounted.', async ({ app, step, waitFor, assert }) => {
+      const ir = {
+        atoms: [{ id: 1, initial: 0 }],
+        root: {
+          k: 'fragment',
+          children: [
+            {
+              k: 'effect',
+              triggers: [{ type: 'interval', ms: 20 }],
+              actions: [{ k: 'inc', atom: 1, by: 1 }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'interval-value' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 1 } }],
+            },
+          ],
+        },
+      };
+
+      const runtime = boot(ir, app, { target: THORM_TARGET_CLIENT });
+      const value = app.querySelector('#interval-value');
+
+      await step('interval effect increments more than once while mounted', async () => {
+        await waitFor(() => {
+          const current = Number(value.textContent || '0');
+          assert(current >= 2, `expected interval to tick at least twice, got ${current}`);
+        }, { label: 'interval effect result', timeoutMs: 2500 });
+      });
+
+      runtime.dispose();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>http-text</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('http-text', 'HTTP action should fetch a text response and store it in the target atom.', async ({ app, step, click, waitFor, assertEqual }) => {
+      const ir = {
+        atoms: [
+          { id: 1, initial: 'idle' },
+          { id: 2, initial: null },
+        ],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'fetch-text' },
+                style: {},
+                on: [{
+                  event: 'click',
+                  action: {
+                    k: 'http',
+                    url: { k: 'val', v: '/api/ping/' },
+                    method: 'GET',
+                    parse: 'text',
+                    to: 1,
+                    status: 2,
+                  },
+                }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Fetch ping' } }],
+            },
+            {
+              k: 'el',
+              tag: 'pre',
+              props: { attrs: { id: 'text-payload' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 1 } }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'text-status' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 2 } }],
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+      const button = app.querySelector('#fetch-text');
+      const payload = app.querySelector('#text-payload');
+      const status = app.querySelector('#text-status');
+
+      await step('before the request, the target atom keeps its initial value', async () => {
+        assertEqual(payload.textContent, 'idle', 'text atom should start unchanged');
+      });
+
+      await step('clicking the button fetches text and stores response + status', async () => {
+        click(button);
+        await waitFor(() => {
+          assertEqual(payload.textContent.trim(), 'pong', 'text response should be stored in the target atom');
+          assertEqual(status.textContent, '200', 'status atom should contain the HTTP status');
+        }, { label: 'text response and status' });
+      });
+    });
+  </script>
+</body>
+</html>

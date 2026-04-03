@@ -1,0 +1,66 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-repeat-mismatch</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-repeat-mismatch', 'Hydration should fail clearly when repeat SSR markup does not match the keyed row IR shape.', async ({ app, step, assertContains }) => {
+      app.innerHTML = '<div><ul><!--repeat:start--><!--repeat:row:a:start--><li>Ada</li><!--repeat:row:a:end--><!--repeat:end--></ul></div>';
+
+      const ir = {
+        atoms: [{ id: 1, initial: [
+          { id: 'a', label: 'Ada' },
+          { id: 'b', label: 'Grace' },
+        ] }],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [{
+            k: 'el',
+            tag: 'ul',
+            props: { attrs: {}, style: {}, on: [] },
+            children: [{
+              k: 'repeat',
+              items: { k: 'read', atom: 1 },
+              key: { k: 'item', path: 'id' },
+              tpl: {
+                k: 'el',
+                tag: 'li',
+                props: { attrs: {}, style: {}, on: [] },
+                children: [{ k: 'text', value: { k: 'item', path: 'label' } }],
+              },
+            }],
+          }],
+        },
+      };
+
+      await step('missing repeat row markup raises a hydration error with a useful message', async () => {
+        let message = '';
+        try {
+          boot(ir, app, {
+            target: THORM_TARGET_SERVER,
+            state: {
+              atoms: {
+                1: [
+                  { id: 'a', label: 'Ada' },
+                  { id: 'b', label: 'Grace' },
+                ],
+              },
+            },
+          });
+        } catch (error) {
+          message = error?.message ?? String(error);
+        }
+        assertContains(message, '[hydrate] expected comment repeat:row:b:start', 'repeat hydration mismatch should fail on the missing keyed row marker');
+      });
+    });
+  </script>
+</body>
+</html>

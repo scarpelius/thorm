@@ -6,6 +6,7 @@ namespace Thorm\IR\Node;
 use InvalidArgumentException;
 use Thorm\IR\AtomCollectable;
 use Thorm\IR\Expr\Expr;
+use Thorm\IR\Renderable;
 
 /**
  * IR node for mounting a component template with props and slots.
@@ -21,7 +22,7 @@ use Thorm\IR\Expr\Expr;
  *     ['default' => [new TextNode('Body')]]
  * );
  */
-final class ComponentNode extends Node implements AtomCollectable
+final class ComponentNode extends Node implements AtomCollectable, Renderable
 {
     /**
      * Build a component IR node.
@@ -74,6 +75,29 @@ final class ComponentNode extends Node implements AtomCollectable
         foreach ($this->props as $expr) $collect($expr);
         foreach ($this->slots as $nodes) foreach ($nodes as $n) $collect($n);
         if ($this->key) $collect($this->key);
+    }
+
+    public function render(callable $renderer): string
+    {
+        $propsExpr = is_array($this->node['props'] ?? null) ? $this->node['props'] : [];
+        $propsVal = [];
+
+        foreach ($propsExpr as $name => $expr) {
+            $propsVal[(string)$name] = $this->evalExpr($expr, $this->ctx);
+        }
+
+        $childCtx = $this->ctx;
+        $childCtx['props'] = $propsVal;
+        $childCtx['__propsExpr'] = $propsExpr;
+        $childCtx['__slots'] = is_array($this->node['slots'] ?? null) ? $this->node['slots'] : [];
+
+        $tpl = $this->node['tpl'] ?? null;
+        if ($tpl instanceof \JsonSerializable) {
+            $tpl = $tpl->jsonSerialize();
+        }
+
+        $inner = is_array($tpl) ? $this->renderNodes([$tpl], $childCtx) : '';
+        return $this->comment('component:start') . $inner . $this->comment('component:end');
     }
 
     /**

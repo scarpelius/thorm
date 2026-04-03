@@ -1,0 +1,79 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>http-error-network</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('http-error-network', 'HTTP action should mark network failures with status -1 and leave the target atom untouched.', async ({ app, step, click, waitFor, assertEqual }) => {
+      const ir = {
+        atoms: [
+          { id: 1, initial: 'idle' },
+          { id: 2, initial: null },
+        ],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'fetch-network-error' },
+                style: {},
+                on: [{
+                  event: 'click',
+                  action: {
+                    k: 'http',
+                    url: { k: 'val', v: 'http://[' },
+                    method: 'GET',
+                    parse: 'text',
+                    to: 1,
+                    status: 2,
+                  },
+                }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Fetch invalid URL' } }],
+            },
+            {
+              k: 'el',
+              tag: 'pre',
+              props: { attrs: { id: 'network-error-payload' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 1 } }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'network-error-status' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 2 } }],
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+      const button = app.querySelector('#fetch-network-error');
+      const payload = app.querySelector('#network-error-payload');
+      const status = app.querySelector('#network-error-status');
+
+      await step('before the request the payload remains idle', async () => {
+        assertEqual(payload.textContent, 'idle', 'payload atom should start unchanged');
+      });
+
+      await step('fetch rejection sets status to -1 without mutating the payload atom', async () => {
+        click(button);
+        await waitFor(() => {
+          assertEqual(payload.textContent, 'idle', 'payload atom should remain unchanged on fetch failure');
+          assertEqual(status.textContent, '-1', 'status atom should contain -1 for network errors');
+        }, { label: 'network failure state' });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>effect-repeat-dispose</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('effect-repeat-dispose', 'Effects owned by repeated rows should stop after that row is removed.', async ({ app, step, click, waitFor, assertEqual, assert }) => {
+      const ir = {
+        atoms: [
+          {
+            id: 1,
+            initial: [
+              { id: 'a', label: 'Alpha', countAtom: 2 },
+              { id: 'b', label: 'Beta', countAtom: 3 },
+            ],
+          },
+          { id: 2, initial: 0 },
+          { id: 3, initial: 0 },
+        ],
+        root: {
+          k: 'fragment',
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'remove-alpha' },
+                style: {},
+                on: [{
+                  event: 'click',
+                  action: {
+                    k: 'set',
+                    atom: 1,
+                    to: {
+                      k: 'val',
+                      v: [
+                        { id: 'b', label: 'Beta', countAtom: 3 },
+                      ],
+                    },
+                  },
+                }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Remove Alpha row' } }],
+            },
+            {
+              k: 'repeat',
+              items: { k: 'read', atom: 1 },
+              key: { k: 'item', path: 'id' },
+              tpl: {
+                k: 'fragment',
+                children: [
+                  {
+                    k: 'show',
+                    when: { k: 'op', name: 'eq', a: { k: 'item', path: 'id' }, b: { k: 'val', v: 'a' } },
+                    child: {
+                      k: 'fragment',
+                      children: [
+                        {
+                          k: 'effect',
+                          triggers: [{ type: 'interval', ms: 20 }],
+                          actions: [{ k: 'inc', atom: 2, by: 1 }],
+                        },
+                        {
+                          k: 'el',
+                          tag: 'div',
+                          props: { attrs: { id: 'row-a' }, style: {}, on: [] },
+                          children: [
+                            {
+                              k: 'el',
+                              tag: 'span',
+                              props: { attrs: { id: 'label-a' }, style: {}, on: [] },
+                              children: [{ k: 'text', value: { k: 'item', path: 'label' } }],
+                            },
+                            { k: 'text', value: { k: 'val', v: ':' } },
+                            {
+                              k: 'el',
+                              tag: 'span',
+                              props: { attrs: { id: 'count-a' }, style: {}, on: [] },
+                              children: [{ k: 'text', value: { k: 'read', atom: 2 } }],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    k: 'show',
+                    when: { k: 'op', name: 'eq', a: { k: 'item', path: 'id' }, b: { k: 'val', v: 'b' } },
+                    child: {
+                      k: 'fragment',
+                      children: [
+                        {
+                          k: 'effect',
+                          triggers: [{ type: 'interval', ms: 20 }],
+                          actions: [{ k: 'inc', atom: 3, by: 1 }],
+                        },
+                        {
+                          k: 'el',
+                          tag: 'div',
+                          props: { attrs: { id: 'row-b' }, style: {}, on: [] },
+                          children: [
+                            {
+                              k: 'el',
+                              tag: 'span',
+                              props: { attrs: { id: 'label-b' }, style: {}, on: [] },
+                              children: [{ k: 'text', value: { k: 'item', path: 'label' } }],
+                            },
+                            { k: 'text', value: { k: 'val', v: ':' } },
+                            {
+                              k: 'el',
+                              tag: 'span',
+                              props: { attrs: { id: 'count-b' }, style: {}, on: [] },
+                              children: [{ k: 'text', value: { k: 'read', atom: 3 } }],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      const runtime = boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('each repeated row effect ticks while both rows are mounted', async () => {
+        await waitFor(() => {
+          const alpha = Number(app.querySelector('#count-a')?.textContent || '0');
+          const beta = Number(app.querySelector('#count-b')?.textContent || '0');
+          assert(alpha >= 1, `expected Alpha row to tick at least once, got ${alpha}`);
+          assert(beta >= 1, `expected Beta row to tick at least once, got ${beta}`);
+        }, { label: 'repeat row interval tick' });
+      });
+
+      await step('removing one row disposes only that row effect', async () => {
+        const alphaCount = app.querySelector('#count-a');
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        click(app.querySelector('#remove-alpha'));
+        await waitFor(() => {
+          assertEqual(app.querySelector('#row-a'), null, 'removed repeat row should leave the DOM');
+          assertEqual(app.querySelector('#row-b') !== null, true, 'remaining repeat row should stay mounted');
+        }, { label: 'repeat row removed' });
+
+        const alphaBeforeWait = runtime.core.store.atoms.get(2).v;
+        const betaBeforeWait = Number(app.querySelector('#count-b').textContent || '0');
+        await new Promise((resolve) => setTimeout(resolve, 80));
+        assertEqual(runtime.core.store.atoms.get(2).v, alphaBeforeWait, 'removed row effect should stop mutating its atom');
+        assertEqual(alphaCount.textContent, String(alphaBeforeWait), 'detached row node should keep its last rendered value');
+        assert(Number(app.querySelector('#count-b').textContent || '0') > betaBeforeWait, 'remaining row effect should keep ticking after the other row is removed');
+      });
+    });
+  </script>
+</body>
+</html>

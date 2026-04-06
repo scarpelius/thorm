@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-slot-fallback-mismatch</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-slot-fallback-mismatch', 'Hydration should fail clearly when slot fallback SSR markup is missing.', async ({ app, step, assert, assertContains }) => {
+      app.innerHTML = '<!--component:start--><section><div><!--slot:start--><!--slot:end--></div></section><!--component:end-->';
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'component',
+          tpl: {
+            k: 'el',
+            tag: 'section',
+            props: { attrs: {}, style: {}, on: [] },
+            children: [{
+              k: 'el',
+              tag: 'div',
+              props: { attrs: {}, style: {}, on: [] },
+              children: [{
+                k: 'slot',
+                children: [{
+                  k: 'el',
+                  tag: 'p',
+                  props: { attrs: { id: 'missing-fallback' }, style: {}, on: [] },
+                  children: [{ k: 'text', value: { k: 'val', v: 'Fallback content' } }],
+                }],
+              }],
+            }],
+          },
+        },
+      };
+
+      await step('missing slot fallback markup raises a hydration error with a useful message', async () => {
+        let message = '';
+        try {
+          boot(ir, app, { target: THORM_TARGET_SERVER, state: { atoms: {} } });
+        } catch (error) {
+          message = error?.message ?? String(error);
+        }
+        assert(message !== '', 'slot fallback hydration mismatch should throw instead of silently succeeding');
+        assertContains(message, '[hydrate] expected <p>', 'slot fallback hydration mismatch should fail on the missing fallback child node');
+      });
+    });
+  </script>
+</body>
+</html>

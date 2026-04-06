@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>effect-show-dispose</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('effect-show-dispose', 'Effects inside a show-controlled subtree should stop after that subtree is hidden.', async ({ app, step, click, waitFor, assertEqual, assert }) => {
+      const ir = {
+        atoms: [
+          { id: 1, initial: true },
+          { id: 2, initial: 0 },
+        ],
+        root: {
+          k: 'fragment',
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'hide-effect' },
+                style: {},
+                on: [{ event: 'click', action: { k: 'set', atom: 1, to: { k: 'val', v: false } } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Hide effect subtree' } }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'show-dispose-count' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 2 } }],
+            },
+            {
+              k: 'show',
+              when: { k: 'read', atom: 1 },
+              child: {
+                k: 'fragment',
+                children: [
+                  {
+                    k: 'effect',
+                    triggers: [{ type: 'interval', ms: 20 }],
+                    actions: [{ k: 'inc', atom: 2, by: 1 }],
+                  },
+                  {
+                    k: 'el',
+                    tag: 'div',
+                    props: { attrs: { id: 'show-effect-subtree' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'val', v: 'Effect subtree mounted' } }],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('effect inside the shown subtree ticks while the subtree is mounted', async () => {
+        await waitFor(() => {
+          const value = Number(app.querySelector('#show-dispose-count').textContent || '0');
+          assert(value >= 1, `expected at least one interval tick while shown, got ${value}`);
+        }, { label: 'shown subtree interval tick' });
+      });
+
+      await step('hiding the show subtree disposes the nested effect and stops later ticks', async () => {
+        const count = app.querySelector('#show-dispose-count');
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        click(app.querySelector('#hide-effect'));
+        await waitFor(() => {
+          assertEqual(app.querySelector('#show-effect-subtree'), null, 'show-controlled subtree should unmount after hiding');
+        }, { label: 'show subtree hidden' });
+
+        const beforeWait = Number(count.textContent || '0');
+        await new Promise((resolve) => setTimeout(resolve, 80));
+        assertEqual(count.textContent, String(beforeWait), 'interval effect should stop after the show subtree is hidden');
+      });
+    });
+  </script>
+</body>
+</html>

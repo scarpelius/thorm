@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-component-mismatch</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-component-mismatch', 'Hydration should fail clearly when component SSR markup does not include the expected component boundary.', async ({ app, step, assert, assertContains }) => {
+      app.innerHTML = '<section><h2 id="broken-title">Welcome</h2></section>';
+
+      const ir = {
+        atoms: [{ id: 1, initial: 'Welcome' }],
+        root: {
+          k: 'component',
+          props: {
+            title: { k: 'read', atom: 1 },
+          },
+          tpl: {
+            k: 'el',
+            tag: 'section',
+            props: { attrs: {}, style: {}, on: [] },
+            children: [{
+              k: 'el',
+              tag: 'h2',
+              props: { attrs: { id: 'broken-title' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'prop', name: 'title' } }],
+            }],
+          },
+        },
+      };
+
+      await step('missing component boundary markup raises a hydration error with a useful message', async () => {
+        let message = '';
+        try {
+          boot(ir, app, { target: THORM_TARGET_SERVER, state: { atoms: { 1: 'Welcome' } } });
+        } catch (error) {
+          message = error?.message ?? String(error);
+        }
+        assert(message !== '', 'component hydration mismatch should throw instead of silently succeeding');
+        assertContains(message, '[hydrate] expected comment component:start', 'component hydration mismatch should fail on the missing component boundary marker');
+      });
+    });
+  </script>
+</body>
+</html>

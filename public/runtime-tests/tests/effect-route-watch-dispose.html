@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>effect-route-watch-dispose</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('effect-route-watch-dispose', 'Watch effects inside a routed view should stop reacting after navigation disposes that view.', async ({ app, step, click, waitFor, waitMicrotasks, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app');
+
+      const ir = {
+        atoms: [
+          { id: 1, initial: 0 },
+          { id: 2, initial: 'idle' },
+        ],
+        root: {
+          k: 'fragment',
+          children: [
+            {
+              k: 'route',
+              base: '/app',
+              table: [
+                { pat: '/', re: '/^\\/$/', keys: [] },
+                { pat: '/details/:id', re: '/^\\/details\\/([^/]+)$/', keys: ['id'] },
+              ],
+              views: [
+                {
+                  k: 'fragment',
+                  children: [
+                    {
+                      k: 'effect',
+                      triggers: [{
+                        type: 'watch',
+                        expr: { k: 'read', atom: 1 },
+                        immediate: false,
+                      }],
+                      actions: [{
+                        k: 'set',
+                        atom: 2,
+                        to: { k: 'val', v: 'changed in home' },
+                      }],
+                    },
+                    {
+                      k: 'el',
+                      tag: 'div',
+                      props: { attrs: { id: 'route-watch-home' }, style: {}, on: [] },
+                      children: [{ k: 'text', value: { k: 'val', v: 'Home watch view' } }],
+                    },
+                    {
+                      k: 'el',
+                      tag: 'button',
+                      props: {
+                        attrs: { id: 'go-details' },
+                        style: {},
+                        on: [{ event: 'click', action: { k: 'navigate', to: { k: 'val', v: '/app/details/42' } } }],
+                      },
+                      children: [{ k: 'text', value: { k: 'val', v: 'Open details' } }],
+                    },
+                  ],
+                },
+                {
+                  k: 'el',
+                  tag: 'div',
+                  props: { attrs: { id: 'details-view' }, style: {}, on: [] },
+                  children: [
+                    { k: 'text', value: { k: 'val', v: 'Details:' } },
+                    { k: 'text', value: { k: 'param', name: 'id' } },
+                  ],
+                },
+              ],
+              fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+            },
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'mutate-source' },
+                style: {},
+                on: [{ event: 'click', action: { k: 'inc', atom: 1, by: 1 } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Mutate watched atom' } }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'route-watch-status' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 2 } }],
+            },
+          ],
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+        await step('watch effect inside the initial route reacts while that route is mounted', async () => {
+          click(app.querySelector('#mutate-source'));
+          await waitFor(() => {
+            assertEqual(app.querySelector('#route-watch-status').textContent, 'changed in home', 'watch effect should react while the home route is mounted');
+          }, { label: 'route watch while mounted' });
+        });
+
+        await step('after route disposal, later source changes no longer trigger the old watch effect', async () => {
+          app.querySelector('#route-watch-status').textContent = 'idle';
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          click(app.querySelector('#go-details'));
+          await waitFor(() => {
+            assertEqual(app.querySelector('#route-watch-home'), null, 'home route watch view should unmount after navigation');
+            assertEqual(app.querySelector('#details-view').textContent, 'Details:42', 'details route should render after navigation');
+          }, { label: 'route watch view swap' });
+
+          app.querySelector('#route-watch-status').textContent = 'idle';
+          click(app.querySelector('#mutate-source'));
+          await waitMicrotasks(3);
+          assertEqual(app.querySelector('#route-watch-status').textContent, 'idle', 'disposed route watch effect should not react after navigation');
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

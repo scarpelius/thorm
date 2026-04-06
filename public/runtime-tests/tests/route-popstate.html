@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>route-popstate</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('route-popstate', 'Route mounts should rerender on browser history popstate events.', async ({ app, step, waitFor, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app');
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/', re: '/^\\/$/', keys: [] },
+            { pat: '/details/:id', re: '/^\\/details\\/([^/]+)$/', keys: ['id'] },
+          ],
+          views: [
+            {
+              k: 'el',
+              tag: 'div',
+              props: { attrs: { id: 'home-view' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'val', v: 'Home' } }],
+            },
+            {
+              k: 'el',
+              tag: 'div',
+              props: { attrs: { id: 'details-view' }, style: {}, on: [] },
+              children: [
+                { k: 'text', value: { k: 'val', v: 'Details:' } },
+                { k: 'text', value: { k: 'param', name: 'id' } },
+              ],
+            },
+          ],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+        await step('route starts on the initial history entry', async () => {
+          assertEqual(app.querySelector('#home-view').textContent, 'Home', 'home route should render for the initial URL');
+        });
+
+        await step('popstate rerenders the route after the history URL changes', async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          history.pushState(null, '', '/app/details/42');
+          window.dispatchEvent(new PopStateEvent('popstate'));
+          await waitFor(() => {
+            assertEqual(app.querySelector('#details-view').textContent, 'Details:42', 'popstate should rerender the route for the current history URL');
+          }, { label: 'route popstate reroute' });
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

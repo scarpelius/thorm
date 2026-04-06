@@ -43,7 +43,12 @@
 
 function normalizePathname(base = '/') {
   let p = location.pathname || '/';
-  if (base !== '/' && p.startsWith(base)) p = p.slice(base.length) || '/';
+  let b = base || '/';
+  if (b.length > 1 && b.endsWith('/')) b = b.slice(0, -1);
+  if (b !== '/' && p.startsWith(b)) {
+    p = p.slice(b.length) || '/';
+    if (p[0] !== '/') p = `/${p}`;
+  }
   if (p.length > 1 && p.endsWith('/')) p = p.slice(0, -1);
   return p || '/';
 }
@@ -220,6 +225,7 @@ export default class RouteMount {
   // -----------------------
 
   _clearBetween() {
+    if (!this.start || !this.end) return;
     let n = this.start.nextSibling;
     while (n && n !== this.end) {
       const next = n.nextSibling;

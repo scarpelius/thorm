@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>route-fallback-query-clear</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('route-fallback-query-clear', 'Fallback route views should clear removed query values when rerendered on the same unmatched path.', async ({ app, step, click, waitFor, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/missing/page?tab=none');
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/', re: '/^\\/$/', keys: [] },
+          ],
+          views: [{
+            k: 'text',
+            value: { k: 'val', v: 'Home' },
+          }],
+          fallback: {
+            k: 'fragment',
+            children: [
+              {
+                k: 'el',
+                tag: 'button',
+                props: {
+                  attrs: { id: 'clear-fallback-query' },
+                  style: {},
+                  on: [{ event: 'click', action: { k: 'navigate', to: { k: 'val', v: '/app/missing/page' } } }],
+                },
+                children: [{ k: 'text', value: { k: 'val', v: 'Clear fallback query' } }],
+              },
+              {
+                k: 'el',
+                tag: 'div',
+                props: { attrs: { id: 'fallback-view' }, style: {}, on: [] },
+                children: [
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'fallback-label' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'val', v: 'Fallback:' } }],
+                  },
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'fallback-tab' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'query', name: 'tab' } }],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+        await step('fallback view renders the initial query-driven output', async () => {
+          assertEqual(app.querySelector('#fallback-view').textContent, 'Fallback:none', 'initial fallback query output should render');
+        });
+
+        await step('rerendering the same unmatched path without a query clears fallback query output', async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          click(app.querySelector('#clear-fallback-query'));
+          await waitFor(() => {
+            assertEqual(app.querySelector('#fallback-tab').textContent, '', 'removed fallback query values should clear');
+            assertEqual(app.querySelector('#fallback-view').textContent, 'Fallback:', 'only the static fallback label should remain');
+          }, { label: 'fallback query clear' });
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -133,9 +133,21 @@
           <ul>
             <li><a href="./tests/route-basic.html">route-basic.html</a> <span class="rt-desc">Confirms a matched route exposes param and query expressions.</span></li>
             <li><a href="./tests/route-fallback.html">route-fallback.html</a> <span class="rt-desc">Checks fallback rendering when no route pattern matches.</span></li>
+            <li><a href="./tests/route-fallback-query-clear.html">route-fallback-query-clear.html</a> <span class="rt-desc">Checks fallback query output clears when the same unmatched path loses its query string.</span></li>
             <li><a href="./tests/route-query.html">route-query.html</a> <span class="rt-desc">Checks query-string parsing through route query expressions.</span></li>
+            <li><a href="./tests/route-query-decoded.html">route-query-decoded.html</a> <span class="rt-desc">Checks encoded query values are decoded before reaching the matched route view.</span></li>
+            <li><a href="./tests/route-query-duplicate.html">route-query-duplicate.html</a> <span class="rt-desc">Checks duplicate query keys resolve to the last value in the matched route view.</span></li>
+            <li><a href="./tests/route-query-clear.html">route-query-clear.html</a> <span class="rt-desc">Checks removed query values clear from the matched route view after navigation.</span></li>
+            <li><a href="./tests/route-query-reroute.html">route-query-reroute.html</a> <span class="rt-desc">Checks rerendering when only the query string changes on the same matched route.</span></li>
+            <li><a href="./tests/route-hash-ignored.html">route-hash-ignored.html</a> <span class="rt-desc">Checks hash fragments do not affect matched route rendering or rerendering.</span></li>
             <li><a href="./tests/route-params-multi.html">route-params-multi.html</a> <span class="rt-desc">Checks extraction across multiple dynamic path segments.</span></li>
+            <li><a href="./tests/route-params-decoded.html">route-params-decoded.html</a> <span class="rt-desc">Checks encoded path params are decoded before reaching the matched route view.</span></li>
+            <li><a href="./tests/route-base-nested.html">route-base-nested.html</a> <span class="rt-desc">Checks multi-segment base paths are stripped before route matching.</span></li>
+            <li><a href="./tests/route-base-trailing-slash.html">route-base-trailing-slash.html</a> <span class="rt-desc">Checks route matching still works when the configured base path ends with a slash.</span></li>
+            <li><a href="./tests/route-no-base.html">route-no-base.html</a> <span class="rt-desc">Checks route matching still works when no explicit base path is configured.</span></li>
+            <li><a href="./tests/route-trailing-slash.html">route-trailing-slash.html</a> <span class="rt-desc">Checks matched routes still resolve when the URL has a trailing slash.</span></li>
             <li><a href="./tests/route-reroute.html">route-reroute.html</a> <span class="rt-desc">Checks <code>navigate</code> triggers rerendering into the new route view.</span></li>
+            <li><a href="./tests/route-popstate.html">route-popstate.html</a> <span class="rt-desc">Checks browser <code>popstate</code> events rerender the current route view.</span></li>
             <li><a href="./tests/route-dispose-restore.html">route-dispose-restore.html</a> <span class="rt-desc">Checks dispose restores the previous reroute hook and stops old rerenders.</span></li>
             <li><a href="./tests/route-view-cleanup-events.html">route-view-cleanup-events.html</a> <span class="rt-desc">Checks rerouted-away view handlers are disposed with the old route subtree.</span></li>
           </ul>
@@ -146,11 +158,28 @@
           <p>Hydration against SSR-like DOM for plain elements, conditionals, repeats, components, slots, and mismatch handling.</p>
           <ul>
             <li><a href="./tests/hydrate-basic.html">hydrate-basic.html</a> <span class="rt-desc">Binds client events onto existing SSR-like markup.</span></li>
+            <li><a href="./tests/hydrate-route-basic.html">hydrate-route-basic.html</a> <span class="rt-desc">Checks SSR-like route markup hydrates in place and still reroutes afterward.</span></li>
+            <li><a href="./tests/hydrate-route-base-root.html">hydrate-route-base-root.html</a> <span class="rt-desc">Checks hydrated routes still match correctly when the base is explicitly set to root.</span></li>
+            <li><a href="./tests/hydrate-route-context.html">hydrate-route-context.html</a> <span class="rt-desc">Checks hydrated route params and query output stay correct across reroute.</span></li>
+            <li><a href="./tests/hydrate-route-fallback.html">hydrate-route-fallback.html</a> <span class="rt-desc">Checks SSR-like fallback route markup hydrates in place and can still recover to a matched route.</span></li>
+            <li><a href="./tests/hydrate-route-fallback-query-clear.html">hydrate-route-fallback-query-clear.html</a> <span class="rt-desc">Checks hydrated fallback query output clears when navigation removes the query string.</span></li>
+            <li><a href="./tests/hydrate-route-popstate.html">hydrate-route-popstate.html</a> <span class="rt-desc">Checks hydrated route markup still rerenders on browser <code>popstate</code> events.</span></li>
+            <li><a href="./tests/hydrate-route-query-duplicate.html">hydrate-route-query-duplicate.html</a> <span class="rt-desc">Checks hydrated duplicate query keys still resolve to the last value.</span></li>
+            <li><a href="./tests/hydrate-route-query-clear.html">hydrate-route-query-clear.html</a> <span class="rt-desc">Checks hydrated query-driven output clears when navigation removes the query string.</span></li>
+            <li><a href="./tests/hydrate-route-query-reroute.html">hydrate-route-query-reroute.html</a> <span class="rt-desc">Checks hydrated route output refreshes when only the query string changes.</span></li>
+            <li><a href="./tests/hydrate-route-params-decoded.html">hydrate-route-params-decoded.html</a> <span class="rt-desc">Checks hydrated route params stay decoded before and after navigation.</span></li>
+            <li><a href="./tests/hydrate-route-trailing-slash.html">hydrate-route-trailing-slash.html</a> <span class="rt-desc">Checks hydrated matched routes still resolve when the URL has a trailing slash.</span></li>
+            <li><a href="./tests/hydrate-route-query-decoded.html">hydrate-route-query-decoded.html</a> <span class="rt-desc">Checks hydrated query values stay decoded before and after navigation.</span></li>
+            <li><a href="./tests/hydrate-route-base-nested.html">hydrate-route-base-nested.html</a> <span class="rt-desc">Checks hydrated routes still match correctly when using a multi-segment base path.</span></li>
+            <li><a href="./tests/hydrate-route-base-trailing-slash.html">hydrate-route-base-trailing-slash.html</a> <span class="rt-desc">Checks hydrated routes still match when the configured base path ends with a slash.</span></li>
+            <li><a href="./tests/hydrate-route-hash-ignored.html">hydrate-route-hash-ignored.html</a> <span class="rt-desc">Checks hydrated routes ignore hash fragments before and after navigation.</span></li>
             <li><a href="./tests/hydrate-show.html">hydrate-show.html</a> <span class="rt-desc">Checks <code>show</code> hydration and later visibility toggles.</span></li>
             <li><a href="./tests/hydrate-show-mismatch.html">hydrate-show-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when visible <code>show</code> markup is missing.</span></li>
             <li><a href="./tests/hydrate-repeat.html">hydrate-repeat.html</a> <span class="rt-desc">Checks hydrated repeat rows stay interactive and reconcile correctly.</span></li>
             <li><a href="./tests/hydrate-repeat-mismatch.html">hydrate-repeat-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when keyed repeat rows are missing.</span></li>
             <li><a href="./tests/hydrate-component-slot.html">hydrate-component-slot.html</a> <span class="rt-desc">Checks hydrated component props and projected slot content.</span></li>
+            <li><a href="./tests/hydrate-component-named-slots.html">hydrate-component-named-slots.html</a> <span class="rt-desc">Checks hydrated named slots project correctly through nested component composition.</span></li>
+            <li><a href="./tests/hydrate-component-named-slots-reactive.html">hydrate-component-named-slots-reactive.html</a> <span class="rt-desc">Checks reactive named slot content survives hydration through nested component composition.</span></li>
             <li><a href="./tests/hydrate-slot-fallback-replace.html">hydrate-slot-fallback-replace.html</a> <span class="rt-desc">Checks hydrated projected slot content replaces fallback slot content.</span></li>
             <li><a href="./tests/hydrate-slot-fallback-empty.html">hydrate-slot-fallback-empty.html</a> <span class="rt-desc">Checks fallback slot content hydrates correctly when no projection exists.</span></li>
           </ul>
@@ -166,6 +195,7 @@
             <li><a href="./tests/component-nested.html">component-nested.html</a> <span class="rt-desc">Checks rendering across nested component boundaries.</span></li>
             <li><a href="./tests/component-props-nested.html">component-props-nested.html</a> <span class="rt-desc">Checks reactive prop updates reach deeply nested consumers.</span></li>
             <li><a href="./tests/component-named-slots-nested.html">component-named-slots-nested.html</a> <span class="rt-desc">Checks named slots project through nested component composition.</span></li>
+            <li><a href="./tests/component-named-slots-reactive-nested.html">component-named-slots-reactive-nested.html</a> <span class="rt-desc">Checks forwarded named slot content stays reactive through nested component composition.</span></li>
           </ul>
         </section>
       </div>

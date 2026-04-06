@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>route-trailing-slash</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('route-trailing-slash', 'Route matching should normalize trailing slashes before evaluating patterns.', async ({ app, step, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/users/42/');
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/', re: '/^\\/$/', keys: [] },
+            { pat: '/users/:id', re: '/^\\/users\\/([^/]+)$/', keys: ['id'] },
+          ],
+          views: [
+            {
+              k: 'el',
+              tag: 'div',
+              props: { attrs: { id: 'home-view' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'val', v: 'Home' } }],
+            },
+            {
+              k: 'el',
+              tag: 'div',
+              props: { attrs: { id: 'user-view' }, style: {}, on: [] },
+              children: [
+                { k: 'text', value: { k: 'val', v: 'User:' } },
+                { k: 'text', value: { k: 'param', name: 'id' } },
+              ],
+            },
+          ],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+        await step('a trailing slash still matches the intended route pattern', async () => {
+          assertEqual(app.querySelector('#user-view').textContent, 'User:42', 'route should match after trimming the trailing slash');
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

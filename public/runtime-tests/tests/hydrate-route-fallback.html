@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-route-fallback</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-route-fallback', 'Hydration should preserve fallback route markup and still recover to a matched route afterward.', async ({ app, step, click, waitFor, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/missing/page?tab=none');
+
+      app.innerHTML = '<!--route:start--><!--fragment:start--><button id="go-home">Open home</button><div id="fallback-view"><span id="fallback-label">Fallback:</span><span id="fallback-tab">none</span></div><!--fragment:end--><!--route:end-->';
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/', re: '/^\\/$/', keys: [] },
+            { pat: '/users/:id', re: '/^\\/users\\/([^/]+)$/', keys: ['id'] },
+          ],
+          views: [
+            {
+              k: 'el',
+              tag: 'div',
+              props: { attrs: { id: 'home-view' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'val', v: 'Home' } }],
+            },
+            {
+              k: 'el',
+              tag: 'div',
+              props: { attrs: { id: 'user-view' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'param', name: 'id' } }],
+            },
+          ],
+          fallback: {
+            k: 'fragment',
+            children: [
+              {
+                k: 'el',
+                tag: 'button',
+                props: {
+                  attrs: { id: 'go-home' },
+                  style: {},
+                  on: [{ event: 'click', action: { k: 'navigate', to: { k: 'val', v: '/app' } } }],
+                },
+                children: [{ k: 'text', value: { k: 'val', v: 'Open home' } }],
+              },
+              {
+                k: 'el',
+                tag: 'div',
+                props: { attrs: { id: 'fallback-view' }, style: {}, on: [] },
+                children: [
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'fallback-label' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'val', v: 'Fallback:' } }],
+                  },
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'fallback-tab' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'query', name: 'tab' } }],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_SERVER });
+
+        await step('hydration preserves the initial fallback route markup', async () => {
+          assertEqual(app.querySelector('#go-home').textContent, 'Open home', 'fallback button should hydrate in place');
+          assertEqual(app.querySelector('#fallback-view').textContent, 'Fallback:none', 'fallback view should preserve hydrated query output');
+        });
+
+        await step('hydrated fallback route can still navigate into a matched route', async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          click(app.querySelector('#go-home'));
+          await waitFor(() => {
+            assertEqual(app.querySelector('#home-view').textContent, 'Home', 'hydrated fallback should reroute into the matched home view');
+          }, { label: 'hydrated fallback reroute' });
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

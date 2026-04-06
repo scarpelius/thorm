@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-route-fallback-query-clear</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-route-fallback-query-clear', 'Hydration should preserve fallback query output and clear it when navigation removes the query string.', async ({ app, step, click, waitFor, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/missing/page?tab=none');
+
+      app.innerHTML = '<!--route:start--><!--fragment:start--><button id="clear-fallback-query">Clear fallback query</button><div id="fallback-view"><span id="fallback-label">Fallback:</span><span id="fallback-tab">none</span></div><!--fragment:end--><!--route:end-->';
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/', re: '/^\\/$/', keys: [] },
+          ],
+          views: [{
+            k: 'text',
+            value: { k: 'val', v: 'Home' },
+          }],
+          fallback: {
+            k: 'fragment',
+            children: [
+              {
+                k: 'el',
+                tag: 'button',
+                props: {
+                  attrs: { id: 'clear-fallback-query' },
+                  style: {},
+                  on: [{ event: 'click', action: { k: 'navigate', to: { k: 'val', v: '/app/missing/page' } } }],
+                },
+                children: [{ k: 'text', value: { k: 'val', v: 'Clear fallback query' } }],
+              },
+              {
+                k: 'el',
+                tag: 'div',
+                props: { attrs: { id: 'fallback-view' }, style: {}, on: [] },
+                children: [
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'fallback-label' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'val', v: 'Fallback:' } }],
+                  },
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'fallback-tab' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'query', name: 'tab' } }],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_SERVER });
+
+        await step('hydration preserves the initial fallback query output', async () => {
+          assertEqual(app.querySelector('#clear-fallback-query').textContent, 'Clear fallback query', 'fallback clear button should hydrate in place');
+          assertEqual(app.querySelector('#fallback-view').textContent, 'Fallback:none', 'hydrated fallback query output should be preserved');
+        });
+
+        await step('hydrated fallback clears query-driven output when the query string is removed', async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          click(app.querySelector('#clear-fallback-query'));
+          await waitFor(() => {
+            assertEqual(app.querySelector('#fallback-tab').textContent, '', 'removed hydrated fallback query values should clear');
+            assertEqual(app.querySelector('#fallback-view').textContent, 'Fallback:', 'only the static fallback label should remain after hydrated query removal');
+          }, { label: 'hydrated fallback query clear' });
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

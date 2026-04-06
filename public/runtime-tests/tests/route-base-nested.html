@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>route-base-nested</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('route-base-nested', 'Route matching should strip multi-segment base paths before evaluating route patterns.', async ({ app, step, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/admin/users/42');
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app/admin',
+          table: [
+            { pat: '/users/:id', re: '/^\\/users\\/([^/]+)$/', keys: ['id'] },
+          ],
+          views: [{
+            k: 'el',
+            tag: 'div',
+            props: { attrs: { id: 'nested-base-view' }, style: {}, on: [] },
+            children: [
+              { k: 'text', value: { k: 'val', v: 'User:' } },
+              { k: 'text', value: { k: 'param', name: 'id' } },
+            ],
+          }],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+        await step('multi-segment base paths are removed before route matching', async () => {
+          assertEqual(app.querySelector('#nested-base-view').textContent, 'User:42', 'route should match after stripping the nested base path');
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

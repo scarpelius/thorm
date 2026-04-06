@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-route-basic</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-route-basic', 'Hydration should preserve SSR-like route markup and still reroute afterward.', async ({ app, step, click, waitFor, assertEqual, assertContains }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app');
+
+      app.innerHTML = '<!--route:start--><button id="go-details">Open details</button><!--route:end-->';
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/', re: '/^\\/$/', keys: [] },
+            { pat: '/details/:id', re: '/^\\/details\\/([^/]+)$/', keys: ['id'] },
+          ],
+          views: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'go-details' },
+                style: {},
+                on: [{ event: 'click', action: { k: 'navigate', to: { k: 'val', v: '/app/details/42' } } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Open details' } }],
+            },
+            {
+              k: 'el',
+              tag: 'div',
+              props: { attrs: { id: 'details-view' }, style: {}, on: [] },
+              children: [
+                { k: 'text', value: { k: 'val', v: 'Details:' } },
+                { k: 'text', value: { k: 'param', name: 'id' } },
+              ],
+            },
+          ],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_SERVER });
+
+        await step('hydration preserves the initial matched route markup', async () => {
+          assertEqual(app.querySelector('#go-details').textContent, 'Open details', 'home route button should hydrate in place');
+          assertContains(app.innerHTML, '<!--route:start-->', 'route start anchor should remain present after hydration');
+          assertContains(app.innerHTML, '<!--route:end-->', 'route end anchor should remain present after hydration');
+        });
+
+        await step('hydrated route markup still reroutes to the next matched view', async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          click(app.querySelector('#go-details'));
+          await waitFor(() => {
+            assertEqual(app.querySelector('#details-view').textContent, 'Details:42', 'hydrated route should rerender the details view after navigation');
+          }, { label: 'hydrated route reroute' });
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

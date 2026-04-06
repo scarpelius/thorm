@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>route-hash-ignored</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('route-hash-ignored', 'Route matching should ignore hash fragments and only use pathname plus query context.', async ({ app, step, click, waitFor, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/users/42?tab=info#section-a');
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/users/:id', re: '/^\\/users\\/([^/]+)$/', keys: ['id'] },
+          ],
+          views: [{
+            k: 'fragment',
+            children: [
+              {
+                k: 'el',
+                tag: 'button',
+                props: {
+                  attrs: { id: 'next-user' },
+                  style: {},
+                  on: [{ event: 'click', action: { k: 'navigate', to: { k: 'val', v: '/app/users/99?tab=posts#section-b' } } }],
+                },
+                children: [{ k: 'text', value: { k: 'val', v: 'Open next user' } }],
+              },
+              {
+                k: 'el',
+                tag: 'div',
+                props: { attrs: { id: 'hash-route-view' }, style: {}, on: [] },
+                children: [
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'hash-route-user' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'param', name: 'id' } }],
+                  },
+                  { k: 'text', value: { k: 'val', v: ':' } },
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'hash-route-tab' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'query', name: 'tab' } }],
+                  },
+                ],
+              },
+            ],
+          }],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+        await step('initial route matching ignores the current hash fragment', async () => {
+          assertEqual(app.querySelector('#hash-route-view').textContent, '42:info', 'hash fragments should not affect initial route matching or query parsing');
+        });
+
+        await step('rerouting with a new hash still updates only from path and query', async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          click(app.querySelector('#next-user'));
+          await waitFor(() => {
+            assertEqual(app.querySelector('#hash-route-view').textContent, '99:posts', 'hash changes should not interfere with rerendering the matched route');
+          }, { label: 'route hash ignored reroute' });
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

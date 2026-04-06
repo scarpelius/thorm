@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-route-context</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-route-context', 'Hydration should preserve route params/query output and refresh it after reroute.', async ({ app, step, click, waitFor, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/users/alice?tab=info');
+
+      app.innerHTML = '<!--route:start--><!--fragment:start--><button id="go-user">Open next user</button><div id="route-context-view"><span id="route-user">alice</span>:<span id="route-tab">info</span></div><!--fragment:end--><!--route:end-->';
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/users/:id', re: '/^\\/users\\/([^/]+)$/', keys: ['id'] },
+          ],
+          views: [{
+            k: 'fragment',
+            children: [
+              {
+                k: 'el',
+                tag: 'button',
+                props: {
+                  attrs: { id: 'go-user' },
+                  style: {},
+                  on: [{ event: 'click', action: { k: 'navigate', to: { k: 'val', v: '/app/users/bob?tab=posts' } } }],
+                },
+                children: [{ k: 'text', value: { k: 'val', v: 'Open next user' } }],
+              },
+              {
+                k: 'el',
+                tag: 'div',
+                props: { attrs: { id: 'route-context-view' }, style: {}, on: [] },
+                children: [
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'route-user' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'param', name: 'id' } }],
+                  },
+                  { k: 'text', value: { k: 'val', v: ':' } },
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'route-tab' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'query', name: 'tab' } }],
+                  },
+                ],
+              },
+            ],
+          }],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_SERVER });
+
+        await step('hydration preserves the initial route params and query output', async () => {
+          assertEqual(app.querySelector('#go-user').textContent, 'Open next user', 'route button should hydrate in place');
+          assertEqual(app.querySelector('#route-context-view').textContent, 'alice:info', 'hydrated route should preserve initial param and query output');
+        });
+
+        await step('hydrated route params and query refresh after navigation', async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          click(app.querySelector('#go-user'));
+          await waitFor(() => {
+            assertEqual(app.querySelector('#route-context-view').textContent, 'bob:posts', 'route params and query should update after hydrated navigation');
+          }, { label: 'hydrated route context reroute' });
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

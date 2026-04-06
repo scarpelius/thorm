@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>route-query-clear</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('route-query-clear', 'Route query context should clear when navigation removes query-string values.', async ({ app, step, click, waitFor, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/search?term=dune&sort=asc');
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/search', re: '/^\\/search$/', keys: [] },
+          ],
+          views: [{
+            k: 'fragment',
+            children: [
+              {
+                k: 'el',
+                tag: 'button',
+                props: {
+                  attrs: { id: 'clear-query' },
+                  style: {},
+                  on: [{ event: 'click', action: { k: 'navigate', to: { k: 'val', v: '/app/search' } } }],
+                },
+                children: [{ k: 'text', value: { k: 'val', v: 'Clear query' } }],
+              },
+              {
+                k: 'el',
+                tag: 'div',
+                props: { attrs: { id: 'query-view' }, style: {}, on: [] },
+                children: [
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'query-term' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'query', name: 'term' } }],
+                  },
+                  { k: 'text', value: { k: 'val', v: '|' } },
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'query-sort' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'query', name: 'sort' } }],
+                  },
+                ],
+              },
+            ],
+          }],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+        await step('route renders the initial query-string values', async () => {
+          assertEqual(app.querySelector('#query-view').textContent, 'dune|asc', 'initial query values should render');
+        });
+
+        await step('navigating to the same path without a query clears the query context', async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          click(app.querySelector('#clear-query'));
+          await waitFor(() => {
+            assertEqual(app.querySelector('#query-term').textContent, '', 'removed query values should not linger in route context');
+            assertEqual(app.querySelector('#query-sort').textContent, '', 'all removed query values should clear from the view');
+            assertEqual(app.querySelector('#query-view').textContent, '|', 'only the static separator should remain after query removal');
+          }, { label: 'route query clear' });
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

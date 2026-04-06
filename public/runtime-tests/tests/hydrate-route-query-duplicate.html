@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-route-query-duplicate</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-route-query-duplicate', 'Hydration should preserve duplicate query resolution and keep using the last value after navigation.', async ({ app, step, click, waitFor, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/search?term=first&term=second&sort=asc&sort=desc');
+
+      app.innerHTML = '<!--route:start--><!--fragment:start--><button id="next-query">Open next query</button><div id="query-view"><span id="query-term">second</span>:<span id="query-sort">desc</span></div><!--fragment:end--><!--route:end-->';
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/search', re: '/^\\/search$/', keys: [] },
+          ],
+          views: [{
+            k: 'fragment',
+            children: [
+              {
+                k: 'el',
+                tag: 'button',
+                props: {
+                  attrs: { id: 'next-query' },
+                  style: {},
+                  on: [{ event: 'click', action: { k: 'navigate', to: { k: 'val', v: '/app/search?term=alpha&term=omega&sort=up&sort=down' } } }],
+                },
+                children: [{ k: 'text', value: { k: 'val', v: 'Open next query' } }],
+              },
+              {
+                k: 'el',
+                tag: 'div',
+                props: { attrs: { id: 'query-view' }, style: {}, on: [] },
+                children: [
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'query-term' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'query', name: 'term' } }],
+                  },
+                  { k: 'text', value: { k: 'val', v: ':' } },
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'query-sort' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'query', name: 'sort' } }],
+                  },
+                ],
+              },
+            ],
+          }],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_SERVER });
+
+        await step('hydration preserves the initial duplicate-query resolution', async () => {
+          assertEqual(app.querySelector('#next-query').textContent, 'Open next query', 'route button should hydrate in place');
+          assertEqual(app.querySelector('#query-view').textContent, 'second:desc', 'hydrated route should preserve the last-value query resolution');
+        });
+
+        await step('hydrated route keeps using the last duplicate query value after navigation', async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          click(app.querySelector('#next-query'));
+          await waitFor(() => {
+            assertEqual(app.querySelector('#query-term').textContent, 'omega', 'rerouted duplicate term should keep the last value');
+            assertEqual(app.querySelector('#query-sort').textContent, 'down', 'rerouted duplicate sort should keep the last value');
+            assertEqual(app.querySelector('#query-view').textContent, 'omega:down', 'hydrated route should still render the last duplicate values');
+          }, { label: 'hydrated duplicate query reroute' });
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

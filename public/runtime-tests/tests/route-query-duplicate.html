@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>route-query-duplicate</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('route-query-duplicate', 'Route query parsing should use the last value when the same query key appears multiple times.', async ({ app, step, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/search?term=first&term=second&sort=asc&sort=desc');
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/search', re: '/^\\/search$/', keys: [] },
+          ],
+          views: [{
+            k: 'el',
+            tag: 'div',
+            props: { attrs: { id: 'query-view' }, style: {}, on: [] },
+            children: [
+              {
+                k: 'el',
+                tag: 'span',
+                props: { attrs: { id: 'query-term' }, style: {}, on: [] },
+                children: [{ k: 'text', value: { k: 'query', name: 'term' } }],
+              },
+              { k: 'text', value: { k: 'val', v: ':' } },
+              {
+                k: 'el',
+                tag: 'span',
+                props: { attrs: { id: 'query-sort' }, style: {}, on: [] },
+                children: [{ k: 'text', value: { k: 'query', name: 'sort' } }],
+              },
+            ],
+          }],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+        await step('duplicate query keys resolve to the last encountered value', async () => {
+          assertEqual(app.querySelector('#query-term').textContent, 'second', 'last term value should win');
+          assertEqual(app.querySelector('#query-sort').textContent, 'desc', 'last sort value should win');
+          assertEqual(app.querySelector('#query-view').textContent, 'second:desc', 'rendered query output should use the last values');
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

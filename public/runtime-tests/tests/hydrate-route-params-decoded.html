@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-route-params-decoded</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-route-params-decoded', 'Hydration should preserve decoded route params and keep them decoded after reroute.', async ({ app, step, click, waitFor, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/users/Ada%20Lovelace/posts/notes%2Fintro');
+
+      app.innerHTML = '<!--route:start--><!--fragment:start--><button id="next-entry">Open next entry</button><div id="decoded-view"><span id="decoded-user">Ada Lovelace</span> | <span id="decoded-post">notes/intro</span></div><!--fragment:end--><!--route:end-->';
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/users/:userId/posts/:postId', re: '/^\\/users\\/([^/]+)\\/posts\\/([^/]+)$/', keys: ['userId', 'postId'] },
+          ],
+          views: [{
+            k: 'fragment',
+            children: [
+              {
+                k: 'el',
+                tag: 'button',
+                props: {
+                  attrs: { id: 'next-entry' },
+                  style: {},
+                  on: [{ event: 'click', action: { k: 'navigate', to: { k: 'val', v: '/app/users/Grace%20Hopper/posts/debug%2Freport' } } }],
+                },
+                children: [{ k: 'text', value: { k: 'val', v: 'Open next entry' } }],
+              },
+              {
+                k: 'el',
+                tag: 'div',
+                props: { attrs: { id: 'decoded-view' }, style: {}, on: [] },
+                children: [
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'decoded-user' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'param', name: 'userId' } }],
+                  },
+                  { k: 'text', value: { k: 'val', v: ' | ' } },
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'decoded-post' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'param', name: 'postId' } }],
+                  },
+                ],
+              },
+            ],
+          }],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_SERVER });
+
+        await step('hydration preserves the initial decoded route params', async () => {
+          assertEqual(app.querySelector('#next-entry').textContent, 'Open next entry', 'route button should hydrate in place');
+          assertEqual(app.querySelector('#decoded-user').textContent, 'Ada Lovelace', 'hydrated user param should stay decoded');
+          assertEqual(app.querySelector('#decoded-post').textContent, 'notes/intro', 'hydrated post param should stay decoded');
+        });
+
+        await step('hydrated route keeps params decoded after navigation', async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          click(app.querySelector('#next-entry'));
+          await waitFor(() => {
+            assertEqual(app.querySelector('#decoded-user').textContent, 'Grace Hopper', 'rerouted user param should be decoded');
+            assertEqual(app.querySelector('#decoded-post').textContent, 'debug/report', 'rerouted post param should be decoded');
+            assertEqual(app.querySelector('#decoded-view').textContent, 'Grace Hopper | debug/report', 'decoded route params should render correctly after hydrated navigation');
+          }, { label: 'hydrated decoded params reroute' });
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

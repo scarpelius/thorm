@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>route-query-reroute</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('route-query-reroute', 'Route views should rerender when only the query string changes on the same matched path.', async ({ app, step, click, waitFor, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/search?term=dune&sort=asc');
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/search', re: '/^\\/search$/', keys: [] },
+          ],
+          views: [{
+            k: 'fragment',
+            children: [
+              {
+                k: 'el',
+                tag: 'button',
+                props: {
+                  attrs: { id: 'update-query' },
+                  style: {},
+                  on: [{ event: 'click', action: { k: 'navigate', to: { k: 'val', v: '/app/search?term=foundation&sort=desc' } } }],
+                },
+                children: [{ k: 'text', value: { k: 'val', v: 'Update query' } }],
+              },
+              {
+                k: 'el',
+                tag: 'div',
+                props: { attrs: { id: 'query-view' }, style: {}, on: [] },
+                children: [
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'query-term' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'query', name: 'term' } }],
+                  },
+                  { k: 'text', value: { k: 'val', v: ':' } },
+                  {
+                    k: 'el',
+                    tag: 'span',
+                    props: { attrs: { id: 'query-sort' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'query', name: 'sort' } }],
+                  },
+                ],
+              },
+            ],
+          }],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+        await step('route renders the initial query-string values', async () => {
+          assertEqual(app.querySelector('#query-view').textContent, 'dune:asc', 'initial query values should render on the matched route');
+        });
+
+        await step('navigate rerenders the same matched route when only the query changes', async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          click(app.querySelector('#update-query'));
+          await waitFor(() => {
+            assertEqual(app.querySelector('#query-view').textContent, 'foundation:desc', 'query-only navigation should rerender the same matched route with fresh query values');
+          }, { label: 'route query reroute' });
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

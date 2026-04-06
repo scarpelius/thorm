@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>component-named-slots-reactive-nested</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('component-named-slots-reactive-nested', 'Forwarded named slot content should stay reactive through nested component composition.', async ({ app, step, waitFor, assertEqual }) => {
+      const layoutTemplate = {
+        k: 'el',
+        tag: 'article',
+        props: { attrs: { id: 'outer-layout' }, style: {}, on: [] },
+        children: [
+          {
+            k: 'el',
+            tag: 'header',
+            props: { attrs: {}, style: {}, on: [] },
+            children: [{ k: 'slot', name: 'title' }],
+          },
+          {
+            k: 'component',
+            slots: {
+              default: [{ k: 'slot', name: 'content' }],
+            },
+            tpl: {
+              k: 'el',
+              tag: 'section',
+              props: { attrs: { id: 'inner-shell' }, style: {}, on: [] },
+              children: [{ k: 'slot' }],
+            },
+          },
+        ],
+      };
+
+      const ir = {
+        atoms: [{ id: 1, initial: 'alpha' }],
+        root: {
+          k: 'component',
+          slots: {
+            title: [{
+              k: 'el',
+              tag: 'h1',
+              props: { attrs: { id: 'reactive-slot-title' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'val', v: 'Projected title' } }],
+            }],
+            content: [{
+              k: 'el',
+              tag: 'p',
+              props: { attrs: { id: 'reactive-slot-content' }, style: {}, on: [] },
+              children: [
+                { k: 'text', value: { k: 'val', v: 'Projected body:' } },
+                { k: 'text', value: { k: 'read', atom: 1 } },
+              ],
+            }],
+          },
+          tpl: layoutTemplate,
+        },
+      };
+
+      const runtime = boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('forwarded named slot content renders through the nested inner component', async () => {
+        assertEqual(app.querySelector('#reactive-slot-title').textContent, 'Projected title', 'title slot should render through the outer component');
+        assertEqual(app.querySelector('#reactive-slot-content').textContent, 'Projected body:alpha', 'forwarded content slot should render its initial reactive value');
+      });
+
+      await step('reactive reads inside forwarded slot content stay live after mount', async () => {
+        runtime.core.store.atoms.get(1).v = 'beta';
+        runtime.core.store.notify(1);
+        await waitFor(() => {
+          assertEqual(app.querySelector('#reactive-slot-content').textContent, 'Projected body:beta', 'forwarded content slot should update when its source atom changes');
+          assertEqual(app.querySelector('#reactive-slot-title').textContent, 'Projected title', 'independent title slot content should remain stable');
+        }, { label: 'forwarded slot reactive update' });
+      });
+    });
+  </script>
+</body>
+</html>

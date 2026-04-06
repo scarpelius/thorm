@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>route-params-decoded</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('route-params-decoded', 'Route params should be decodeURIComponent-decoded before reaching the matched view.', async ({ app, step, assertEqual }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/users/Ada%20Lovelace/posts/notes%2Fintro');
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/users/:userId/posts/:postId', re: '/^\\/users\\/([^/]+)\\/posts\\/([^/]+)$/', keys: ['userId', 'postId'] },
+          ],
+          views: [{
+            k: 'el',
+            tag: 'div',
+            props: { attrs: { id: 'decoded-view' }, style: {}, on: [] },
+            children: [
+              {
+                k: 'el',
+                tag: 'span',
+                props: { attrs: { id: 'decoded-user' }, style: {}, on: [] },
+                children: [{ k: 'text', value: { k: 'param', name: 'userId' } }],
+              },
+              { k: 'text', value: { k: 'val', v: ' | ' } },
+              {
+                k: 'el',
+                tag: 'span',
+                props: { attrs: { id: 'decoded-post' }, style: {}, on: [] },
+                children: [{ k: 'text', value: { k: 'param', name: 'postId' } }],
+              },
+            ],
+          }],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+        await step('encoded route params are decoded in the matched view', async () => {
+          assertEqual(app.querySelector('#decoded-user').textContent, 'Ada Lovelace', 'space-encoded path params should be decoded');
+          assertEqual(app.querySelector('#decoded-post').textContent, 'notes/intro', 'slash-encoded path params should be decoded after matching');
+          assertEqual(app.querySelector('#decoded-view').textContent, 'Ada Lovelace | notes/intro', 'decoded params should preserve expected separators in the rendered view');
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

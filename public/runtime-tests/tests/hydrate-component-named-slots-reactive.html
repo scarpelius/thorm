@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-component-named-slots-reactive</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-component-named-slots-reactive', 'Hydration should preserve reactive named slot content through nested component composition.', async ({ app, step, click, waitFor, assertEqual }) => {
+      app.innerHTML = '<div><button id="update-badge">Update</button><!--component:start--><article id="outer-layout"><header><!--slot:start--><h1 id="hydrated-slot-title">Projected title</h1><!--slot:end--></header><p id="hydrated-badge">Badge:alpha</p><!--component:start--><section id="inner-shell"><!--slot:start--><p id="hydrated-slot-content">Projected body:alpha</p><!--slot:end--></section><!--component:end--></article><!--component:end--></div>';
+
+      const layoutTemplate = {
+        k: 'el',
+        tag: 'article',
+        props: { attrs: { id: 'outer-layout' }, style: {}, on: [] },
+        children: [
+          {
+            k: 'el',
+            tag: 'header',
+            props: { attrs: {}, style: {}, on: [] },
+            children: [{ k: 'slot', name: 'title' }],
+          },
+          {
+            k: 'el',
+            tag: 'p',
+            props: { attrs: { id: 'hydrated-badge' }, style: {}, on: [] },
+            children: [
+              { k: 'text', value: { k: 'val', v: 'Badge:' } },
+              { k: 'text', value: { k: 'prop', name: 'badge' } },
+            ],
+          },
+          {
+            k: 'component',
+            slots: {
+              default: [{ k: 'slot', name: 'content' }],
+            },
+            tpl: {
+              k: 'el',
+              tag: 'section',
+              props: { attrs: { id: 'inner-shell' }, style: {}, on: [] },
+              children: [{ k: 'slot' }],
+            },
+          },
+        ],
+      };
+
+      const ir = {
+        atoms: [{ id: 1, initial: 'alpha' }, { id: 2, initial: 'alpha' }],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'update-badge' },
+                style: {},
+                on: [{
+                  event: 'click',
+                  action: {
+                    k: 'task',
+                    actions: [
+                      { k: 'set', atom: 1, to: { k: 'val', v: 'beta' } },
+                      { k: 'set', atom: 2, to: { k: 'val', v: 'beta' } },
+                    ],
+                  },
+                }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Update' } }],
+            },
+            {
+              k: 'component',
+              props: {
+                badge: { k: 'read', atom: 1 },
+              },
+              slots: {
+                title: [{
+                  k: 'el',
+                  tag: 'h1',
+                  props: { attrs: { id: 'hydrated-slot-title' }, style: {}, on: [] },
+                  children: [{ k: 'text', value: { k: 'val', v: 'Projected title' } }],
+                }],
+                content: [{
+                  k: 'el',
+                  tag: 'p',
+                  props: { attrs: { id: 'hydrated-slot-content' }, style: {}, on: [] },
+                  children: [
+                    { k: 'text', value: { k: 'val', v: 'Projected body:' } },
+                    { k: 'text', value: { k: 'read', atom: 2 } },
+                  ],
+                }],
+              },
+              tpl: layoutTemplate,
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_SERVER, state: { atoms: { 1: 'alpha', 2: 'alpha' } } });
+
+      await step('hydration preserves nested named slot projection and its initial reactive text', async () => {
+        assertEqual(app.querySelector('#hydrated-slot-title').textContent, 'Projected title', 'title slot should hydrate in place through the outer component');
+        assertEqual(app.querySelector('#hydrated-slot-content').textContent, 'Projected body:alpha', 'content slot should hydrate in place through the nested inner component');
+        assertEqual(app.querySelector('#hydrated-badge').textContent, 'Badge:alpha', 'component prop text should hydrate against the existing DOM');
+      });
+
+      await step('hydrated nested slot projection remains reactive after boot', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        click(app.querySelector('#update-badge'));
+        await waitFor(() => {
+          assertEqual(app.querySelector('#hydrated-badge').textContent, 'Badge:beta', 'component prop should still react after nested slot hydration');
+          assertEqual(app.querySelector('#hydrated-slot-content').textContent, 'Projected body:beta', 'reactive reads inside hydrated forwarded slot content should update after boot');
+          assertEqual(app.querySelector('#hydrated-slot-title').textContent, 'Projected title', 'title slot projection should remain stable after reactive updates');
+        }, { label: 'hydrated forwarded slot reactive update' });
+      });
+    });
+  </script>
+</body>
+</html>

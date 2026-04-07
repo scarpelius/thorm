@@ -18,9 +18,7 @@ Please report suspected vulnerabilities privately.
 
 ## Contact
 
-Security contact channel: TBD
-
-Until a dedicated security email is published, use the most private available maintainer contact channel.
+Security contact channel: `contact@thorm.dev`
 
 ## Response Process
 

@@ -38,7 +38,7 @@ $app = fragment([
 ]);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// render → public/tests/<filename>/
+// render → public/examples/<filename>/
 
 
 $app = client(el('div', [], [$app]));

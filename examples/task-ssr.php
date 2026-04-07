@@ -46,7 +46,7 @@ $app = el('div', [attrs(['class' => 'container p-3'])], [
 ]);
 
 $test = strtolower(pathinfo(__FILE__, PATHINFO_FILENAME));
-$path = __DIR__ . '/../../public/tests/' . $test . '/';
+$path = __DIR__ . '/../public/examples/' . $test . '/';
 if (!is_dir($path)) { mkdir($path, 0777, true); }
 
 $renderer = new Render();
@@ -54,7 +54,7 @@ $res = $renderer->render($app);
 
 $title = 'Task action (SSR)';
 $containerId = 'app';
-$templatePath = __DIR__ . '/../../assets/index-test-ssr.tpl.html';
+$templatePath = __DIR__ . '/../assets/index.tpl.html';
 
 $callerId = md5(__FILE__);
 $iruri = $callerId . '.ir.json';

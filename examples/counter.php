@@ -18,7 +18,7 @@ $code = el('div', [cls('bg-body-secondary p-3 rounded-4 border mt-5')], [html(hi
         text(concat('Count: ', read(\$cnt))),
         show(eq(mod(read(\$cnt), 2), 0), el('span', [ cls('') ], [ text(' is even') ])),
         show(eq(mod(read(\$cnt), 2), 1), el('span', [ cls('') ], [ text(' is odd') ])),
-        show(eq(mod(read(\$cnt), 13), 0), el('p', [ cls('h6') ], [ text('How odd is that ðŸ™ƒ?') ])),
+        show(eq(mod(read(\$cnt), 13), 0), el('p', [ cls('h6') ], [ text('How odd is that 🙃?') ])),
     ]),
     el('p', [], [text('A simple stateful counter that reacts to clicks and shows even/odd state.')]),
     el('button', [
@@ -36,7 +36,7 @@ $app = el('div', [ cls('container mt-5') ], [
         text(concat('Count: ', read($cnt))),
         show(eq(mod(read($cnt), 2), 0), el('span', [ cls('') ], [ text(' is even') ])),
         show(eq(mod(read($cnt), 2), 1), el('span', [ cls('') ], [ text(' is odd') ])),
-        show(eq(mod(read($cnt), 13), 0), el('p', [ cls('h6') ], [ text('How odd is that ðŸ™ƒ?') ])),
+        show(eq(mod(read($cnt), 13), 0), el('p', [ cls('h6') ], [ text('How odd is that 🙃?') ])),
     ]),
     el('p', [], [text('A simple stateful counter that reacts to clicks and shows even/odd state.')]),
     el('button', [

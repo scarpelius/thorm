@@ -18,11 +18,11 @@ Thorm is not yet published as a public Composer package.
 ## Project layout
 - `src/php/functions.php`: Public DSL surface (state, el, attrs, on, repeat, route, component, effects, http, etc.).
 - `src/php/Render.php`: Builds the shared IR and can render server-side HTML from that IR.
-- `src/php/BuildExample.php`: Writes generated example output to `public/tests/<example>/`.
+- `src/php/BuildExample.php`: Writes generated example output to `public/examples/<example>/`.
 - `src/php/IR/*`: IR node definitions for atoms, expressions, actions, effects, and DOM nodes.
-- `assets/index.tpl.html`: HTML template used during example generation (`{$title}`, `{$containerId}`, `{$runtimeSrc}`, `{$iruri}` placeholders).
-- `public/runtime/**`: Browser runtime (core, primitives, utils, devtools). Synced to `public/runtime/` when shipping.
-- `examples/*.php`: End-to-end samples that generate pages under `public/tests/`.
+- `assets/index.tpl.html`: HTML template used during example generation (`{$title}`, `{$containerId}`, `{$iruri}` placeholders).
+- `public/runtime/**`: Browser runtime (core, primitives, utils, devtools).
+- `examples/*.php`: End-to-end samples that generate pages under `public/examples/`.
 - `cli/watch.sh`: Dev helper that watches the tree, reruns touched example PHP files, and syncs runtime assets.
 
 ## Requirements
@@ -35,11 +35,11 @@ Thorm is not yet published as a public Composer package.
 ```bash
 composer install
 ```
-2) Run an example to generate IR + HTML in `public/tests/<example>/`:
+2) Run an example to generate IR + HTML in `public/examples/<example>/`:
 ```bash
-php examples/tests/counter.php
+php examples/counter.php
 ```
-3) Serve the `public/` folder and open `http://localhost:8000/tests/counter/`.
+3) Serve the `public/` folder and open `http://localhost:8000/examples/counter/`.
 
 To regenerate on changes, use the watcher (auto-runs example scripts and syncs runtime):
 ```bash
@@ -88,9 +88,9 @@ $res = $render->render($app);
 
 BuildExample::build([
     'name' => 'counter',
-    'path' => __DIR__ . '/public/tests/',
+    'path' => __DIR__ . '/public/examples/',
     'renderer' => $res,
-    'template' => __DIR__ . '/assets/index-test.tpl.html',
+    'template' => __DIR__ . '/assets/index.tpl.html',
     'opts' => [
         'title' => 'Counter',
         'containerId' => 'app',
@@ -108,7 +108,7 @@ BuildExample::build([
 - HTTP helper: `http(url, method, toAtom, statusAtom, headers, body, parse)` usable as listener or action (`asAction=true`).
 - Utilities: `bind` for two-way form binding; `inc`, `set`, `add`, `delay` for state updates.
 
-## Examples worth reading (`examples/tests`)
+## Examples worth reading (`examples`)
 - `counter.php`, `2counters.php`: Atoms, math expressions, conditional rendering.
 - `attrs.php`, `text-reactive.php`, `toggle.php`: Props, class/style helpers, simple state.
 - `repeat.php`: Lists with keyed templates and `item()` accessors.
@@ -117,13 +117,12 @@ BuildExample::build([
 - `router.php`, `fragments.php`, `search-box-live.php`, `bid.php`: Routing, fragments, form bindings, more realistic flows.
 
 ## Runtime & templates
-- Runtime entry: `assets/runtime/index.js` (bundles core/primitives/utils/devtools) and is expected to be available at `/assets/Thorm-runtime.js` or copied to `public/runtime/`.
-- Templates: `assets/index.tpl.html` (default), `assets/index-test.tpl.html`, `assets/index-old.tpl.html`, `assets/index-hronic.tpl.html` (legacy). Tokens are replaced during example generation.
+- Runtime entry: `public/runtime/index.js`.
+- Templates: `assets/index.tpl.html`. Tokens are replaced during example generation.
 
 ## Serving and packaging
 - For quick demos, serve `public/` with PHP's built-in server: `php -S localhost:8000 -t public`.
-- When deploying, copy `public/` plus the generated `*.ir.json` files. Ensure runtime assets from `assets/runtime/` (or `public/runtime/`) are reachable at the path used in the template.
+- When deploying, copy `public/` plus the generated `*.ir.json` files. Ensure runtime assets under `public/runtime/` stay reachable at the path used in the generated page.
 
 ## Notes
-- The `examples/tests/hronic/` folder and `README.md.old` are deprecated and intentionally ignored.
 - IR is JSON-friendly; you can persist it alongside rendered HTML or feed it to another build step.

@@ -52,7 +52,7 @@ $app = fragment([
 ]);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// render → public/tests/<name>/
+// render → public/examples/<name>/
 
 
 $app = client(el('div', [], [$app]));

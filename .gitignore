@@ -4,4 +4,5 @@ assets/runtime.zip
 src.zip
 /public/runtime
 /public/_runtime/*
-/public/examples
+/public/examples/*
+!/public/examples/donotdelete.md

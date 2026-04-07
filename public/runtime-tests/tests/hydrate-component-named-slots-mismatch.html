@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-component-named-slots-mismatch</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-component-named-slots-mismatch', 'Hydration should fail clearly when nested named slot SSR markup is missing.', async ({ app, step, assert, assertContains }) => {
+      app.innerHTML = '<!--component:start--><article><header><!--slot:start--><!--slot:end--></header><!--component:start--><section><!--slot:start--><!--slot:end--></section><!--component:end--></article><!--component:end-->';
+
+      const layoutTemplate = {
+        k: 'el',
+        tag: 'article',
+        props: { attrs: {}, style: {}, on: [] },
+        children: [
+          {
+            k: 'el',
+            tag: 'header',
+            props: { attrs: {}, style: {}, on: [] },
+            children: [{ k: 'slot', name: 'title' }],
+          },
+          {
+            k: 'component',
+            slots: {
+              default: [{ k: 'slot', name: 'content' }],
+            },
+            tpl: {
+              k: 'el',
+              tag: 'section',
+              props: { attrs: {}, style: {}, on: [] },
+              children: [{ k: 'slot' }],
+            },
+          },
+        ],
+      };
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'component',
+          slots: {
+            title: [{
+              k: 'el',
+              tag: 'h1',
+              props: { attrs: { id: 'missing-nested-title' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'val', v: 'Projected title' } }],
+            }],
+            content: [{
+              k: 'el',
+              tag: 'p',
+              props: { attrs: { id: 'missing-nested-content' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'val', v: 'Projected body' } }],
+            }],
+          },
+          tpl: layoutTemplate,
+        },
+      };
+
+      await step('missing nested named slot markup raises a hydration error with a useful message', async () => {
+        let message = '';
+        try {
+          boot(ir, app, { target: THORM_TARGET_SERVER, state: { atoms: {} } });
+        } catch (error) {
+          message = error?.message ?? String(error);
+        }
+        assert(message !== '', 'nested named slot hydration mismatch should throw instead of silently succeeding');
+        assertContains(message, '[hydrate] expected <h1>', 'nested named slot hydration mismatch should fail on the missing forwarded title slot node');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-show-false-mismatch</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-show-false-mismatch', 'Hydration should fail clearly when hidden show content is present in SSR-like markup.', async ({ app, step, assert, assertContains }) => {
+      app.innerHTML = '<div><!--show:start--><span id="unexpected-show">Visible</span><!--show:end--></div>';
+
+      const ir = {
+        atoms: [{ id: 1, initial: false }],
+        root: {
+          k: 'el',
+          tag: 'div',
+          props: { attrs: {}, style: {}, on: [] },
+          children: [{
+            k: 'show',
+            when: { k: 'read', atom: 1 },
+            child: {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'unexpected-show' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'val', v: 'Visible' } }],
+            },
+          }],
+        },
+      };
+
+      await step('unexpected hidden show markup raises a hydration error with a useful message', async () => {
+        let message = '';
+        try {
+          boot(ir, app, { target: THORM_TARGET_SERVER, state: { atoms: { 1: false } } });
+        } catch (error) {
+          message = error?.message ?? String(error);
+        }
+        assert(message !== '', 'hidden show hydration mismatch should throw instead of silently succeeding');
+        assertContains(message, '[hydrate] expected comment show:end', 'hidden show hydration mismatch should fail on the unexpected visible child node');
+      });
+    });
+  </script>
+</body>
+</html>

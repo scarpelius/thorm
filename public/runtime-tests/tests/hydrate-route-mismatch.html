@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-route-mismatch</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-route-mismatch', 'Hydration should fail clearly when matched route SSR markup is missing.', async ({ app, step, assert, assertContains }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/details/42');
+      app.innerHTML = '<!--route:start--><!--route:end-->';
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/details/:id', re: '/^\\/details\\/([^/]+)$/', keys: ['id'] },
+          ],
+          views: [{
+            k: 'el',
+            tag: 'div',
+            props: { attrs: { id: 'details-view' }, style: {}, on: [] },
+            children: [
+              { k: 'text', value: { k: 'val', v: 'Details:' } },
+              { k: 'text', value: { k: 'param', name: 'id' } },
+            ],
+          }],
+          fallback: { k: 'text', value: { k: 'val', v: 'Not found' } },
+        },
+      };
+
+      try {
+        await step('missing matched route markup raises a hydration error with a useful message', async () => {
+          let message = '';
+          try {
+            boot(ir, app, { target: THORM_TARGET_SERVER });
+          } catch (error) {
+            message = error?.message ?? String(error);
+          }
+          assert(message !== '', 'route hydration mismatch should throw instead of silently succeeding');
+          assertContains(message, '[hydrate] expected <div>', 'route hydration mismatch should fail on the missing matched route node');
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

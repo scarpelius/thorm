@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>component-props-dispose-nested</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('component-props-dispose-nested', 'Nested component consumers should stop mutating detached DOM after the component subtree is removed.', async ({ app, step, click, waitFor, waitMicrotasks, assertEqual }) => {
+      const ir = {
+        atoms: [
+          { id: 1, initial: true },
+          { id: 2, initial: 'Welcome' },
+        ],
+        root: {
+          k: 'fragment',
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'hide-component-tree' },
+                style: {},
+                on: [{ event: 'click', action: { k: 'set', atom: 1, to: { k: 'val', v: false } } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Hide component tree' } }],
+            },
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'update-source-title' },
+                style: {},
+                on: [{ event: 'click', action: { k: 'set', atom: 2, to: { k: 'val', v: 'Updated after removal' } } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Update title source' } }],
+            },
+            {
+              k: 'show',
+              when: { k: 'read', atom: 1 },
+              child: {
+                k: 'component',
+                props: {
+                  title: { k: 'read', atom: 2 },
+                },
+                tpl: {
+                  k: 'component',
+                  props: {
+                    nestedTitle: { k: 'prop', name: 'title' },
+                  },
+                  tpl: {
+                    k: 'el',
+                    tag: 'div',
+                    props: { attrs: { id: 'nested-component-tree' }, style: {}, on: [] },
+                    children: [{
+                      k: 'el',
+                      tag: 'h3',
+                      props: { attrs: { id: 'detached-deep-title' }, style: {}, on: [] },
+                      children: [{ k: 'text', value: { k: 'prop', name: 'nestedTitle' } }],
+                    }],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('nested component tree renders the initial source value', async () => {
+        assertEqual(app.querySelector('#detached-deep-title').textContent, 'Welcome', 'nested component consumer should render the initial source value');
+      });
+
+      await step('removing the component tree detaches the nested consumer and later source changes do not mutate the detached node', async () => {
+        const detachedTitle = app.querySelector('#detached-deep-title');
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        click(app.querySelector('#hide-component-tree'));
+        await waitFor(() => {
+          assertEqual(app.querySelector('#nested-component-tree'), null, 'nested component tree should unmount after hiding');
+        }, { label: 'nested component tree hidden' });
+
+        click(app.querySelector('#update-source-title'));
+        await waitMicrotasks(3);
+        assertEqual(detachedTitle.textContent, 'Welcome', 'detached nested consumer should keep its last rendered value after removal');
+      });
+    });
+  </script>
+</body>
+</html>

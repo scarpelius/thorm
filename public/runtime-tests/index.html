@@ -112,9 +112,11 @@
             <li><a href="./tests/effect-interval-dispose.html">effect-interval-dispose.html</a> <span class="rt-desc">Checks disposed interval effects stop ticking after teardown.</span></li>
             <li><a href="./tests/effect-watch-dispose.html">effect-watch-dispose.html</a> <span class="rt-desc">Checks disposed watch effects stop reacting to later changes.</span></li>
             <li><a href="./tests/effect-show-dispose.html">effect-show-dispose.html</a> <span class="rt-desc">Checks effects inside a <code>show</code> subtree stop after that subtree is hidden.</span></li>
+            <li><a href="./tests/effect-show-watch-dispose.html">effect-show-watch-dispose.html</a> <span class="rt-desc">Checks watch effects inside a <code>show</code> subtree stop reacting after that subtree is hidden.</span></li>
             <li><a href="./tests/effect-route-dispose.html">effect-route-dispose.html</a> <span class="rt-desc">Checks effects inside a routed view stop after navigation disposes that view.</span></li>
             <li><a href="./tests/effect-route-watch-dispose.html">effect-route-watch-dispose.html</a> <span class="rt-desc">Checks watch effects inside a routed view stop reacting after navigation disposes that view.</span></li>
             <li><a href="./tests/effect-repeat-dispose.html">effect-repeat-dispose.html</a> <span class="rt-desc">Checks effects owned by repeated rows stop after that row is removed.</span></li>
+            <li><a href="./tests/effect-repeat-watch-dispose.html">effect-repeat-watch-dispose.html</a> <span class="rt-desc">Checks watch effects owned by repeated rows stop reacting after that row is removed.</span></li>
           </ul>
         </section>
 
@@ -167,6 +169,8 @@
             <li><a href="./tests/hydrate-route-context.html">hydrate-route-context.html</a> <span class="rt-desc">Checks hydrated route params and query output stay correct across reroute.</span></li>
             <li><a href="./tests/hydrate-route-fallback.html">hydrate-route-fallback.html</a> <span class="rt-desc">Checks SSR-like fallback route markup hydrates in place and can still recover to a matched route.</span></li>
             <li><a href="./tests/hydrate-route-fallback-query-clear.html">hydrate-route-fallback-query-clear.html</a> <span class="rt-desc">Checks hydrated fallback query output clears when navigation removes the query string.</span></li>
+            <li><a href="./tests/hydrate-route-fallback-mismatch.html">hydrate-route-fallback-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when fallback route markup is missing.</span></li>
+            <li><a href="./tests/hydrate-route-mismatch.html">hydrate-route-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when matched route markup is missing.</span></li>
             <li><a href="./tests/hydrate-route-popstate.html">hydrate-route-popstate.html</a> <span class="rt-desc">Checks hydrated route markup still rerenders on browser <code>popstate</code> events.</span></li>
             <li><a href="./tests/hydrate-route-query-duplicate.html">hydrate-route-query-duplicate.html</a> <span class="rt-desc">Checks hydrated duplicate query keys still resolve to the last value.</span></li>
             <li><a href="./tests/hydrate-route-query-clear.html">hydrate-route-query-clear.html</a> <span class="rt-desc">Checks hydrated query-driven output clears when navigation removes the query string.</span></li>
@@ -178,14 +182,19 @@
             <li><a href="./tests/hydrate-route-base-trailing-slash.html">hydrate-route-base-trailing-slash.html</a> <span class="rt-desc">Checks hydrated routes still match when the configured base path ends with a slash.</span></li>
             <li><a href="./tests/hydrate-route-hash-ignored.html">hydrate-route-hash-ignored.html</a> <span class="rt-desc">Checks hydrated routes ignore hash fragments before and after navigation.</span></li>
             <li><a href="./tests/hydrate-show.html">hydrate-show.html</a> <span class="rt-desc">Checks <code>show</code> hydration and later visibility toggles.</span></li>
+            <li><a href="./tests/hydrate-show-false-mismatch.html">hydrate-show-false-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when hidden <code>show</code> content is unexpectedly present.</span></li>
             <li><a href="./tests/hydrate-show-mismatch.html">hydrate-show-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when visible <code>show</code> markup is missing.</span></li>
             <li><a href="./tests/hydrate-repeat.html">hydrate-repeat.html</a> <span class="rt-desc">Checks hydrated repeat rows stay interactive and reconcile correctly.</span></li>
+            <li><a href="./tests/hydrate-repeat-extra-row-mismatch.html">hydrate-repeat-extra-row-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when repeat markup contains an unexpected extra row.</span></li>
             <li><a href="./tests/hydrate-repeat-mismatch.html">hydrate-repeat-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when keyed repeat rows are missing.</span></li>
             <li><a href="./tests/hydrate-component-slot.html">hydrate-component-slot.html</a> <span class="rt-desc">Checks hydrated component props and projected slot content.</span></li>
             <li><a href="./tests/hydrate-component-mismatch.html">hydrate-component-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when component boundary markup is missing.</span></li>
+            <li><a href="./tests/hydrate-component-named-slots-mismatch.html">hydrate-component-named-slots-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when nested named slot markup is missing.</span></li>
             <li><a href="./tests/hydrate-component-named-slots.html">hydrate-component-named-slots.html</a> <span class="rt-desc">Checks hydrated named slots project correctly through nested component composition.</span></li>
             <li><a href="./tests/hydrate-component-named-slots-reactive.html">hydrate-component-named-slots-reactive.html</a> <span class="rt-desc">Checks reactive named slot content survives hydration through nested component composition.</span></li>
             <li><a href="./tests/hydrate-slot-fallback-mismatch.html">hydrate-slot-fallback-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when slot fallback markup is missing.</span></li>
+            <li><a href="./tests/hydrate-slot-projected-mismatch.html">hydrate-slot-projected-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when projected slot markup is missing.</span></li>
+            <li><a href="./tests/hydrate-slot-named-mismatch.html">hydrate-slot-named-mismatch.html</a> <span class="rt-desc">Checks hydration fails clearly when named slot markup is missing.</span></li>
             <li><a href="./tests/hydrate-slot-fallback-replace.html">hydrate-slot-fallback-replace.html</a> <span class="rt-desc">Checks hydrated projected slot content replaces fallback slot content.</span></li>
             <li><a href="./tests/hydrate-slot-fallback-empty.html">hydrate-slot-fallback-empty.html</a> <span class="rt-desc">Checks fallback slot content hydrates correctly when no projection exists.</span></li>
           </ul>
@@ -196,6 +205,8 @@
           <p>Prop evaluation, slot projection, nesting, and reactive prop flow through component trees.</p>
           <ul>
             <li><a href="./tests/component-props.html">component-props.html</a> <span class="rt-desc">Checks component prop expressions and reactive prop updates.</span></li>
+            <li><a href="./tests/component-props-dispose-nested.html">component-props-dispose-nested.html</a> <span class="rt-desc">Checks nested component consumers stop mutating detached DOM after the component tree is removed.</span></li>
+            <li><a href="./tests/component-slot-fallback-dispose.html">component-slot-fallback-dispose.html</a> <span class="rt-desc">Checks fallback slot content is removed cleanly when its component subtree is disposed.</span></li>
             <li><a href="./tests/component-slots.html">component-slots.html</a> <span class="rt-desc">Checks named slot projection and fallback rendering.</span></li>
             <li><a href="./tests/component-slot-replace.html">component-slot-replace.html</a> <span class="rt-desc">Checks projected slot content replaces default fallback content.</span></li>
             <li><a href="./tests/component-nested.html">component-nested.html</a> <span class="rt-desc">Checks rendering across nested component boundaries.</span></li>

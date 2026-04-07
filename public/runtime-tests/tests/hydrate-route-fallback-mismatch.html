@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hydrate-route-fallback-mismatch</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_SERVER } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('hydrate-route-fallback-mismatch', 'Hydration should fail clearly when fallback route SSR markup is missing.', async ({ app, step, assert, assertContains }) => {
+      const originalUrl = location.pathname + location.search + location.hash;
+      history.replaceState(null, '', '/app/missing/page');
+      app.innerHTML = '<!--route:start--><!--route:end-->';
+
+      const ir = {
+        atoms: [],
+        root: {
+          k: 'route',
+          base: '/app',
+          table: [
+            { pat: '/', re: '/^\\/$/', keys: [] },
+          ],
+          views: [{
+            k: 'text',
+            value: { k: 'val', v: 'Home' },
+          }],
+          fallback: {
+            k: 'el',
+            tag: 'div',
+            props: { attrs: { id: 'fallback-view' }, style: {}, on: [] },
+            children: [{ k: 'text', value: { k: 'val', v: 'Fallback' } }],
+          },
+        },
+      };
+
+      try {
+        await step('missing fallback route markup raises a hydration error with a useful message', async () => {
+          let message = '';
+          try {
+            boot(ir, app, { target: THORM_TARGET_SERVER });
+          } catch (error) {
+            message = error?.message ?? String(error);
+          }
+          assert(message !== '', 'fallback route hydration mismatch should throw instead of silently succeeding');
+          assertContains(message, '[hydrate] expected <div>', 'fallback route hydration mismatch should fail on the missing fallback node');
+        });
+      } finally {
+        history.replaceState(null, '', originalUrl);
+      }
+    });
+  </script>
+</body>
+</html>

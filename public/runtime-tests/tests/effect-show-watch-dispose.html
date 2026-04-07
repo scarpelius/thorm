@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>effect-show-watch-dispose</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('effect-show-watch-dispose', 'Watch effects inside a show-controlled subtree should stop reacting after that subtree is hidden.', async ({ app, step, click, waitFor, waitMicrotasks, assertEqual }) => {
+      const ir = {
+        atoms: [
+          { id: 1, initial: true },
+          { id: 2, initial: 0 },
+          { id: 3, initial: 'idle' },
+        ],
+        root: {
+          k: 'fragment',
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'mutate-source' },
+                style: {},
+                on: [{ event: 'click', action: { k: 'inc', atom: 2, by: 1 } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Mutate watched atom' } }],
+            },
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'hide-watch-subtree' },
+                style: {},
+                on: [{ event: 'click', action: { k: 'set', atom: 1, to: { k: 'val', v: false } } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Hide watch subtree' } }],
+            },
+            {
+              k: 'el',
+              tag: 'span',
+              props: { attrs: { id: 'show-watch-status' }, style: {}, on: [] },
+              children: [{ k: 'text', value: { k: 'read', atom: 3 } }],
+            },
+            {
+              k: 'show',
+              when: { k: 'read', atom: 1 },
+              child: {
+                k: 'fragment',
+                children: [
+                  {
+                    k: 'effect',
+                    triggers: [{
+                      type: 'watch',
+                      expr: { k: 'read', atom: 2 },
+                      immediate: false,
+                    }],
+                    actions: [{
+                      k: 'set',
+                      atom: 3,
+                      to: { k: 'val', v: 'changed while shown' },
+                    }],
+                  },
+                  {
+                    k: 'el',
+                    tag: 'div',
+                    props: { attrs: { id: 'show-watch-subtree' }, style: {}, on: [] },
+                    children: [{ k: 'text', value: { k: 'val', v: 'Watch subtree mounted' } }],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('watch effect inside the shown subtree reacts while that subtree is mounted', async () => {
+        click(app.querySelector('#mutate-source'));
+        await waitFor(() => {
+          assertEqual(app.querySelector('#show-watch-status').textContent, 'changed while shown', 'watch effect should react while the show subtree is mounted');
+        }, { label: 'show watch while mounted' });
+      });
+
+      await step('hiding the show subtree disposes the watch effect and stops later reactions', async () => {
+        app.querySelector('#show-watch-status').textContent = 'idle';
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        click(app.querySelector('#hide-watch-subtree'));
+        await waitFor(() => {
+          assertEqual(app.querySelector('#show-watch-subtree'), null, 'show watch subtree should unmount after hiding');
+        }, { label: 'show watch subtree hidden' });
+
+        click(app.querySelector('#mutate-source'));
+        await waitMicrotasks(3);
+        assertEqual(app.querySelector('#show-watch-status').textContent, 'idle', 'watch effect should stop reacting after the show subtree is hidden');
+      });
+    });
+  </script>
+</body>
+</html>

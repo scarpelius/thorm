@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>effect-repeat-watch-dispose</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('effect-repeat-watch-dispose', 'Watch effects owned by repeated rows should stop reacting after that row is removed.', async ({ app, step, click, waitFor, waitMicrotasks, assertEqual }) => {
+      const ir = {
+        atoms: [
+          {
+            id: 1,
+            initial: [
+              { id: 'a', label: 'Alpha' },
+              { id: 'b', label: 'Beta' },
+            ],
+          },
+          { id: 2, initial: 0 },
+          { id: 3, initial: 0 },
+          { id: 4, initial: 'idle-a' },
+          { id: 5, initial: 'idle-b' },
+        ],
+        root: {
+          k: 'fragment',
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'mutate-alpha-source' },
+                style: {},
+                on: [{ event: 'click', action: { k: 'inc', atom: 2, by: 1 } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Mutate Alpha source' } }],
+            },
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'remove-alpha-row' },
+                style: {},
+                on: [{
+                  event: 'click',
+                  action: {
+                    k: 'set',
+                    atom: 1,
+                    to: { k: 'val', v: [{ id: 'b', label: 'Beta' }] },
+                  },
+                }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Remove Alpha row' } }],
+            },
+            {
+              k: 'repeat',
+              items: { k: 'read', atom: 1 },
+              key: { k: 'item', path: 'id' },
+              tpl: {
+                k: 'fragment',
+                children: [
+                  {
+                    k: 'show',
+                    when: { k: 'op', name: 'eq', a: { k: 'item', path: 'id' }, b: { k: 'val', v: 'a' } },
+                    child: {
+                      k: 'fragment',
+                      children: [
+                        {
+                          k: 'effect',
+                          triggers: [{
+                            type: 'watch',
+                            expr: { k: 'read', atom: 2 },
+                            immediate: false,
+                          }],
+                          actions: [{ k: 'set', atom: 4, to: { k: 'val', v: 'changed-a' } }],
+                        },
+                        {
+                          k: 'el',
+                          tag: 'div',
+                          props: { attrs: { id: 'watch-row-a' }, style: {}, on: [] },
+                          children: [
+                            { k: 'text', value: { k: 'item', path: 'label' } },
+                            { k: 'text', value: { k: 'val', v: ':' } },
+                            {
+                              k: 'el',
+                              tag: 'span',
+                              props: { attrs: { id: 'watch-status-a' }, style: {}, on: [] },
+                              children: [{ k: 'text', value: { k: 'read', atom: 4 } }],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    k: 'show',
+                    when: { k: 'op', name: 'eq', a: { k: 'item', path: 'id' }, b: { k: 'val', v: 'b' } },
+                    child: {
+                      k: 'fragment',
+                      children: [
+                        {
+                          k: 'effect',
+                          triggers: [{
+                            type: 'watch',
+                            expr: { k: 'read', atom: 3 },
+                            immediate: false,
+                          }],
+                          actions: [{ k: 'set', atom: 5, to: { k: 'val', v: 'changed-b' } }],
+                        },
+                        {
+                          k: 'el',
+                          tag: 'div',
+                          props: { attrs: { id: 'watch-row-b' }, style: {}, on: [] },
+                          children: [
+                            { k: 'text', value: { k: 'item', path: 'label' } },
+                            { k: 'text', value: { k: 'val', v: ':' } },
+                            {
+                              k: 'el',
+                              tag: 'span',
+                              props: { attrs: { id: 'watch-status-b' }, style: {}, on: [] },
+                              children: [{ k: 'text', value: { k: 'read', atom: 5 } }],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('repeat-row watch reacts while the row is still mounted', async () => {
+        click(app.querySelector('#mutate-alpha-source'));
+        await waitFor(() => {
+          assertEqual(app.querySelector('#watch-status-a').textContent, 'changed-a', 'Alpha row watch should react while mounted');
+        }, { label: 'repeat row watch while mounted' });
+      });
+
+      await step('removing the row disposes its watch effect and stops later reactions', async () => {
+        app.querySelector('#watch-status-a').textContent = 'idle-a';
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        click(app.querySelector('#remove-alpha-row'));
+        await waitFor(() => {
+          assertEqual(app.querySelector('#watch-row-a'), null, 'Alpha repeat row should unmount after removal');
+          assertEqual(app.querySelector('#watch-row-b') !== null, true, 'Beta repeat row should remain mounted');
+        }, { label: 'repeat watch row removed' });
+
+        click(app.querySelector('#mutate-alpha-source'));
+        await waitMicrotasks(3);
+        assertEqual(app.querySelector('#watch-row-a'), null, 'removed Alpha row should stay removed');
+        assertEqual(app.querySelector('#watch-status-b').textContent, 'idle-b', 'unrelated Beta row watch status should stay unchanged');
+      });
+    });
+  </script>
+</body>
+</html>

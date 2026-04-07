@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>component-slot-fallback-dispose</title>
+</head>
+<body>
+  <script type="module">
+    import { boot, THORM_TARGET_CLIENT } from '../../runtime/index.js';
+    import { runPage } from '../assert.js';
+
+    await runPage('component-slot-fallback-dispose', 'Fallback slot content should be removed cleanly when the owning component subtree is disposed.', async ({ app, step, click, waitFor, assertEqual }) => {
+      const ir = {
+        atoms: [{ id: 1, initial: true }],
+        root: {
+          k: 'fragment',
+          children: [
+            {
+              k: 'el',
+              tag: 'button',
+              props: {
+                attrs: { id: 'hide-slot-component' },
+                style: {},
+                on: [{ event: 'click', action: { k: 'set', atom: 1, to: { k: 'val', v: false } } }],
+              },
+              children: [{ k: 'text', value: { k: 'val', v: 'Hide slot component' } }],
+            },
+            {
+              k: 'show',
+              when: { k: 'read', atom: 1 },
+              child: {
+                k: 'component',
+                tpl: {
+                  k: 'el',
+                  tag: 'section',
+                  props: { attrs: { id: 'slot-component' }, style: {}, on: [] },
+                  children: [{
+                    k: 'slot',
+                    children: [{
+                      k: 'el',
+                      tag: 'p',
+                      props: { attrs: { id: 'slot-fallback-content' }, style: {}, on: [] },
+                      children: [{ k: 'text', value: { k: 'val', v: 'Fallback content' } }],
+                    }],
+                  }],
+                },
+              },
+            },
+          ],
+        },
+      };
+
+      boot(ir, app, { target: THORM_TARGET_CLIENT });
+
+      await step('component renders fallback slot content while mounted', async () => {
+        assertEqual(app.querySelector('#slot-fallback-content').textContent, 'Fallback content', 'fallback slot content should render while the component is mounted');
+      });
+
+      await step('disposing the component subtree removes fallback slot content cleanly', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        click(app.querySelector('#hide-slot-component'));
+        await waitFor(() => {
+          assertEqual(app.querySelector('#slot-component'), null, 'slot component should unmount after hiding');
+          assertEqual(app.querySelector('#slot-fallback-content'), null, 'fallback slot content should be removed with the component subtree');
+        }, { label: 'slot component hidden' });
+      });
+    });
+  </script>
+</body>
+</html>

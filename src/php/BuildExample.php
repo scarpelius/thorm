@@ -4,11 +4,6 @@ namespace Thorm;
 
 class BuildExample
 {
-    public function _construct()
-    {
-        
-    }
-
     public static function build(array $data): bool
     {
         $path = $data['path'].$data['name'].'/';

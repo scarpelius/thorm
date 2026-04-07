@@ -2,6 +2,11 @@
 
 PHP-first DSL for describing reactive UIs that compile to a small JavaScript runtime. Build views with simple PHP functions, emit an intermediate representation (IR), and let the runtime handle reactivity, events, routing, and effects in the browser.
 
+## Project docs
+- [ROADMAP.md](ROADMAP.md): Current project direction, priorities, and release phases.
+- [CONTRIBUTING.md](CONTRIBUTING.md): Current contribution policy for the public repo.
+- [SECURITY.md](SECURITY.md): How to report security issues privately.
+
 ## Current release status
 Thorm is not yet published as a public Composer package.
 
@@ -15,9 +20,9 @@ Thorm is not yet published as a public Composer package.
 - `src/php/Render.php`: Builds the shared IR and can render server-side HTML from that IR.
 - `src/php/BuildExample.php`: Writes generated example output to `public/tests/<example>/`.
 - `src/php/IR/*`: IR node definitions for atoms, expressions, actions, effects, and DOM nodes.
-- `assets/index*.tpl.html`: HTML templates used during example generation (`{$title}`, `{$containerId}`, `{$runtimeSrc}`, `{$iruri}` placeholders).
-- `assets/runtime/**`: Browser runtime (core, primitives, utils, devtools). Synced to `public/runtime/` when shipping.
-- `examples/tests/*.php`: End-to-end samples that generate pages under `public/tests/` (ignore `examples/tests/hronic/`, it is outdated).
+- `assets/index.tpl.html`: HTML template used during example generation (`{$title}`, `{$containerId}`, `{$runtimeSrc}`, `{$iruri}` placeholders).
+- `public/runtime/**`: Browser runtime (core, primitives, utils, devtools). Synced to `public/runtime/` when shipping.
+- `examples/*.php`: End-to-end samples that generate pages under `public/tests/`.
 - `cli/watch.sh`: Dev helper that watches the tree, reruns touched example PHP files, and syncs runtime assets.
 
 ## Requirements

@@ -2,8 +2,6 @@
 /docs
 assets/runtime.zip
 src.zip
-/public/tests
-/public/tests/*
 /public/runtime
 /public/_runtime/*
-/public/tests
+/public/examples

@@ -3,6 +3,28 @@
   "description": "PHP-first UI framework that compiles a declarative DSL to a small browser runtime via a shared IR.",
   "type": "library",
   "license": "Apache-2.0",
+  "homepage": "https://thorm.dev",
+  "keywords": [
+    "php",
+    "javascript",
+    "ui",
+    "framework",
+    "reactive",
+    "frontend",
+    "ssr",
+    "hydration",
+    "dsl"
+  ],
+  "authors": [
+    {
+      "name": "Marius Bucur"
+    }
+  ],
+  "support": {
+    "email": "support@thorm.dev",
+    "source": "https://github.com/scarpelius/thorm",
+    "issues": "https://github.com/scarpelius/thorm/issues"
+  },
   "autoload": {
     "psr-4": {
       "Thorm\\": "src/php/"

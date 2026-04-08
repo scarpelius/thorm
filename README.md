@@ -2,53 +2,34 @@
 
 PHP-first DSL for describing reactive UIs that compile to a small JavaScript runtime. Build views with simple PHP functions, emit an intermediate representation (IR), and let the runtime handle reactivity, events, routing, and effects in the browser.
 
+## Status
+Thorm is currently in pre-alpha / developer preview.
+
+- APIs may change without backward compatibility
+- package structure and build flows may change
+- suitable for evaluation, experimentation, and early integration work
+
 ## Project docs
 - [ROADMAP.md](ROADMAP.md): Current project direction, priorities, and release phases.
 - [CONTRIBUTING.md](CONTRIBUTING.md): Current contribution policy for the public repo.
 - [SECURITY.md](SECURITY.md): How to report security issues privately.
 
-## Current release status
-Thorm is not yet published as a public Composer package.
+## Installation
+Install the framework with Composer:
 
-- In this repository, `composer install` is only used to generate local autoload files under `vendor/`.
-- A public GitHub repository is not required for that local install flow.
-- A public repository matters later for `composer require bitforge/thorm` from another project or for Packagist publication.
-- Until the repository is public, consume Thorm from this checkout or through a Composer `path` repository in a separate local test project.
-
-## Project layout
-- `src/php/functions.php`: Public DSL surface (state, el, attrs, on, repeat, route, component, effects, http, etc.).
-- `src/php/Render.php`: Builds the shared IR and can render server-side HTML from that IR.
-- `src/php/BuildExample.php`: Writes generated example output to `public/examples/<example>/`.
-- `src/php/IR/*`: IR node definitions for atoms, expressions, actions, effects, and DOM nodes.
-- `assets/index.tpl.html`: HTML template used during example generation (`{$title}`, `{$containerId}`, `{$iruri}` placeholders).
-- `public/runtime/**`: Browser runtime (core, primitives, utils, devtools).
-- `examples/*.php`: End-to-end samples that generate pages under `public/examples/`.
-- `cli/watch.sh`: Dev helper that watches the tree, reruns touched example PHP files, and syncs runtime assets.
-
-## Requirements
-- PHP 8.1+
-- Composer (or an existing `vendor/` directory) for autoloading via `vendor/autoload.php`
-- A static file server to view the generated pages (e.g., `php -S localhost:8000 -t public`)
-
-## Quick start
-1) Install autoload files in this repository:
 ```bash
+composer require bitforge/thorm
+```
+
+If you want to explore the framework itself, study the examples, or work directly from the source repository, clone the repo and install its local dependencies:
+
+```bash
+git clone https://github.com/scarpelius/thorm.git
+cd thorm
 composer install
 ```
-2) Run an example to generate IR + HTML in `public/examples/<example>/`:
-```bash
-php examples/counter.php
-```
-3) Serve the `public/` folder and open `http://localhost:8000/examples/counter/`.
 
-To regenerate on changes, use the watcher (auto-runs example scripts and syncs runtime):
-```bash
-bash cli/watch.sh
-```
-(Use `WATCH_MODE=poll` on filesystems without inotify.)
-
-## Testing from another local project before publication
-If you want to exercise the package as a dependency before the repository is public, use a Composer `path` repository:
+If you want to consume a local checkout from another PHP project, use a Composer `path` repository:
 
 ```json
 {
@@ -64,7 +45,51 @@ If you want to exercise the package as a dependency before the repository is pub
 }
 ```
 
-That lets you validate package metadata, autoloading, and install behavior locally before making the GitHub repository public.
+## Project layout
+- `src/php/functions.php`: Public DSL surface (state, el, attrs, on, repeat, route, component, effects, http, etc.).
+- `src/php/Render.php`: Builds the shared IR and can render server-side HTML from that IR.
+- `src/php/BuildExample.php`: Writes generated example output to `public/examples/<example>/`.
+- `src/php/IR/*`: IR node definitions for atoms, expressions, actions, effects, and DOM nodes.
+- `assets/index.tpl.html`: HTML template used during example generation (`{$title}`, `{$containerId}`, `{$iruri}` placeholders).
+- `public/runtime/**`: Browser runtime (core, primitives, utils, devtools).
+- `examples/*.php`: End-to-end samples that generate pages under `public/examples/`.
+- `cli/watch.sh`: Dev helper that watches the tree, reruns touched example PHP files, and syncs runtime assets.
+
+## Requirements
+- PHP 8.1+
+- Composer for autoloading via `vendor/autoload.php`
+- A static file server to view the generated pages (e.g., `php -S localhost:8000 -t public`)
+
+## Quick start
+1) Install the package in your PHP project:
+```bash
+composer require bitforge/thorm
+```
+2) To explore the bundled examples from this repository instead, clone the repo and install local dependencies:
+```bash
+git clone https://github.com/scarpelius/thorm.git
+cd thorm
+composer install
+```
+3) Run an example to generate IR + HTML in `public/examples/<example>/`:
+```bash
+php examples/counter.php
+```
+4) Serve the `public/` folder and open `http://localhost/examples/counter/`.
+
+To regenerate on changes, use the watcher (auto-runs example scripts and syncs runtime):
+```bash
+bash cli/watch.sh
+```
+(Use `WATCH_MODE=poll` on filesystems without inotify.)
+
+## Explore the repository
+If you are learning Thorm for the first time, the repository is the best place to study the framework surface, examples, runtime, and generated output together.
+
+- `examples/*.php` contains end-to-end sample apps
+- `src/php/**` contains the DSL, renderer, and IR classes
+- `src/runtime/**` contains the browser runtime
+- `assets/index.tpl.html` shows the HTML template used during example generation
 
 ## Authoring UIs in PHP
 Build views with the DSL from `Thorm\` (autoloaded via composer files):

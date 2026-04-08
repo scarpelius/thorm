@@ -18,8 +18,10 @@ Thorm is currently in pre-alpha / developer preview.
 Install the framework with Composer:
 
 ```bash
-composer require bitforge/thorm
+composer require bitforge/thorm:^0.1@alpha
 ```
+
+Because Thorm is currently in pre-alpha / developer preview, Composer installation requires an explicit alpha version constraint.
 
 If you want to explore the framework itself, study the examples, or work directly from the source repository, clone the repo and install its local dependencies:
 
@@ -63,7 +65,7 @@ If you want to consume a local checkout from another PHP project, use a Composer
 ## Quick start
 1) Install the package in your PHP project:
 ```bash
-composer require bitforge/thorm
+composer require bitforge/thorm:^0.1@alpha
 ```
 2) To explore the bundled examples from this repository instead, clone the repo and install local dependencies:
 ```bash

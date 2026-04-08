@@ -11,7 +11,8 @@ use Thorm\IR\Action\{Listener, Action, IncAction, AddAction,
     RuntimeAction,
     PersistAction,
     HydrateAction,
-    TaskAction
+    TaskAction,
+    AppendAction
 };
 use Thorm\IR\Atom as AtomDef;
 
@@ -702,6 +703,16 @@ function push(AtomDef $atom, Expr|int|float|string|bool|array|null $value, bool 
     return new PushAction($atom->id, $v);
 }
 
+function append(AtomDef $atom, Expr|int|float|string|bool|array|null $value, bool $asAction = false)
+{
+    if (!$asAction) {
+        throw new \InvalidArgumentException('append(): currently supported only as an Action (use $asAction=true).');
+    }
+
+    $v = $value instanceof Expr ? $value : Expr::val($value);
+    return new AppendAction($atom->id, $v);
+}
+
 function onSse(
     Expr|string $url,
     array $actions,
@@ -714,7 +725,6 @@ function onSse(
     $u = $url instanceof Expr ? $url : Expr::val($url);
     return effect([new SseTrigger($u, $event, $parse, $withCredentials, $sinceId)], $actions, $target);
 }
-
 
 /* target creators */
 function windowTarget(): EffectTarget   { return new WindowTarget(); }

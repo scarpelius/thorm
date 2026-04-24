@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Thorm\IR\Action;
 
 use InvalidArgumentException;
+use Thorm\IR\AtomCollectable;
 
 /**
  * Task action: compose a list of actions sequentially.
@@ -12,7 +13,7 @@ use InvalidArgumentException;
  * @example
  * $action = new TaskAction([new IncAction(1, 1), new DelayAction(200, [new IncAction(1, 1)])]);
  */
-final class TaskAction implements Action
+final class TaskAction implements Action, AtomCollectable
 {
     /**
      * Build a task action.
@@ -36,6 +37,21 @@ final class TaskAction implements Action
      * @return string
      */
     public function kind(): string { return 'task'; }
+
+    /**
+     * Collect atom-related dependencies referenced by this node.
+     *
+     * @param callable $collect Collector callback that receives dependency nodes.
+     * @return void
+     */
+    public function collectAtoms(callable $collect): void
+    {
+        foreach ($this->actions as $action) {
+            if ($action instanceof AtomCollectable) {
+                $action->collectAtoms($collect);
+            }
+        }
+    }
 
     /**
      * Encode this action as runtime IR payload.

@@ -63,7 +63,7 @@ final class ElNode extends Node implements \JsonSerializable, AtomCollectable, R
                 } elseif ($p[0] === 'cls') {
                     if (($p[1] ?? null) instanceof Expr) $collect($p[1]);
                 } elseif ($p[0] === 'on') {
-                    if (isset($p[2]) && $p[2] instanceof Listener) $collect($p[2]);
+                    if (isset($p[2]) && $p[2] instanceof AtomCollectable) $collect($p[2]);
                 }
             }
         }

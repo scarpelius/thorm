@@ -7,3 +7,6 @@ src.zip
 /public/examples/*
 !/public/examples/donotdelete.md
 /public/codeflow
+thorm-ssh.code-workspace
+/codex
+src/typescript/.env
